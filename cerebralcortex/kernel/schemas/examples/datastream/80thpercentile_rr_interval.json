@@ -25,18 +25,9 @@
     "input_streams": [
       {
         "name": "ecg_rr_interval",
-        "stream_identifier": 40
+        "stream_identifier": "5b7fb6f3-7bf6-4031-881c-a25faf112dd1"
       }
-    ],
-    "metadataMOVETHISTOANNOTATIONS": {
-      "platform": {
-        "device": {
-          "model": "Samsung Galaxy S5",
-          "OS": "6.0.0",
-          "battery_capacity": "8500mah"
-        }
-      }
-    }
+    ]
   },
   "annotations": [
     {

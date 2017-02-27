@@ -10,16 +10,7 @@
     }
   ],
   "execution_context": {
-    "processing_module": "61b7e1ca-3112-40bd-a754-442361b9b62d",
-    "metadataMOVETHISTOANNOTATIONS": {
-      "platform": {
-        "device": {
-          "model": "Samsung Galaxy S5",
-          "OS": "6.0.0",
-          "battery_capacity": "8500mah"
-        }
-      }
-    }
+    "processing_module": "61b7e1ca-3112-40bd-a754-442361b9b62d"
   },
   "annotations": [
     {
