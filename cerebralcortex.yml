@@ -13,3 +13,17 @@ mysql:
   processing_module_table: processing_module
   user_table: user
   study_table: study
+
+data_diagnostic:
+  SENSOR_UNAVAILABLE: 4
+  DATA_LOST: 6
+  SENSOR_OFF_BODY: 8
+  SENSOR_ON_BODY: 9
+  IMPROPER_ATTACHMENT: 10
+  DELAY_IN_ATTACHMENT: 12
+  SENSOR_BATTERY_DOWN: 14
+  PHONE_BATTERY_DOWN: 16
+  SENSOR_POWERED_OFF: 18
+  PHONE_POWERED_OFF: 20
+  ACCEPTABLE_DATA: 22
+  
