@@ -37,6 +37,7 @@ class Stream:
                  data_descriptor: List[DataDescriptor] = None,
                  execution_context: ExecutionContext = None,
                  annotations: List[StreamReference] = None,
+                 stream_type: str = None,
                  data: List[DataPoint] = None
                  ):
         self._identifier = identifier
@@ -44,7 +45,7 @@ class Stream:
         self._name = name
         self._description = description
         self._data_descriptor = data_descriptor
-        self._datastream_type = None
+        self._datastream_type = stream_type
         self._execution_context = execution_context
         self._annotations = annotations
         self._data = data
@@ -78,6 +79,7 @@ class Stream:
     def identifier(self):
         return self._identifier
 
+    #Ali: rename to owner?
     @property
     def user(self):
         return self._owner
@@ -90,10 +92,12 @@ class Stream:
     def name(self, value):
         self._name = value
 
+    #Ali: remove?
     @property
     def description(self):
         return self._description
 
+    #Ali: remove?
     @description.setter
     def description(self, value):
         self._description = value

@@ -21,16 +21,22 @@
 # CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
+import json
 
 class StoreMetadata:
-    def storeDatastrem(self, datastreamID: int = None, studyIDs: int = None, userID: int = None,
-                       processingModuleID: int = None,
-                       sourceIDs: dict = None,
-                       datastreamType: str = None, metadata: dict = None) -> int:
+
+    # stream_identifier, ownerID, name,
+    # data_descriptor, execution_context,
+    # annotations,
+    # stream_type
+
+    def storeDatastrem(self, stream_identifier: int = None, ownerID: str = None, name: str = None, description: str= None,
+                       data_descriptor: dict = None,
+                       execution_context: dict = None,
+                       annotations: dict = None, stream_type: str = None) -> int:
         """
         This method will update a record if datastreamID is provided else it would insert a new record.
-        :param datastreamID:
+        :param stream_identifier:
         :param studyIDs:
         :param userID:
         :param processingModuleID:
@@ -39,43 +45,82 @@ class StoreMetadata:
         :param metadata:
         :return: id (int) of last inserted datastream in MySQL
         """
-        if (datastreamID == None):
-            qry = "INSERT INTO " + self.datastreamTable + " (study_ids, user_id, processing_module_id, source_ids, type, metadata) VALUES('" + str(
-                studyIDs) + "','" + str(userID) + "','" + str(processingModuleID) + "','" + str(
-                sourceIDs) + "','" + str(datastreamType) + "','" + str(metadata) + "')"
-        else:
-            qry = "UPDATE " + self.datastreamTable + " set study_ids='" + str(studyIDs) + "' , user_id='" + str(
-                userID) + "' , processing_module_id='" + str(processingModuleID) + "' , source_ids='" + str(
-                sourceIDs) + "' , type='" + str(datastreamType) + "' , metadata='" + str(
-                metadata) + "' where id=" + str(
-                datastreamID)
-        return self.executeQueryq(qry)
 
-    def storeProcessingModule(self, metadata: dict, processingModuleID: int = "") -> int:
-        """
-        This method will update a record if processingModuleID is provided else it would insert a new record.
-        :param metadata:
-        :param processingModuleID:
-        :return: id (int) of last inserted processing module in MySQL
-        """
-        if (processingModuleID != ""):
-            qry = "UPDATE " + self.processingModuleTable + " set metadata='" + metadata + "' where id=" + str(
-                processingModuleID)
-        else:
-            qry = "INSERT INTO " + self.processingModuleTable + " (metadata) VALUES('" + metadata + "')"
+        isStreamCreated = self.streamAlreadyExist(stream_identifier, ownerID, name, description, data_descriptor, execution_context, stream_type)
 
+        if (isStreamCreated == True):
+            qry = "UPDATE " + self.datastreamTable + " set annotations=JSON_ARRAY_APPEND(annotations, '$',  \"" + str(annotations) + "\") where identifier=" + str(stream_identifier)
+        else:
+            qry = "INSERT INTO " + self.datastreamTable + " (identifier, owner, name, description, data_descriptor, execution_context, annotations, type) VALUES('" + str(
+                stream_identifier) + "','" + str(ownerID) + "','" + str(name) + "','" + str(
+                description) + "','" + str(json.dumps(data_descriptor)) + "','" + str(json.dumps(execution_context)) + "', '"+json.dumps(annotations)+"', '"+stream_type+"'"
+        print(qry)
         return self.executeQuery(qry)
 
-    def executeQueryq(self, qry: str):
+    def streamAlreadyExist(self, stream_identifier, ownerID, name, description, data_descriptor, execution_context, stream_type):
+        qry = "select * from "+self.datastreamTable+" where identifier="+stream_identifier
+        result = self.executeQuery2(qry)
+
+        print(result[0][0])
+        print(stream_identifier)
+        if(result[0][0]==stream_identifier):
+            return True
+        else:
+            if(result[0][1]!=ownerID):
+                raise "Update failed: owner ID is not same.."
+            elif (result[0][2] != name):
+                raise "Update failed: name is not same.."
+            elif (result[0][3] != description):
+                raise "Update failed: description is not same.."
+            elif (sorted(json.loads(str(result[0][4])).items()) != sorted(json.loads(json.dumps(data_descriptor)).items())):
+                raise "Update failed: data descriptor is not same."
+            elif (sorted(json.loads(str(result[0][5])).items()) != sorted(json.loads(json.dumps(execution_context)).items())):
+                raise "Update failed: execution context is not same."
+            elif (result[0][7] != stream_type):
+                raise "Update failed: type is not same."
+
+        return False
+
+
+    # def storeProcessingModule(self, metadata: dict, processingModuleID: int = "") -> int:
+    #     """
+    #     This method will update a record if processingModuleID is provided else it would insert a new record.
+    #     :param metadata:
+    #     :param processingModuleID:
+    #     :return: id (int) of last inserted processing module in MySQL
+    #     """
+    #     if (processingModuleID != ""):
+    #         qry = "UPDATE " + self.processingModuleTable + " set metadata='" + metadata + "' where id=" + str(
+    #             processingModuleID)
+    #     else:
+    #         qry = "INSERT INTO " + self.processingModuleTable + " (metadata) VALUES('" + metadata + "')"
+    #
+    #     return self.executeQuery(qry)
+
+    def executeQuery(self, qry: str):
         """
         This method executes MySQL query, commits data, closes cursor and database connections
         :param qry: SQL Query
         :return: id (int) of last inserted record in MySQL
         """
         self.cursor.execute(qry)
-        lastAddedRecordID = self.cursor.lastrowid
+        #lastAddedRecordID = self.cursor.lastrowid
         self.dbConnection.commit()
         self.cursor.close()
         self.dbConnection.close()
 
-        return lastAddedRecordID
+        #return lastAddedRecordID
+
+    def executeQuery2(self, qry: str) -> list:
+        """
+        :param qry: SQL Query
+        :return: results of a query
+        """
+        self.cursor.execute(qry)
+        results = self.cursor.fetchall()
+        self.cursor.close()
+        self.dbConnection.close()
+        if len(results) == 0:
+            raise "No record found."
+        else:
+            return results
