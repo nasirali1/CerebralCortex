@@ -1,18 +1,21 @@
 import json
-
+import os
 from pyspark.sql.functions import *
 
-import cerebralcortex
+from cerebralcortex.CerebralCortex import CerebralCortex
 
 
 def main():
-    CC = cerebralcortex.CerebralCortex(master="local[*]", name="Memphis cStress Development App")
+    #CC = cerebralcortex.CerebralCortex("", master="local[*]", name="Memphis cStress Development App")
+
+    configuration_file = os.path.join(os.path.dirname(__file__), '../../../cerebralcortex.yml')
+    CC = CerebralCortex(configuration_file, master="local[*]", name="Memphis cStress Development App")
 
     df = CC.get_datastream(1992)
 
     #df.setID(1111)
 
-    # print(df)
+    print(df)
     # dp = df.datapoints
     # print(df.userObj.getMetadata())
     # #df.show()

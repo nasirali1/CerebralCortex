@@ -81,27 +81,24 @@ class LoadMetadata:
             "tableName"] + " " + whereClause + " " + orderedByColumnName + " " + sortingOrder + " " + limitBy
         return qry
 
-    def get_datastream_info(self, datastreamID, userID: int = "", processinModuleID: int = "",
-                            limitRecords: str = "") -> list:
+    def get_datastream_info(self, datastreamID, streamOwnerID: int = "", limitRecords: str = "") -> list:
         """
         :param datastreamID:
-        :param userID:
+        :param streamOwnerID:
         :param processinModuleID:
         :param limitRecords: range (e.g., 1,10 or 130,200)
         :return: list
         """
-        whereClause = "id=" + str(datastreamID)
+        whereClause = "identifier=" + str(datastreamID)
 
-        if (userID != ""):
-            whereClause += " and user_id=" + str(userID)
-        if (processinModuleID != ""):
-            whereClause += " and processing_module_id=" + str(processinModuleID)
+        if (streamOwnerID != ""):
+            whereClause += " and owner=" + str(streamOwnerID)
 
         jsonQueryParam = {
             "columnNames": "*",
             "tableName": self.datastreamTable,
             "whereClause": whereClause,
-            "orderedByColumnName": "id",
+            "orderedByColumnName": "identifier",
             "sortingOrder": "ASC",
             "limitBy": limitRecords
         }
@@ -192,7 +189,6 @@ class LoadMetadata:
         :param qry: SQL Query
         :return: results of a query
         """
-
         self.cursor.execute(qry)
         results = self.cursor.fetchall()
         self.cursor.close()
