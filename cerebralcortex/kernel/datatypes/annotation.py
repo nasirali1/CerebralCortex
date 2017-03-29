@@ -33,7 +33,7 @@ class Annotation(DataPoint):
                  start_time: datetime = None,
                  end_time: datetime = None,
                  sample: Dict = None):
-        super().__init__(datastream_id=annotationstream_id,
+        super().__init__(
                          start_time=start_time,
                          end_time=end_time,
                          sample=sample)

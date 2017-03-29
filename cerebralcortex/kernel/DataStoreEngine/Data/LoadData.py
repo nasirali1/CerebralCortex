@@ -54,7 +54,7 @@ class LoadData:
             where_clause += " and datetime>='" + str(start_time) + "'"
 
         if end_time != "":
-            where_clause += " and datetime<='" + str(end_time) + "' limit 10"
+            where_clause += " and datetime<='" + str(end_time) + "' limit 2"
 
         datapoints = self.map_dataframe_to_datapoint(self.load_data(self.datapointTable, where_clause))
         datastream = self.map_datapoint_and_metadata_to_datastream(datastream_id, datapoints)
@@ -88,7 +88,7 @@ class LoadData:
 
         # query datastream(mysql) for metadata and user-id
         datastream_info = Metadata(self.configuration).get_datastream_info(datastream_id)
-
+        print(datastream_info)
         # load data from MySQL
         # study_objs = []
         # studies = json.loads(datastream_info[0][1])
@@ -107,6 +107,7 @@ class LoadData:
         data_descriptor = json.loads(datastream_info[0][4])
         execution_context = json.loads(datastream_info[0][5])
         annotations = json.loads(datastream_info[0][6])
+        stream_type = datastream_info[0][7]
         #data = datastream_info[0][1]
 
         # processing_module = Processing(processing_module_info[0][0], MetadataStruct(processing_module_info[0][1]))
@@ -125,8 +126,7 @@ class LoadData:
 # execution_context: ExecutionContext = None,
 # annotations: List[StreamReference] = None,
 # data: List[DataPoint] = None):
-
-        return DataStream(datastream_id, ownerID, name, description, data_descriptor, execution_context, annotations, data)
+        return DataStream(datastream_id, ownerID, name, description, data_descriptor, execution_context, annotations, stream_type, data)
 
     def load_data(self, table_name: str, where_clause: str) -> object:
         """

@@ -53,7 +53,7 @@ class CerebralCortex:
 
 
     def save_datastream(self, datastream):
-        pass
+        #pass
         Data(self.sc, self.sqlContext, self.configuration).store_datastream(datastream)
 
     def save_stream(self, stream: Stream):
