@@ -49,13 +49,13 @@ class StoreMetadata:
         isStreamCreated = self.streamAlreadyExist(stream_identifier, ownerID, name, description, data_descriptor, execution_context, stream_type)
 
         if (isStreamCreated == True):
-            qry = "UPDATE " + self.datastreamTable + " set annotations=JSON_ARRAY_APPEND(annotations, '$',  \"" + str(annotations) + "\") where identifier=" + str(stream_identifier)
+            qry = "UPDATE " + self.datastreamTable + " set annotations=JSON_ARRAY_APPEND(annotations, '$',  '" + self.cleanJson(annotations) + "') where identifier=" + str(stream_identifier)
         else:
             qry = "INSERT INTO " + self.datastreamTable + " (identifier, owner, name, description, data_descriptor, execution_context, annotations, type) VALUES('" + str(
                 stream_identifier) + "','" + str(ownerID) + "','" + str(name) + "','" + str(
                 description) + "','" + str(json.dumps(data_descriptor)) + "','" + str(json.dumps(execution_context)) + "', '"+json.dumps(annotations)+"', '"+stream_type+"'"
         print(qry)
-        return self.executeQuery(qry)
+        return self.executeQuery1(qry)
 
     def streamAlreadyExist(self, stream_identifier, ownerID, name, description, data_descriptor, execution_context, stream_type):
         qry = "select * from "+self.datastreamTable+" where identifier="+stream_identifier
@@ -81,23 +81,12 @@ class StoreMetadata:
 
         return False
 
+    def cleanJson(self, jsonObj):
+        cleaned = json.dumps(jsonObj).strip().replace('\\"','\"')
+        return cleaned
 
-    # def storeProcessingModule(self, metadata: dict, processingModuleID: int = "") -> int:
-    #     """
-    #     This method will update a record if processingModuleID is provided else it would insert a new record.
-    #     :param metadata:
-    #     :param processingModuleID:
-    #     :return: id (int) of last inserted processing module in MySQL
-    #     """
-    #     if (processingModuleID != ""):
-    #         qry = "UPDATE " + self.processingModuleTable + " set metadata='" + metadata + "' where id=" + str(
-    #             processingModuleID)
-    #     else:
-    #         qry = "INSERT INTO " + self.processingModuleTable + " (metadata) VALUES('" + metadata + "')"
-    #
-    #     return self.executeQuery(qry)
 
-    def executeQuery(self, qry: str):
+    def executeQuery1(self, qry: str):
         """
         This method executes MySQL query, commits data, closes cursor and database connections
         :param qry: SQL Query
@@ -118,8 +107,8 @@ class StoreMetadata:
         """
         self.cursor.execute(qry)
         results = self.cursor.fetchall()
-        self.cursor.close()
-        self.dbConnection.close()
+        #self.cursor.close()
+        #self.dbConnection.close()
         if len(results) == 0:
             raise "No record found."
         else:
