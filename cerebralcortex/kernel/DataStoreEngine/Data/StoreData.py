@@ -65,8 +65,9 @@ class StoreData:
 
     def store_datastream(self, datastream):
         datastream_identifier = datastream.get_identifier()
-        study_ids = datastream.getStudyIDs()  # TO-DO, only add study-ids if they exist
-        user_id = datastream.userObj.getID()
+
+        #study_ids = datastream.getStudyIDs()  # TO-DO, only add study-ids if they exist
+       # user_id = datastream.userObj.getID()
 
         processing_module_id = datastream.processingModuleObj.getID()
         datastream_type = datastream.get_datastream_type()

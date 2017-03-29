@@ -45,3 +45,31 @@ class DataStream(Stream):
                          data)
 
         self._datastream_type = StreamTypes.DATASTREAM
+
+    @property
+    def get_identifier(self):
+        return self.identifier
+
+    @property
+    def get_owner(self):
+        return self.owner
+
+    @property
+    def get_name(self):
+        return self.name
+
+    @property
+    def get_data_descriptor(self):
+        return self.data_descriptor
+
+    @property
+    def get_execution_context(self):
+        return self.execution_context
+
+    @property
+    def get_annotations(self):
+        return self.annotations
+
+    @property
+    def get_data(self):
+        return self.data
