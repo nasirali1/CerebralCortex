@@ -79,7 +79,7 @@ class LoadData:
         """
 
         # query datastream(mysql) for metadata
-        datastream_info = Metadata(self.configuration).get_datastream_info(stream_id)
+        datastream_info = Metadata(self.configuration).get_stream_info(stream_id)
 
         ownerID = datastream_info[0][1]
         name = datastream_info[0][2]

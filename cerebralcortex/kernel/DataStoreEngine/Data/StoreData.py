@@ -41,10 +41,10 @@ class StoreData:
         stream_type = datastream.datastream_type
         data = datastream.data
 
-        Metadata(self.configuration).storeDatastrem(stream_identifier, ownerID, name, description,
-                                                    data_descriptor, execution_context,
-                                                    annotations,
-                                                    stream_type)
+        Metadata(self.configuration).store_stream_info(stream_identifier, ownerID, name, description,
+                                                       data_descriptor, execution_context,
+                                                       annotations,
+                                                       stream_type)
 
         dataframe = self.map_datapoint_to_dataframe(stream_identifier, data)
 
