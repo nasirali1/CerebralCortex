@@ -40,7 +40,7 @@ class TestDataStoreEngine(unittest.TestCase):
         # TODO: populate databases with sample information for these tests
 
     def test_Data_datastreamRead(self):
-        datastream = self.CC.get_datastream(1992)
+        datastream = self.CC.get_stream(1992)
         print(datastream)
 
     def test_Data_datastreamWrite(self, datastream):

@@ -23,57 +23,14 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 from cerebralcortex.kernel.DataStoreEngine.Metadata.Metadata import Metadata
-
+from cerebralcortex.kernel.datatypes.datastream import DataStream
 
 class StoreData:
-    def store_data(self, dataframe_data: object, table_name: str):
+    def store_stream(self, datastream: DataStream):
         """
-        :param dataframe_data: pyspark Dataframe
-        :param table_name: Cassandra table name
+
+        :param datastream:
         """
-        dataframe_data.write.format("org.apache.spark.sql.cassandra") \
-            .mode('append') \
-            .options(table=table_name, keyspace=self.keyspaceName) \
-            .save()
-
-    # These two methods will be moved to struct classes
-    def save_datapoint(self, df: object):
-        """
-        :param df:
-        """
-        self.store_data(df, self.datapointTable)
-
-    # def saveSpan(self, df: object):
-    #     """
-    #     :param df:
-    #     """
-    #     self.storeData(df, self.spanTable)
-
-    def map_datapoint_to_dataframe(self, datastream_id, datapoints):
-        temp = []
-        for i in datapoints:
-            day = i.start_time
-            day = day.strftime("%Y%m%d")
-            dp = datastream_id, day, i.start_time, i.end_time, i.sample
-            temp.append(dp)
-
-        temp_RDD = self.sparkContext.parallelize(temp)
-        df = self.sqlContext.createDataFrame(temp_RDD,
-                                             ["datastream_id", "day", "start_time", "end_time", "sample"])
-
-        return df
-
-    def store_datastream(self, datastream):
-        #datastream_identifier = datastream.get_identifier()
-        #study_ids = datastream.getStudyIDs()  # TO-DO, only add study-ids if they exist
-       # user_id = datastream.userObj.getID()
-
-        #processing_module_id = datastream.processingModuleObj.getID()
-        #datastream_type = datastream.get_datastream_type()
-        #metadata = datastream.getMetadata().getMetadata()
-        #source_ids = datastream.get_source_ids()
-        print("saving stream")
-        print(datastream)
         stream_identifier = datastream.identifier
         ownerID = datastream.user
         name = datastream.name
@@ -84,15 +41,44 @@ class StoreData:
         stream_type = datastream.datastream_type
         data = datastream.data
 
-        # if datastream_identifier is empty then create a new datastream_identifier in MySQL database and return the newly added datastream_identifier
-        lastAddedRecordID = Metadata(self.configuration).storeDatastrem(stream_identifier, ownerID, name, description,
-                                                                        data_descriptor, execution_context,
-                                                                        annotations,
-                                                                        stream_type)
-
-        #if stream_identifier == "":
-           # datastream_identifier = lastAddedRecordID
+        Metadata(self.configuration).storeDatastrem(stream_identifier, ownerID, name, description,
+                                                    data_descriptor, execution_context,
+                                                    annotations,
+                                                    stream_type)
 
         dataframe = self.map_datapoint_to_dataframe(stream_identifier, data)
 
-        self.save_datapoint(dataframe)
+        self.store_data(dataframe, self.datapointTable)
+
+    def store_data(self, dataframe_data: object, table_name: str):
+        """
+        :param dataframe_data: pyspark Dataframe
+        :param table_name: Cassandra table name
+        """
+
+        if table_name == "":
+            raise Exception("Table name cannot be null.")
+        elif dataframe_data == "":
+            raise Exception("Data cannot be null.")
+
+        dataframe_data.write.format("org.apache.spark.sql.cassandra") \
+            .mode('append') \
+            .options(table=table_name, keyspace=self.keyspaceName) \
+            .save()
+
+
+    def map_datapoint_to_dataframe(self, stream_id, datapoints):
+        temp = []
+        for i in datapoints:
+            day = i.start_time
+            day = day.strftime("%Y%m%d")
+            dp = stream_id, day, i.start_time, i.end_time, i.sample
+            temp.append(dp)
+
+        temp_RDD = self.sparkContext.parallelize(temp)
+        df = self.sqlContext.createDataFrame(temp_RDD,
+                                             ["identifier", "day", "start_time", "end_time", "sample"])
+
+        return df
+
+

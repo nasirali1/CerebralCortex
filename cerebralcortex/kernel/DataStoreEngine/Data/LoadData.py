@@ -26,46 +26,38 @@ import json
 
 from cerebralcortex.kernel.DataStoreEngine.Metadata.Metadata import Metadata
 from cerebralcortex.kernel.datatypes.datastream import *
-# from cerebralcortex.kernel.datatypes.metadata import Metadata as MetadataStruct
-# from cerebralcortex.kernel.datatypes.processing import Processing
-# from cerebralcortex.kernel.datatypes.study import Study
-# from cerebralcortex.kernel.datatypes.user import User
-
 
 class LoadData:
 
-    def get_datastream(self, datastream_id: int, start_time: int = "", end_time: int = "") -> DataStream:
+    def get_stream(self, stream_id: int, start_time: int = "", end_time: int = "") -> DataStream:
         """
-        :param datastream_id:
+        :param stream_id:
         :param start_time:
         :param end_time:
         :return: spark dataframe
         """
-        datastream_id = str(datastream_id)
+        stream_id = str(stream_id)
         start_time = str(start_time)
         end_time = str(end_time)
 
-        where_clause = "datastream_id=" + datastream_id
+        where_clause = "identifier=" + stream_id
 
-        if datastream_id == "":
-            raise Exception("datastreamID cannot be empty")
+        if stream_id == "":
+            raise Exception("Stream identifier cannot be null.")
 
         if start_time != "":
-            where_clause += " and datetime>='" + str(start_time) + "'"
+            where_clause += " and start_time>='" + str(start_time) + "'"
 
         if end_time != "":
-            where_clause += " and datetime<='" + str(end_time) + "' limit 2"
+            where_clause += " and end_time<='" + str(end_time) + "'"
 
-        datapoints = self.map_dataframe_to_datapoint(self.load_data(self.datapointTable, where_clause))
-        datastream = self.map_datapoint_and_metadata_to_datastream(datastream_id, datapoints)
+        datapoints = self.map_dataframe_to_datapoint(self.load_data_from_cassandra(self.datapointTable, where_clause))
+        stream = self.map_datapoint_and_metadata_to_datastream(stream_id, datapoints)
 
-        return datastream
+        return stream
 
-    def dd(self):
-        pass
 
-    @classmethod
-    def map_dataframe_to_datapoint(cls, dataframe: object) -> list:
+    def map_dataframe_to_datapoint(self, dataframe: object) -> list:
         """
         Converts a PySpark DataFrame into a list of datapoint objects
         :param dataframe:
@@ -78,29 +70,17 @@ class LoadData:
             datapointsList.append(dp)
         return datapointsList
 
-    def map_datapoint_and_metadata_to_datastream(self, datastream_id: int, data: list) -> DataStream:
+    def map_datapoint_and_metadata_to_datastream(self, stream_id: int, data: list) -> DataStream:
         """
         This method will map the datapoint and metadata to datastream object
-        :param datastream_id:
+        :param stream_id:
         :param data: list
         :return: datastream object
         """
 
-        # query datastream(mysql) for metadata and user-id
-        datastream_info = Metadata(self.configuration).get_datastream_info(datastream_id)
-        print(datastream_info)
-        # load data from MySQL
-        # study_objs = []
-        # studies = json.loads(datastream_info[0][1])
-        # for study_id in studies:
-        #     study_info = Metadata(self.configuration).get_study_info(study_id)
-        #     study = Study(study_info[0][0], study_info[0][1], MetadataStruct(study_info[0][2]))
-        #     study_objs.append(study)
+        # query datastream(mysql) for metadata
+        datastream_info = Metadata(self.configuration).get_datastream_info(stream_id)
 
-        # user_info = Metadata(self.configuration).getUserInfo(datastream_info[0][2])
-        # processing_module_info = Metadata(self.configuration).getProcessingModuleInfo(datastream_info[0][3])
-
-        # create/populate objects
         ownerID = datastream_info[0][1]
         name = datastream_info[0][2]
         description = datastream_info[0][3]
@@ -108,27 +88,10 @@ class LoadData:
         execution_context = json.loads(datastream_info[0][5])
         annotations = json.loads(datastream_info[0][6])
         stream_type = datastream_info[0][7]
-        #data = datastream_info[0][1]
 
-        # processing_module = Processing(processing_module_info[0][0], MetadataStruct(processing_module_info[0][1]))
-        #
-        # source_ids = datastream_info[0][4]
-        # datastream_type = datastream_info[0][5]
-        # datastream_metadata = MetadataStruct(datastream_info[0][6])
+        return DataStream(stream_id, ownerID, name, description, data_descriptor, execution_context, annotations, stream_type, data)
 
-
-
-# identifier: UUID = None,
-# owner: UUID = None,
-# name: UUID = None,
-# description: str = None,
-# data_descriptor: List[DataDescriptor] = None,
-# execution_context: ExecutionContext = None,
-# annotations: List[StreamReference] = None,
-# data: List[DataPoint] = None):
-        return DataStream(datastream_id, ownerID, name, description, data_descriptor, execution_context, annotations, stream_type, data)
-
-    def load_data(self, table_name: str, where_clause: str) -> object:
+    def load_data_from_cassandra(self, table_name: str, where_clause: str) -> object:
         """
         Establish connection with cassandra, load data, and filter based on the condition passed in whereClause argument
         :return:
