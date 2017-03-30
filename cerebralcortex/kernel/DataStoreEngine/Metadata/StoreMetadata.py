@@ -24,14 +24,15 @@
 import json
 import uuid
 
-class StoreMetadata:
 
+class StoreMetadata:
     # stream_identifier, ownerID, name,
     # data_descriptor, execution_context,
     # annotations,
     # stream_type
 
-    def store_stream_info(self, stream_identifier: int = None, stream_owner_id: str = None, name: str = None, description: str= None,
+    def store_stream_info(self, stream_identifier: int = None, stream_owner_id: str = None, name: str = None,
+                          description: str = None,
                           data_descriptor: dict = None,
                           execution_context: dict = None,
                           annotations: dict = None, stream_type: str = None):
@@ -47,21 +48,24 @@ class StoreMetadata:
         :param stream_type:
         """
 
-        isStreamCreated = self.is_stream_created(stream_identifier, stream_owner_id, name, description, data_descriptor, execution_context, stream_type)
+        isStreamCreated = self.is_stream_created(stream_identifier, stream_owner_id, name, description, data_descriptor,
+                                                 execution_context, stream_type)
 
         if (isStreamCreated == True):
-            qry = "UPDATE " + self.datastreamTable + " set annotations=JSON_ARRAY_APPEND(annotations, '$',  '" + self.cleanJson(annotations) + "') where identifier=" + str(stream_identifier)
+            qry = "UPDATE " + self.datastreamTable + " set annotations=JSON_ARRAY_APPEND(annotations, '$',  %s) where identifier=%s"
+            vals = self.cleanJson(annotations), str(stream_identifier)
         else:
-            qry = "INSERT INTO " + self.datastreamTable + " (identifier, owner, name, description, data_descriptor, execution_context, annotations, type) VALUES('" + str(
-                stream_identifier) + "','" + str(stream_owner_id) + "','" + str(name) + "','" + str(
-                description) + "','" + str(json.dumps(data_descriptor)) + "','" + str(json.dumps(execution_context)) + "', '"+json.dumps(annotations)+"', '"+stream_type+"'"
+            qry = "INSERT INTO " + self.datastreamTable + " (identifier, owner, name, description, data_descriptor, execution_context, annotations, type) VALUES(%s, %s, %s, %s, %s, %s, %s, %s)"
+            vals = str(stream_identifier), str(stream_owner_id), str(name), str(description), str(
+                json.dumps(data_descriptor)), str(json.dumps(execution_context)), json.dumps(annotations), stream_type
 
-        self.cursor.execute(qry)
+        self.cursor.execute(qry, vals)
         self.dbConnection.commit()
         self.cursor.close()
         self.dbConnection.close()
 
-    def is_stream_created(self, stream_identifier: uuid, stream_owner_id: uuid, name: str, description: str, data_descriptor: dict,
+    def is_stream_created(self, stream_identifier: uuid, stream_owner_id: uuid, name: str, description: str,
+                          data_descriptor: dict,
                           execution_context: dict,
                           stream_type: str):
         """
@@ -74,29 +78,31 @@ class StoreMetadata:
         :param execution_context:
         :param stream_type:
         """
-        qry = "select * from "+self.datastreamTable+" where identifier="+stream_identifier
-
-        self.cursor.execute(qry)
+        qry = "select * from " + self.datastreamTable + " where identifier = %(identifier)s"
+        vals = { 'identifier': str(stream_identifier) }
+        self.cursor.execute(qry, vals)
         result = self.cursor.fetchall()
 
-        if(result[0][0]==stream_identifier):
-            if(result[0][1]!=stream_owner_id):
-                raise "Update failed: owner ID is not same.."
+        if (result[0][0] == stream_identifier):
+            if (result[0][1] != stream_owner_id):
+                raise Exception("Update failed: owner ID is not same..")
             elif (result[0][2] != name):
-                raise "Update failed: name is not same.."
+                raise Exception("Update failed: name is not same..")
             elif (result[0][3] != description):
-                raise "Update failed: description is not same.."
-            elif (sorted(json.loads(str(result[0][4])).items()) != sorted(json.loads(json.dumps(data_descriptor)).items())):
-                raise "Update failed: data descriptor is not same."
-            elif (sorted(json.loads(str(result[0][5])).items()) != sorted(json.loads(json.dumps(execution_context)).items())):
-                raise "Update failed: execution context is not same."
+                raise Exception("Update failed: description is not same..")
+            elif (sorted(json.loads(str(result[0][4])).items()) != sorted(
+                    json.loads(json.dumps(data_descriptor)).items())):
+                raise Exception("Update failed: data descriptor is not same.")
+            elif (sorted(json.loads(str(result[0][5])).items()) != sorted(
+                    json.loads(json.dumps(execution_context)).items())):
+                raise Exception("Update failed: execution context is not same.")
             elif (result[0][7] != stream_type):
-                raise "Update failed: type is not same."
+                raise Exception("Update failed: type is not same.")
             else:
                 return True
         else:
             return False
 
     def cleanJson(self, jsonObj):
-        cleaned = json.dumps(jsonObj).strip().replace('\\"','\"')
+        cleaned = json.dumps(jsonObj).strip().replace('\\"', '\"')
         return cleaned
