@@ -65,3 +65,6 @@ fabric.properties
 
 /cerebralcortex/data_processor/data_diagnostic/main.py
 /.gitignore
+/cerebralcortex/kernel/DataStoreEngine/test_db_engine.py
+/cerebralcortex/kernel/DataStoreEngine/test_query_builder.py
+/cerebralcortex/data_processor/data_diagnostic/spark-warehouse/
