@@ -23,6 +23,8 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import json
+from datetime import datetime
+from pytz import timezone
 
 from cerebralcortex.kernel.DataStoreEngine.Metadata.Metadata import Metadata
 from cerebralcortex.kernel.datatypes.datastream import *
@@ -58,6 +60,7 @@ class LoadData:
         return stream
 
 
+
     def map_dataframe_to_datapoint(self, dataframe: object) -> list:
         """
         Converts a PySpark DataFrame into a list of datapoint objects
@@ -67,7 +70,14 @@ class LoadData:
         datapointsList = []
         rows = dataframe.collect()
         for row in rows:
-            dp = DataPoint(row["start_time"], row["end_time"], row["sample"])
+            #dp = DataPoint(self.get_epoch_time(row["start_time"]), self.get_epoch_time(row["end_time"]), row["sample"])
+            localtz = timezone('US/Central')
+            start_time = localtz.localize(row["start_time"])
+            end_time = localtz.localize(row["end_time"])
+
+            #d1 = row["start_time"].replace(tzinfo=pytz.UTC)
+            #d2 = row["start_time"].replace(tzinfo=pytz.UTC)
+            dp = DataPoint(start_time, end_time, row["sample"])
             datapointsList.append(dp)
         return datapointsList
 
@@ -100,8 +110,17 @@ class LoadData:
         :param where_clause:
         :return: spark dataframe
         """
+        #TO-DO, replace .filter with .where() for performance
         dataframe = self.sqlContext.read.format("org.apache.spark.sql.cassandra").options(table=table_name,
-                                                                                          keyspace=self.keyspaceName).load().filter(
+                                                                                          keyspace=self.keyspaceName).load().select("start_time", "end_time", "sample").filter(
             where_clause)
 
         return dataframe
+
+    def get_epoch_time(self, dt: datetime) -> datetime:
+        """
+        :param dt:
+        :return:
+        """
+        epoch = datetime.utcfromtimestamp(0)
+        return (dt - epoch).total_seconds() * 1000.0
