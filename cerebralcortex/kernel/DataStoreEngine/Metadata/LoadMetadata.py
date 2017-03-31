@@ -86,42 +86,6 @@ class LoadMetadata:
             "tableName"] + " " + whereClause + " " + orderedByColumnName + " " + sortingOrder + " " + limitBy
         return qry
 
-
-    def mySQLQueryBuilder(self, jsonQueryParam: dict) -> str:
-
-        if (jsonQueryParam["columnNames"].strip() != ""):
-            columnNames = jsonQueryParam["columnNames"].strip()
-        else:
-            raise ValueError("No column name(s) has been defined.")
-
-        if (jsonQueryParam["tableName"].strip() == ""):
-            raise ValueError("No table name has been defined.")
-
-        if (jsonQueryParam["whereClause"].strip() != ""):
-            whereClause = "where " + jsonQueryParam["whereClause"].strip()
-        else:
-            whereClause = ""
-
-        if (jsonQueryParam["orderedByColumnName"].strip() != ""):
-            orderedByColumnName = "ORDER BY " + jsonQueryParam["orderedByColumnName"].strip()
-        else:
-            orderedByColumnName = ""
-
-        if (jsonQueryParam["sortingOrder"].strip() != ""):
-            sortingOrder = jsonQueryParam["sortingOrder"].strip()
-        else:
-            sortingOrder = ""
-
-        if (jsonQueryParam["sortingOrder"].strip() != ""):
-            limitBy = jsonQueryParam["limitBy"].strip()
-        else:
-            limitBy = ""
-
-        qry = "Select " + columnNames + " from " + jsonQueryParam[
-            "tableName"] + " " + whereClause + " " + orderedByColumnName + " " + sortingOrder + " " + limitBy
-        return qry
-
-
     def get_stream_info(self, stream_id, stream_owner_id: int = "", records_limit: str = "") -> list:
         """
         :param stream_id:
