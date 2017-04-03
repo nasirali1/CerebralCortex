@@ -106,6 +106,7 @@ def window_iter(iterable: List[DataPoint],
     iterator = iter(iterable)
 
     win_size = timedelta(seconds=window_size)
+    print(iterable[0].start_time)
     start_time = epoch_align(iterable[0].start_time, window_offset)
     end_time = start_time + win_size
     key = (start_time, end_time)
@@ -114,6 +115,7 @@ def window_iter(iterable: List[DataPoint],
     for element in iterator:
         timestamp = element.start_time
         if timestamp > end_time:
+            print("goinggg")
             yield key, data
 
             start_time = epoch_align(element.start_time, window_offset)
@@ -121,7 +123,7 @@ def window_iter(iterable: List[DataPoint],
             key = (start_time, end_time)
 
             data = [i for i in data if i.start_time > start_time]
-
+        print("IN "+str(start_time))
         data.append(element)
     yield key, data
 
