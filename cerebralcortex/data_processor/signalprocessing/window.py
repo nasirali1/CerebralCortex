@@ -32,6 +32,117 @@ import pytz
 from cerebralcortex.kernel.datatypes.datapoint import DataPoint
 
 
+
+def window(data: List[DataPoint],
+           window_size: float, all_windows:bool=False) -> OrderedDict:
+    """
+    Special case of a sliding window with no overlaps
+    :param data:
+    :param window_size:
+    :return:
+    """
+    return window_sliding(data, window_size=window_size, window_offset=window_size, all_windows=all_windows)
+
+
+def window_sliding(data: List[DataPoint],
+                   window_size: float,
+                   window_offset: float, all_windows) -> OrderedDict:
+    """
+    Sliding Window Implementation
+
+    :param data: list
+    :param window_size: float
+    :param window_offset: float
+    :return: OrderedDict representing [(st,et),[dp,dp,dp,dp...],
+                                       (st,et),[dp,dp,dp,dp...],
+                                        ...]
+    """
+    if data is None:
+        raise TypeError('data is not List[DataPoint]')
+
+    if len(data) == 0:
+        raise ValueError('The length of data is zero')
+
+    windowed_datastream = OrderedDict()
+
+    if all_windows==True:
+        for key, data in create_all_windows(data, window_size, window_offset):
+            windowed_datastream[key] = data
+            print(key, data)
+    else:
+        for key, data in window_iter(data, window_size, window_offset):
+            windowed_datastream[key] = data
+            print(key, data)
+
+
+    return windowed_datastream
+
+
+def window_iter(iterable: List[DataPoint],
+                window_size: float,
+                window_offset: float):
+    """
+    Window iteration function that support various common implementations
+    :param iterable:
+    :param window_size:
+    :param window_offset:
+    """
+    iterator = iter(iterable)
+
+    win_size = timedelta(seconds=window_size)
+    start_time = epoch_align(iterable[0].start_time, window_offset)
+    end_time = start_time + win_size
+    key = (start_time, end_time)
+
+    data = []
+    for element in iterator:
+        timestamp = element.start_time
+        if timestamp > end_time:
+            yield key, data
+
+            start_time = epoch_align(element.start_time, window_offset)
+            end_time = start_time + win_size
+            key = (start_time, end_time)
+
+            data = [i for i in data if i.start_time > start_time]
+        data.append(element)
+    yield key, data
+
+def create_all_windows(datapoint: List[DataPoint], window_size: float, window_offset: float):
+    """
+    This method will create a complete list of a windows between start and end time of the data provided.
+    :param datapoint:
+    :param window_size:
+    :param window_offset:
+    :return: OrderedDict representing [(st,et),[dp,dp,dp,dp...], {if a window contains data}
+                                       (st,et),[], (if a window does not contain any data}
+                                        ...]
+    """
+    window_start_time = epoch_align(datapoint[0].start_time, window_offset)
+    window_end_time = window_start_time + timedelta(seconds=window_size)
+    window_data = []
+    for dp in datapoint:
+        if window_start_time <= dp.start_time <= window_end_time:
+            window_data.append(dp)
+        else:
+            key = (window_start_time, window_end_time)
+            yield key, window_data
+            # when datapoint is not in current range, identify emtpy windows and yield.
+            _w_start_time = window_end_time
+            _w_end_time = _w_start_time + timedelta(seconds=window_size)
+            while dp.start_time > _w_end_time:
+                key = (_w_start_time, _w_end_time)
+                yield key, []
+                window_data = []
+                _w_start_time = _w_end_time
+                _w_end_time = _w_start_time + timedelta(seconds=window_size)
+
+            window_data.append(dp)
+            window_end_time = _w_end_time
+            window_start_time = _w_start_time
+    key = (window_start_time, window_end_time)
+    yield key, window_data
+
 def epoch_align(ts: datetime,
                 offset: float,
                 after: bool = False,
@@ -54,76 +165,3 @@ def epoch_align(ts: datetime,
 
     result = datetime.fromtimestamp(new_timestamp / time_base, time_zone)
     return result
-
-
-def window(data: List[DataPoint],
-           window_size: float) -> OrderedDict:
-    """
-    Special case of a sliding window with no overlaps
-    :param data:
-    :param window_size:
-    :return:
-    """
-    return window_sliding(data, window_size=window_size, window_offset=window_size)
-
-
-def window_sliding(data: List[DataPoint],
-                   window_size: float,
-                   window_offset: float) -> OrderedDict:
-    """
-    Sliding Window Implementation
-
-    :param data: list
-    :param window_size: float
-    :param window_offset: float
-    :return: OrderedDict representing [(st,et),[dp,dp,dp,dp...],
-                                       (st,et),[dp,dp,dp,dp...],
-                                        ...]
-    """
-    if data is None:
-        raise TypeError('data is not List[DataPoint]')
-
-    if len(data) == 0:
-        raise ValueError('The length of data is zero')
-
-    windowed_datastream = OrderedDict()
-
-    for key, data in window_iter(data, window_size, window_offset):
-        windowed_datastream[key] = data
-
-    return windowed_datastream
-
-
-def window_iter(iterable: List[DataPoint],
-                window_size: float,
-                window_offset: float):
-    """
-    Window iteration function that support various common implementations
-    :param iterable:
-    :param window_size:
-    :param window_offset:
-    """
-    iterator = iter(iterable)
-
-    win_size = timedelta(seconds=window_size)
-    print(iterable[0].start_time)
-    start_time = epoch_align(iterable[0].start_time, window_offset)
-    end_time = start_time + win_size
-    key = (start_time, end_time)
-
-    data = []
-    for element in iterator:
-        timestamp = element.start_time
-        if timestamp > end_time:
-            print("goinggg")
-            yield key, data
-
-            start_time = epoch_align(element.start_time, window_offset)
-            end_time = start_time + win_size
-            key = (start_time, end_time)
-
-            data = [i for i in data if i.start_time > start_time]
-        print("IN "+str(start_time))
-        data.append(element)
-    yield key, data
-

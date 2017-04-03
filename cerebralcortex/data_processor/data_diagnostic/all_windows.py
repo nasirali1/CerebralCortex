@@ -22,55 +22,45 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import math
 from collections import OrderedDict
 from datetime import datetime, timedelta
 from typing import List
 
-import pytz
 
 from cerebralcortex.kernel.datatypes.datapoint import DataPoint
+
 
 class All_Windows:
     def window(self, data: List[DataPoint],
                window_size: float) -> OrderedDict:
-        start_time = data[0].start_time
-        end_time = data[len(data)-1].start_time
 
-        self.create_blank_windows(data, window_size, start_time, end_time);
+        windowed_datastream = OrderedDict()
+        for key, data in self.create_all_windows(data, window_size, ""):
+            windowed_datastream[key] = data
+            print(key, data)
 
-
-    def create_blank_windows(self, data, window_size, start_time, end_time):
-        time_delta = (end_time-start_time).total_seconds()
-        total_windows = math.floor(time_delta/window_size)
-        print(total_windows)
-        end_time2 = start_time
-        for i in range(total_windows):
-            start_time = end_time2
-            end_time2 = start_time + timedelta(seconds=window_size)
-
-            data2 = [i for i in data if start_time<= i.start_time and i.start_time <= end_time2]
-            if not data2:
-                print(str(start_time)+""+str(end_time2)+" NO DATA")
+    def create_all_windows(self, datapoint, window_size, window_offset: float):
+        window_start_time = datapoint[0].start_time
+        window_end_time = window_start_time + timedelta(seconds=window_size)
+        window_data = []
+        for dp in datapoint:
+            if window_start_time <= dp.start_time <= window_end_time:
+                window_data.append(dp)
             else:
-                print(str(start_time)+""+str(end_time2)+" - "+str(data2))
-            # for j in range(len(data)):
-            #     #print(j)
-            #     if start_time<= data[j].start_time and data[j].start_time <= end_time2:
-            #         print(str(start_time) +" - "+str(end_time2))
-            #         #data.pop(j)
-            #         #continue
-            #     print("IN "+str(start_time))
-            # print("out "+str(start_time))
-            # for j in self.simple_gen(data, start_time, end_time2):
-            #     print(j)
-            # print("out "+str(start_time))
+                key = (window_start_time, window_end_time)
+                yield key, window_data
+                # when datapoint is not in current range, identify emtpy windows and yield.
+                _w = window_end_time
+                _w_end = _w + timedelta(seconds=window_size)
+                while dp.start_time > _w_end:
+                    key = (_w, _w_end)
+                    yield key, []
+                    window_data = []
+                    _w = _w_end
+                    _w_end = _w + timedelta(seconds=window_size)
 
-    def simple_gen(self,data, st, et):
-        for j in range(len(data)):
-            if st<= data[j].start_time and data[j].start_time <= et:
-                yield str(st) +" - "+str(et)
-            #print(st)
-            #print(str(len(data))+"yild "+str(j))
-            print("IN "+str(st))
-
+                window_data.append(dp)
+                window_end_time = _w_end
+                window_start_time = _w
+        key = (window_start_time, window_end_time)
+        yield key, window_data
