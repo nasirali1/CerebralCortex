@@ -39,6 +39,7 @@ def window(data: List[DataPoint],
     Special case of a sliding window with no overlaps
     :param data:
     :param window_size:
+    :param all_windows: if the value is set to "True" then it will return a complete list (empty and non-empty) windows. Otherwise, it will only return windows that contain data (non-empty).
     :return:
     """
     return window_sliding(data, window_size=window_size, window_offset=window_size, all_windows=all_windows)
@@ -50,9 +51,11 @@ def window_sliding(data: List[DataPoint],
     """
     Sliding Window Implementation
 
+    :param all_windows:
     :param data: list
     :param window_size: float
     :param window_offset: float
+    :param all_windows: if the value is set to "True" then it will return a complete list (empty and non-empty) windows. Otherwise, it will only return windows that contain data (non-empty).
     :return: OrderedDict representing [(st,et),[dp,dp,dp,dp...],
                                        (st,et),[dp,dp,dp,dp...],
                                         ...]
@@ -68,11 +71,9 @@ def window_sliding(data: List[DataPoint],
     if all_windows==True:
         for key, data in create_all_windows(data, window_size, window_offset):
             windowed_datastream[key] = data
-            print(key, data)
     else:
         for key, data in window_iter(data, window_size, window_offset):
             windowed_datastream[key] = data
-            print(key, data)
 
 
     return windowed_datastream
@@ -114,7 +115,7 @@ def create_all_windows(datapoint: List[DataPoint], window_size: float, window_of
     :param datapoint:
     :param window_size:
     :param window_offset:
-    :return: OrderedDict representing [(st,et),[dp,dp,dp,dp...], {if a window contains data}
+    :return: a tupal of windowed data: [(st,et),[dp,dp,dp,dp...], {if a window contains data}
                                        (st,et),[], (if a window does not contain any data}
                                         ...]
     """
