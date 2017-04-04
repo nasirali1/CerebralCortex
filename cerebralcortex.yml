@@ -1,5 +1,5 @@
 cassandra:
-  keyspace: cortex
+  keyspace: cort
   db_user: ""
   db_pass: ""
   datapoint_table: data

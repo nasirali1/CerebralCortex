@@ -54,6 +54,8 @@ class LoadData:
         if end_time != "":
             where_clause += " and end_time<='" + str(end_time) + "'"
 
+        #where_clause += " order by start_time"
+
         datapoints = self.map_dataframe_to_datapoint(self.load_data_from_cassandra(self.datapointTable, where_clause))
         stream = self.map_datapoint_and_metadata_to_datastream(stream_id, datapoints)
 
@@ -73,8 +75,11 @@ class LoadData:
             #dp = DataPoint(self.get_epoch_time(row["start_time"]), self.get_epoch_time(row["end_time"]), row["sample"])
             localtz = timezone('US/Central')
             start_time = localtz.localize(row["start_time"])
-            end_time = localtz.localize(row["end_time"])
-
+            #print(row["end_time"])
+            if row["end_time"]!=None:
+                end_time = localtz.localize(row["end_time"])
+            else:
+                end_time = ""
             #d1 = row["start_time"].replace(tzinfo=pytz.UTC)
             #d2 = row["start_time"].replace(tzinfo=pytz.UTC)
             dp = DataPoint(start_time, end_time, row["sample"])
@@ -113,7 +118,7 @@ class LoadData:
         #TO-DO, replace .filter with .where() for performance
         dataframe = self.sqlContext.read.format("org.apache.spark.sql.cassandra").options(table=table_name,
                                                                                           keyspace=self.keyspaceName).load().select("start_time", "end_time", "sample").filter(
-            where_clause)
+            where_clause).orderBy('start_time', ascending=True)
 
         return dataframe
 
