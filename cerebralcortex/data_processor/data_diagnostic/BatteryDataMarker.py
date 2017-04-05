@@ -105,30 +105,3 @@ def autosense_battery(dp: List) -> str:
     return None
 
 
-def merge_consective_windows(data: OrderedDict) -> OrderedDict:
-    """
-    Merge two or more windows if the time difference between them is 0
-    :param data:
-    :return:
-    """
-    merged_windows = OrderedDict()
-    element = None
-    start = None
-    end = None
-    for key, val in data.items():
-        if element is None:
-            element = val
-            start = key[0]
-            end = key[1]
-        elif element == val:
-            element = val
-            end = key[1]
-        else:
-            merged_windows[(start, end)] = element
-            element = val
-            start = key[0]
-            end = key[1]
-    if val is not None:
-        merged_windows[(start, end)] = val
-
-    return merged_windows
