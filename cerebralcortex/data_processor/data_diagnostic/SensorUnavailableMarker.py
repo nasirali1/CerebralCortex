@@ -1,5 +1,32 @@
 import numpy as np
+import math
 
+from cerebralcortex.kernel.datatypes.datapoint import DataPoint
+from cerebralcortex.data_processor.signalprocessing.window import window
+
+def autosense_calculate_magnitude(accel_x, accel_y, accel_z, window_size):
+    datapointsList = []
+    max_list_size = len(max(accel_x, accel_y, accel_z, key=len))
+
+    for i in range(max_list_size):
+        x = 0 if len(accel_x) - 1 < i else float(accel_x[i].sample)
+        y = 0 if len(accel_y) - 1 < i else float(accel_y[i].sample)
+        z = 0 if len(accel_z) - 1 < i else float(accel_z[i].sample)
+
+        if len(accel_x) == max_list_size:
+            start_time = accel_x[i].start_time
+        elif len(accel_y) == max_list_size:
+            start_time = accel_y[i].start_time
+        elif len(accel_z) == max_list_size:
+            start_time = accel_z[i].start_time
+
+        magnitude = math.sqrt(math.pow(x, 2) + math.pow(y, 2) + math.pow(z, 2));
+
+        dp = DataPoint(start_time, '', magnitude)
+        datapointsList.append(dp)
+
+    #windowed_data = window(datapointsList, window_size, True)
+    #print("done")
 
 def WirelessDisconnection(accelerometer_data_window, caller_method):
     # pass windows that are marked as sensor-powered off
@@ -28,9 +55,3 @@ def WirelessDisconnection(accelerometer_data_window, caller_method):
 
 def motionsenseWirelessDC(sensor_powed_off_windows):
     pass
-
-def autoSenseWirelessDC():
-    pass
-
-
-

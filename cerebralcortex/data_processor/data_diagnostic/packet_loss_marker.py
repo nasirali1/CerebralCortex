@@ -22,13 +22,12 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 from typing import List
-import numpy as np
 
 from cerebralcortex.kernel.datatypes.datapoint import DataPoint
 from cerebralcortex.data_processor.signalprocessing.window import window
 from cerebralcortex.data_processor.data_diagnostic.util import *
 
-def battery_marker(datapoints: List[DataPoint], window_size: int, type: str) -> OrderedDict:
+def packet_loss_marker(datapoints: List[DataPoint], window_size: int, type: str) -> OrderedDict:
     """
     :param datapoints:
     :param window_size: in seconds
@@ -37,71 +36,28 @@ def battery_marker(datapoints: List[DataPoint], window_size: int, type: str) -> 
                                        (st,et),[label],
                                         ...]
     """
-    windowed_data = window(datapoints, window_size, True)
+    #only create windows if a window has data in it
+    windowed_data = window(datapoints, window_size, False)
     results = OrderedDict()
+    sampling_rate = None
+    threshold_val = None
+
+    if type=="autosense":
+        sampling_rate = 12
+
+    elif type=="motionsense":
+        sampling_rate = 12
+    else:
+        raise ValueError("Incorrect sensor type.")
+
     for key, data in windowed_data.items():
-        dp = []
-        for k in data:
-            dp.append(float(k.sample))
 
-        if type=="phone":
-            results[key] = phone_battery(dp)
+        available_packets = len(data)
+        expected_packets = sampling_rate * window_size
 
-        elif type=="motionsense":
-            results[key] = phone_battery(dp)
-        elif type=="autosense":
-            results = phone_battery(dp)
-        else:
-            raise ValueError("Incorrect sensor type.")
+        if (available_packets/expected_packets)< threshold_val:
+            results[key] = "packet_loss"
+
+
     merged_windows = merge_consective_windows(results)
     return merged_windows
-
-def phone_battery(dp: List) -> str:
-    """
-
-    :param dp:
-    :return:
-    """
-    if not dp:
-        return "phone-off"
-    else:
-        #get sampling rate and check if the current window has acceptable number of samples
-        """TO-DO"""
-        dp_sample_avg = np.mean(dp)
-        if dp_sample_avg<10:
-            return "phone-battery-down"
-    return  None
-
-def motionSenseBatteryMarker(dp: List) -> str:
-    """
-
-    :param dp:
-    :return:
-    """
-    if not dp:
-        return "motionsense-off"
-    else:
-        #get sampling rate and check if the current window has acceptable number of samples
-        """TO-DO"""
-        dp_sample_avg = np.mean(dp)
-        if dp_sample_avg<10:
-            return "motionsense-battery-down"
-    return None
-
-def autosense_battery(dp: List) -> str:
-    """
-
-    :param dp:
-    :return:
-    """
-    if not dp:
-        return "sensor-off"
-    else:
-        dp_sample_avg = np.mean(dp)
-        # Values (Min=0 and Max=6) in battery voltage.
-        voltageValue = (dp_sample_avg / 4096) * 3 * 2
-        if voltageValue<0.5:
-            return "sensor-battery-down"
-    return None
-
-

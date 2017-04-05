@@ -31,7 +31,7 @@ from cerebralcortex.kernel.datatypes.datastream import *
 
 class LoadData:
 
-    def get_stream(self, stream_id: int, start_time: int = "", end_time: int = "") -> DataStream:
+    def get_stream(self, stream_id: int, start_time: int = "", end_time: int = "", xx="") -> DataStream:
 
         """
         :param stream_id:
@@ -52,10 +52,9 @@ class LoadData:
             where_clause += " and start_time>='" + str(start_time) + "'"
 
         if end_time != "":
-            where_clause += " and end_time<='" + str(end_time) + "'"
+            where_clause += " and end_time<='" + str(end_time) + "' limit 100"
 
         #where_clause += " order by start_time"
-
         datapoints = self.map_dataframe_to_datapoint(self.load_data_from_cassandra(self.datapointTable, where_clause))
         stream = self.map_datapoint_and_metadata_to_datastream(stream_id, datapoints)
 
