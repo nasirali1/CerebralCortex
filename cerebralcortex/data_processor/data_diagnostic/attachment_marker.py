@@ -1,4 +1,4 @@
-# Copyright (c) 2017, MD2K Center of Excellence
+# Copyright (c) 2016, MD2K Center of Excellence
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -22,93 +22,74 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import statistics as stat
-import uuid
-from collections import OrderedDict
-from datetime import datetime
+from typing import List
+import numpy as np
 
-from cerebralcortex.CerebralCortex import CerebralCortex
-from cerebralcortex.data_processor.data_diagnostic.post_processing import store
-from cerebralcortex.data_processor.data_diagnostic.util import merge_consective_windows, outlier_detection
-from cerebralcortex.data_processor.signalprocessing.vector import magnitude
+from cerebralcortex.kernel.datatypes.datapoint import DataPoint
 from cerebralcortex.data_processor.signalprocessing.window import window
-from cerebralcortex.kernel.DataStoreEngine.dataset import DataSet
+from cerebralcortex.data_processor.data_diagnostic.util import *
 
 
-def attachment_marker(stream_id: uuid, CC_obj: CerebralCortex, config: dict, start_time=None, end_time=None):
+def variance_based_data_quality(datapoints: List[DataPoint], window_size: int, type: str) -> OrderedDict:
     """
-    Label sensor data as sensor-on-body, sensor-off-body, or improper-attachment.
-    All the labeled data (st, et, label) with its metadata are then stored in a datastore
-    :param stream_id: UUID
-    :param CC_obj: CerebralCortex object
-    :param config: Data diagnostics configurations
+    This method accepts one window at a time
+    :param datapoints:
+    :param window_size: in seconds
+    :param type: acceptable types are: phone, autosense, motionsense
+    :return: OrderedDict representing [(st,et),[label],
+                                       (st,et),[label],
+                                        ...]
     """
-
-    stream = CC_obj.get_datastream(stream_id, data_type=DataSet.COMPLETE, start_time=start_time, end_time=end_time)
-
-    CC_obj.get_datastream(stream_id, data_type=DataSet.COMPLETE, start_time=start_time, end_time=end_time)
-
+    windowed_data = window(datapoints, window_size, False)
     results = OrderedDict()
+    sampling_rate = None
     threshold_val = None
-    name = stream._name
 
-    if name == config["sensor_types"]["autosense_ecg"]:
-        threshold_val = config['attachment_marker']['ecg_on_body']
-        label_on = config['labels']['ecg_on_body']
-        label_off = config['labels']['ecg_off_body']
-        windowed_data = window(stream.data, config['general']['window_size'], False)
-    elif name == config["sensor_types"]["autosense_rip"]:
-        threshold_val = config['attachment_marker']['rip_on_body']
-        label_on = config['labels']['rip_on_body']
-        label_off = config['labels']['rip_off_body']
-        windowed_data = window(stream.data, config['general']['window_size'], False)
-    elif name == config["sensor_types"]["motionsense_accel"]:
-        threshold_val = config['attachment_marker']['motionsense_on_body']
-        label_on = config['labels']['motionsense_on_body']
-        label_off = config['labels']['motionsense_off_body']
-        motionsense_accel_magni = magnitude(stream)
-        windowed_data = window(motionsense_accel_magni.data, config['general']['window_size'], False)
+    if type=="autosense":
+        threshold_val = 12
+
+    elif type=="motionsense":
+        threshold_val = 12
     else:
         raise ValueError("Incorrect sensor type.")
 
     for key, data in windowed_data.items():
-        # remove outliers from a window data
+        # remove outliers from the window data
         normal_values = outlier_detection(data)
 
-        if stat.variance(normal_values) < threshold_val:
-            results[key] = label_off
+        # TO-DO: move all threshold values in config
+        if np.var(normal_values) < threshold_val:
+            results[key] = "off-body"
         else:
-            results[key] = label_on
+            results[key] = "on-body"
 
     merged_windows = merge_consective_windows(results)
-    input_streams = [{"id": str(stream_id), "name": name}]
-    store(input_streams, merged_windows, CC_obj, config, config["algo_names"]["attachment_marker"])
+    return merged_windows
 
-
-# TO-DO gsr_response method is not being used. Need to make sure whether GSR values actually respresent GSR data.
-
-
-
-def gsr_response(stream_id: uuid, start_time: datetime, end_time: datetime, label_attachment: str, label_off: str,
-                 CC_obj: CerebralCortex, config: dict) -> str:
+def bb():
+    #get GSR stream
+    #create non-empty windows
+    #get_stream_data()
+    pass
+def outlier_detection(window_data: list) -> list:
     """
-    This method analyzes Galvanic skin response to label a window as improper attachment or sensor-off-body
-    :param stream_id: UUID
-    :param start_time:
-    :param end_time:
-    :param label_attachment:
-    :param label_off:
-    :param CC_obj:
-    :param config:
-    :return: string
+    removes outliers from a list
+    This algorithm is modified version of Chauvenet's_criterion (https://en.wikipedia.org/wiki/Chauvenet's_criterion)
+    :param window_data:
+    :return:
     """
-    datapoints = CC_obj.get_datastream(stream_id, start_time=start_time, end_time=end_time, data_type=DataSet.COMPLETE)
+    if not window_data:
+        raise ValueError("List is empty.")
 
-    vals = []
-    for dp in datapoints:
-        vals.append(dp.sample)
+    median = np.median(window_data)
+    standard_deviation = np.std(window_data)
+    normal_values = list()
 
-    if stat.median(stat.array(vals)) < config["attachment_marker"]["improper_attachment"]:
-        return label_attachment
-    elif stat.median(stat.array(vals)) > config["attachment_marker"]["gsr_off_body"]:
-        return label_off
+    for val in window_data:
+        if (abs(val) - median) < standard_deviation:
+            normal_values.append(val)
+
+    return normal_values
+
+
+variance_based_data_quality([1, 2, 3])
