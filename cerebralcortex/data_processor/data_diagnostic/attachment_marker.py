@@ -22,39 +22,70 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+from typing import List
 import numpy as np
 
+from cerebralcortex.kernel.datatypes.datapoint import DataPoint
+from cerebralcortex.data_processor.signalprocessing.window import window
+from cerebralcortex.data_processor.data_diagnostic.util import *
 
-def variance_based_data_quality(window_data: list) -> str:
+
+def variance_based_data_quality(datapoints: List[DataPoint], window_size: int, type: str) -> OrderedDict:
     """
     This method accepts one window at a time
-    :param raw_sensor_data:
+    :param datapoints:
+    :param window_size: in seconds
+    :param type: acceptable types are: phone, autosense, motionsense
+    :return: OrderedDict representing [(st,et),[label],
+                                       (st,et),[label],
+                                        ...]
     """
-    # remove outliers from the window data
-    normal_values = outlier_detection(window_data)
+    windowed_data = window(datapoints, window_size, False)
+    results = OrderedDict()
+    sampling_rate = None
+    threshold_val = None
 
-    # TO-DO: move all threshold values in config
-    if np.var(normal_values) < 0.7:
-        return "off-body"
+    if type=="autosense":
+        threshold_val = 12
 
-    return "on-body"
+    elif type=="motionsense":
+        threshold_val = 12
+    else:
+        raise ValueError("Incorrect sensor type.")
 
+    for key, data in windowed_data.items():
+        # remove outliers from the window data
+        normal_values = outlier_detection(data)
 
-def outlier_detection(signal_values: list) -> list:
+        # TO-DO: move all threshold values in config
+        if np.var(normal_values) < threshold_val:
+            results[key] = "off-body"
+        else:
+            results[key] = "on-body"
+
+    merged_windows = merge_consective_windows(results)
+    return merged_windows
+
+def bb():
+    #get GSR stream
+    #create non-empty windows
+    #get_stream_data()
+    pass
+def outlier_detection(window_data: list) -> list:
     """
     removes outliers from a list
     This algorithm is modified version of Chauvenet's_criterion (https://en.wikipedia.org/wiki/Chauvenet's_criterion)
-    :param signal_values:
+    :param window_data:
     :return:
     """
-    if not signal_values:
-        return
+    if not window_data:
+        raise ValueError("List is empty.")
 
-    median = np.median(signal_values)
-    standard_deviation = np.std(signal_values)
+    median = np.median(window_data)
+    standard_deviation = np.std(window_data)
     normal_values = list()
 
-    for val in signal_values:
+    for val in window_data:
         if (abs(val) - median) < standard_deviation:
             normal_values.append(val)
 

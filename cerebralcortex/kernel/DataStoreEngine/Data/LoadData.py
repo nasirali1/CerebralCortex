@@ -25,18 +25,19 @@
 import json
 from datetime import datetime
 from pytz import timezone
-
+import re
 from cerebralcortex.kernel.DataStoreEngine.Metadata.Metadata import Metadata
 from cerebralcortex.kernel.datatypes.datastream import *
 
-class LoadData:
 
-    def get_stream(self, stream_id: int, start_time: int = "", end_time: int = "", xx="") -> DataStream:
+class LoadData:
+    def get_stream(self, stream_id: datetime, start_time: datetime = "", end_time: int = "", type="all") -> DataStream:
 
         """
         :param stream_id:
         :param start_time:
         :param end_time:
+        :param type: this parameter accepts only three types (i.e., all, data, metadata)
         :return: spark dataframe
         """
         stream_id = str(stream_id)
@@ -45,22 +46,29 @@ class LoadData:
 
         where_clause = "identifier=" + stream_id
 
-        if stream_id == "":
+        if stream_id == None:
             raise Exception("Stream identifier cannot be null.")
 
         if start_time != "":
-            where_clause += " and start_time>='" + str(start_time) + "'"
+            where_clause += " and start_time>=cast('"+start_time+"' as timestamp)"
 
         if end_time != "":
-            where_clause += " and end_time<='" + str(end_time) + "' limit 100"
+            where_clause += " and start_time<=cast('"+end_time+"' as timestamp)"
 
-        #where_clause += " order by start_time"
-        datapoints = self.map_dataframe_to_datapoint(self.load_data_from_cassandra(self.datapointTable, where_clause))
-        stream = self.map_datapoint_and_metadata_to_datastream(stream_id, datapoints)
+        print(where_clause)
+        if type == "all":
+            datapoints = self.map_dataframe_to_datapoint(
+                self.load_data_from_cassandra(self.datapointTable, where_clause))
+            stream = self.map_datapoint_and_metadata_to_datastream(stream_id, datapoints)
+        elif type == "data":
+            return self.map_dataframe_to_datapoint(self.load_data_from_cassandra(self.datapointTable, where_clause))
+        elif type == "metadata":
+            datapoints = []
+            stream = self.map_datapoint_and_metadata_to_datastream(stream_id, datapoints)
+        else:
+            raise ValueError("Invalid type parameter.")
 
         return stream
-
-
 
     def map_dataframe_to_datapoint(self, dataframe: object) -> list:
         """
@@ -70,17 +78,18 @@ class LoadData:
         """
         datapointsList = []
         rows = dataframe.collect()
+
         for row in rows:
-            #dp = DataPoint(self.get_epoch_time(row["start_time"]), self.get_epoch_time(row["end_time"]), row["sample"])
+            # dp = DataPoint(self.get_epoch_time(row["start_time"]), self.get_epoch_time(row["end_time"]), row["sample"])
             localtz = timezone('US/Central')
             start_time = localtz.localize(row["start_time"])
-            #print(row["end_time"])
-            if row["end_time"]!=None:
+            # print(row["end_time"])
+            if row["end_time"] != None:
                 end_time = localtz.localize(row["end_time"])
             else:
                 end_time = ""
-            #d1 = row["start_time"].replace(tzinfo=pytz.UTC)
-            #d2 = row["start_time"].replace(tzinfo=pytz.UTC)
+            # d1 = row["start_time"].replace(tzinfo=pytz.UTC)
+            # d2 = row["start_time"].replace(tzinfo=pytz.UTC)
             dp = DataPoint(start_time, end_time, row["sample"])
             datapointsList.append(dp)
         return datapointsList
@@ -104,7 +113,8 @@ class LoadData:
         annotations = json.loads(datastream_info[0][6])
         stream_type = datastream_info[0][7]
 
-        return DataStream(stream_id, ownerID, name, description, data_descriptor, execution_context, annotations, stream_type, data)
+        return DataStream(stream_id, ownerID, name, description, data_descriptor, execution_context, annotations,
+                          stream_type, data)
 
     def load_data_from_cassandra(self, table_name: str, where_clause: str) -> object:
         """
@@ -114,11 +124,13 @@ class LoadData:
         :param where_clause:
         :return: spark dataframe
         """
-        #TO-DO, replace .filter with .where() for performance
-        dataframe = self.sqlContext.read.format("org.apache.spark.sql.cassandra").options(table=table_name,
-                                                                                          keyspace=self.keyspaceName).load().select("start_time", "end_time", "sample").filter(
-            where_clause).orderBy('start_time', ascending=True)
+        # TO-DO, replace .filter with .where() for performance
 
+        dataframe = self.sqlContext.read.format("org.apache.spark.sql.cassandra"). \
+            options(table=table_name, keyspace=self.keyspaceName, pushdownss=True).load(). \
+            select("start_time", "end_time", "sample"). \
+            filter(where_clause). \
+            orderBy('start_time', ascending=True)
         return dataframe
 
     def get_epoch_time(self, dt: datetime) -> datetime:

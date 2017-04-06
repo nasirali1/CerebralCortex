@@ -4,7 +4,7 @@ import math
 from cerebralcortex.kernel.datatypes.datapoint import DataPoint
 from cerebralcortex.data_processor.signalprocessing.window import window
 
-def autosense_calculate_magnitude(accel_x, accel_y, accel_z, window_size):
+def autosense_calculate_magnitude(accel_x, accel_y, accel_z):
     datapointsList = []
     max_list_size = len(max(accel_x, accel_y, accel_z, key=len))
 
@@ -25,10 +25,21 @@ def autosense_calculate_magnitude(accel_x, accel_y, accel_z, window_size):
         dp = DataPoint(start_time, '', magnitude)
         datapointsList.append(dp)
 
-    #windowed_data = window(datapointsList, window_size, True)
+
+    return datapointsList
+    # windowed_data = window(datapointsList, window_size, False)
+    #
+    # del accel_x[:]
+    # del accel_y[:]
+    # del accel_z[:]
+    # del datapointsList[:]
+    #
+    # WirelessDisconnection(datapointsList, "autoSenseWirelessDC")
+    # print("wow")
+
     #print("done")
 
-def WirelessDisconnection(accelerometer_data_window, caller_method):
+def WirelessDisconnection(accelerometer_data_window, CC_obj, caller_method):
     # pass windows that are marked as sensor-powered off
     # also a previous window before sensor-powered off to analyze whether
     # the disconnection was due to power-off or wireless disconnection
@@ -40,6 +51,16 @@ def WirelessDisconnection(accelerometer_data_window, caller_method):
     :param caller_method:
     :return:
     """
+
+    autosense_battery_dc = CC_obj.get_datastream(7664, type="data")
+
+    if autosense_battery_dc.start_time!="" and autosense_battery_dc.end_time!="":
+        autosense_acc_x = CC_obj.get_datastream(7664, start_time=autosense_battery_dc.start_time, end_time=autosense_battery_dc.end_time, type="data")
+        autosense_acc_y = CC_obj.get_datastream(7669, start_time=autosense_battery_dc.start_time, end_time=autosense_battery_dc.end_time, type="data")
+        autosense_acc_z = CC_obj.get_datastream(7673, start_time=autosense_battery_dc.start_time, end_time=autosense_battery_dc.end_time, type="data")
+
+        magnitude = autosense_calculate_magnitude(autosense_acc_x, autosense_acc_y, autosense_acc_z)
+
     threshold = 0
     if caller_method == "autoSenseWirelessDC":
         threshold = 4000
