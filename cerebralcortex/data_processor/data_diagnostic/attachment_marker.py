@@ -22,15 +22,14 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from typing import List
-import numpy as np
+import statistics as stat
 
-from cerebralcortex.kernel.datatypes.datapoint import DataPoint
 from cerebralcortex.data_processor.signalprocessing.window import window
 from cerebralcortex.data_processor.data_diagnostic.util import *
+from cerebralcortex.data_processor.data_diagnostic.post_processing import *
 
 
-def variance_based_data_quality(datapoints: List[DataPoint], window_size: int, type: str) -> OrderedDict:
+def attachment_marker(stream_id, CC_obj, config) -> OrderedDict:
     """
     This method accepts one window at a time
     :param datapoints:
@@ -40,37 +39,54 @@ def variance_based_data_quality(datapoints: List[DataPoint], window_size: int, t
                                        (st,et),[label],
                                         ...]
     """
-    windowed_data = window(datapoints, window_size, False)
+
+    stream = CC_obj.get_datastream(stream_id, type="all")
+    windowed_data = window(stream.data, config['general']['window_size'], False)
+
     results = OrderedDict()
-    sampling_rate = None
     threshold_val = None
+    name = stream._data_descriptor["name"]
 
-    if type=="autosense":
-        threshold_val = 12
-
-    elif type=="motionsense":
-        threshold_val = 12
+    if name=="ecg":
+        threshold_val = config['attachment_marker']['ecg_on_body']
+    elif name=="rip":
+        threshold_val = config['attachment_marker']['rip_on_body']
+    elif name=="motionsense":
+        threshold_val = config['attachment_marker']['motionsense_on_body']
     else:
         raise ValueError("Incorrect sensor type.")
 
     for key, data in windowed_data.items():
-        # remove outliers from the window data
+        # remove outliers from a window data
         normal_values = outlier_detection(data)
 
-        # TO-DO: move all threshold values in config
-        if np.var(normal_values) < threshold_val:
-            results[key] = "off-body"
+        if stat.variance(normal_values) < threshold_val:
+            results[key] = config['labels']['sensor_off_body']
         else:
-            results[key] = "on-body"
+            results[key] = config['labels']['sensor_on_body']
 
     merged_windows = merge_consective_windows(results)
+    store(stream_id, merged_windows, CC_obj)
+    print(merged_windows)
     return merged_windows
 
-def bb():
-    #get GSR stream
-    #create non-empty windows
-    #get_stream_data()
-    pass
+
+"""TO-DO"""
+#This method is not being used. Need to make sure whether GSR values actually respresent GSR data.
+def gsr_response(stream_id, start_time, end_time, CC_obj, config):
+    datapoints = CC_obj.get_datastream(stream_id, start_time=start_time, end_time=end_time, type="data")
+
+    vals = []
+    for dp in datapoints:
+        vals.append(dp.sample)
+
+    if stat.median(stat.array(vals)) < config["attachment_marker"]["improper_attachment"]:
+        return config["labels"]["improper_attachment"]
+    elif stat.median(stat.array(vals)) > config["attachment_marker"]["gsr_off_body"]:
+        return config["labels"]["sensor_off_body"]
+
+
+
 def outlier_detection(window_data: list) -> list:
     """
     removes outliers from a list
@@ -81,15 +97,16 @@ def outlier_detection(window_data: list) -> list:
     if not window_data:
         raise ValueError("List is empty.")
 
-    median = np.median(window_data)
-    standard_deviation = np.std(window_data)
+    vals = []
+    for dp in window_data:
+        vals.append(float(dp.sample))
+
+    median = stat.median(vals)
+    standard_deviation = stat.stdev(vals)
     normal_values = list()
 
     for val in window_data:
-        if (abs(val) - median) < standard_deviation:
-            normal_values.append(val)
+        if (abs(float(val.sample)) - median) < standard_deviation:
+            normal_values.append(float(val.sample))
 
     return normal_values
-
-
-variance_based_data_quality([1, 2, 3])
