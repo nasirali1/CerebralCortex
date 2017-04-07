@@ -82,26 +82,27 @@ class StoreMetadata:
         vals = { 'identifier': str(stream_identifier) }
         self.cursor.execute(qry, vals)
         result = self.cursor.fetchall()
-
-        if (result[0][0] == stream_identifier):
-            if (result[0][1] != stream_owner_id):
-                raise Exception("Update failed: owner ID is not same..")
-            elif (result[0][2] != name):
-                raise Exception("Update failed: name is not same..")
-            elif (result[0][3] != description):
-                raise Exception("Update failed: description is not same..")
-            elif (sorted(json.loads(str(result[0][4])).items()) != sorted(
-                    json.loads(json.dumps(data_descriptor)).items())):
-                raise Exception("Update failed: data descriptor is not same.")
-            elif (sorted(json.loads(str(result[0][5])).items()) != sorted(
-                    json.loads(json.dumps(execution_context)).items())):
-                raise Exception("Update failed: execution context is not same.")
-            elif (result[0][7] != stream_type):
-                raise Exception("Update failed: type is not same.")
+        if result:
+            print(result[0][0])
+            if (result[0][0] == str(stream_identifier)):
+                if (result[0][1] != stream_owner_id):
+                    raise Exception("Update failed: owner ID is not same..")
+                elif (result[0][2] != name):
+                    raise Exception("Update failed: name is not same..")
+                elif (result[0][3] != description):
+                    raise Exception("Update failed: description is not same..")
+                elif (sorted(json.loads(str(result[0][4])).items()) != sorted(
+                        json.loads(json.dumps(data_descriptor)).items())):
+                    raise Exception("Update failed: data descriptor is not same.")
+                elif (sorted(json.loads(str(result[0][5])).items()) != sorted(
+                        json.loads(json.dumps(execution_context)).items())):
+                    raise Exception("Update failed: execution context is not same.")
+                elif (result[0][7] != stream_type):
+                    raise Exception("Update failed: type is not same.")
+                else:
+                    return True
             else:
-                return True
-        else:
-            return False
+                return False
 
     def cleanJson(self, jsonObj):
         cleaned = json.dumps(jsonObj).strip().replace('\\"', '\"')

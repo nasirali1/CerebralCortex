@@ -1,0 +1,59 @@
+general:
+  window_size: 60
+
+
+sampling_rate:
+  rip: 21.33
+  ecg: 64
+  autosense_accel: 10.67
+  motionsense: 16
+
+battery_marker:
+  phone_powered_off: 0 #min=0 and max=100
+  phone_battery_down: 10
+  autosense_powered_off: 4 #Min=0 and Max=6
+  autosense_battery_down: 1 #Min=0 and Max=6
+  motionsense_powered_off: 1 #min= and max=
+  motionsense_battery_down: 10 #min= and max=
+
+
+attachment_marker:
+  ecg_on_body: 1000
+  rip_on_body: 1000
+  motionsense_on_body: 0.00003
+  #these two parameters are only used with GSR. In future, we might not have GSR values.
+  improper_attachment: 750
+  gsr_off_body: 1800
+
+packet_loss_marker:
+  acceptable_packet_loss: 0.33 #min=0 and max=1.0
+
+sensor_unavailable_marker:
+  #Threshold to distinguish between a wireless disconnection and sensor-off
+  ecg: 4000
+  motionsense: 0.005
+
+labels:
+  sensor_unavailable: 4
+  data_lost: 6
+  sensor_off_body: 8
+  sensor_on_body: 9
+  improper_attachment: 10
+  #delay_in_attachment: 12
+  sensor_battery_down: 14
+  phone_battery_down: 16
+  sensor_powered_off: 18
+  phone_powered_off: 20
+  #acceptable_data: 22
+
+#!#Value is in percentage of battery remaining. Min=0 and Max=100
+#PHONE_BATTERY_DOWN = 0
+#PHONE_POWERED_OFF = 10
+#
+#!Sensor battery voltage. Min=0 and Max=6
+#MOTIONSENSE_BATTERY_DOWN = 1
+#AUTOSENSE_BATTERY_DOWN = 1
+#AUTOSENSE_POWERED_OFF = 4
+
+
+
