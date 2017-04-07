@@ -45,7 +45,7 @@ def attachment_marker(stream_id, CC_obj, config) -> OrderedDict:
 
     results = OrderedDict()
     threshold_val = None
-    name = stream._data_descriptor["name"]
+    name = stream._name
 
     if name=="ecg":
         threshold_val = config['attachment_marker']['ecg_on_body']
@@ -66,7 +66,7 @@ def attachment_marker(stream_id, CC_obj, config) -> OrderedDict:
             results[key] = config['labels']['sensor_on_body']
 
     merged_windows = merge_consective_windows(results)
-    store(stream_id, merged_windows, CC_obj)
+    store(stream_id, merged_windows, CC_obj, name)
     print(merged_windows)
     return merged_windows
 
