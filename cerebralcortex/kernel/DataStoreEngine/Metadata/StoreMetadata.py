@@ -50,6 +50,11 @@ class StoreMetadata:
 
         isStreamCreated = self.is_stream_created(stream_identifier, stream_owner_id, name, description, data_descriptor,
                                                  execution_context, stream_type)
+        isIDCreated = self.is_id_created(stream_identifier)
+
+        if isIDCreated:
+            stream_identifier = isIDCreated
+            
 
         if (isStreamCreated == True):
             qry = "UPDATE " + self.datastreamTable + " set annotations=JSON_ARRAY_APPEND(annotations, '$',  %s) where identifier=%s"
@@ -83,7 +88,6 @@ class StoreMetadata:
         self.cursor.execute(qry, vals)
         result = self.cursor.fetchall()
         if result:
-            print(result[0][0])
             if (result[0][0] == str(stream_identifier)):
                 if (result[0][1] != stream_owner_id):
                     raise Exception("Update failed: owner ID is not same..")
@@ -91,10 +95,10 @@ class StoreMetadata:
                     raise Exception("Update failed: name is not same..")
                 elif (result[0][3] != description):
                     raise Exception("Update failed: description is not same..")
-                elif (sorted(json.loads(str(result[0][4])).items()) != sorted(
+                elif (sorted(json.loads(json.dumps(result[0][4])).items()) != sorted(
                         json.loads(json.dumps(data_descriptor)).items())):
                     raise Exception("Update failed: data descriptor is not same.")
-                elif (sorted(json.loads(str(result[0][5])).items()) != sorted(
+                elif (sorted(json.loads(json.dumps(result[0][5])).items()) != sorted(
                         json.loads(json.dumps(execution_context)).items())):
                     raise Exception("Update failed: execution context is not same.")
                 elif (result[0][7] != stream_type):
@@ -103,6 +107,17 @@ class StoreMetadata:
                     return True
             else:
                 return False
+
+    def is_id_created(self, parent_stream_id):
+
+        # qry = "select json_extract(execution_context, '$.execution_context.processing_module.input_streams[*].name') as parent_stream_id from stream"
+        # vals = { 'identifier': str(stream_identifier) }
+        # self.cursor.execute(qry, vals)
+        # result = self.cursor.fetchall()
+        # if result:
+        #     return result[0][0]
+        # else:
+            return False
 
     def cleanJson(self, jsonObj):
         cleaned = json.dumps(jsonObj).strip().replace('\\"', '\"')
