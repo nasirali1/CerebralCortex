@@ -47,31 +47,35 @@ class StoreMetadata:
         :param annotations:
         :param stream_type:
         """
-
+        exe = 0
         isStreamCreated = self.is_stream_created(stream_identifier, stream_owner_id, name, description, data_descriptor,
-                                                 execution_context, stream_type)
-        isIDCreated = self.is_id_created(stream_identifier)
+                                                 execution_context, annotations, stream_type)
+        isIDCreated = self.is_id_created(stream_owner_id, name)
 
         if isIDCreated:
             stream_identifier = isIDCreated
+            isStreamCreated = True
             
 
         if (isStreamCreated == True):
             qry = "UPDATE " + self.datastreamTable + " set annotations=JSON_ARRAY_APPEND(annotations, '$',  %s) where identifier=%s"
-            vals = self.cleanJson(annotations), str(stream_identifier)
-        else:
+            vals = json.dumps(annotations), str(stream_identifier)
+            exe = 1
+        elif (isStreamCreated == False):
             qry = "INSERT INTO " + self.datastreamTable + " (identifier, owner, name, description, data_descriptor, execution_context, annotations, type) VALUES(%s, %s, %s, %s, %s, %s, %s, %s)"
             vals = str(stream_identifier), str(stream_owner_id), str(name), str(description), str(
                 json.dumps(data_descriptor)), str(json.dumps(execution_context)), json.dumps(annotations), stream_type
-
-        self.cursor.execute(qry, vals)
-        self.dbConnection.commit()
-        self.cursor.close()
-        self.dbConnection.close()
+            exe = 1
+        if exe==1:
+            self.cursor.execute(qry, vals)
+            self.dbConnection.commit()
+            self.cursor.close()
+            self.dbConnection.close()
 
     def is_stream_created(self, stream_identifier: uuid, stream_owner_id: uuid, name: str, description: str,
                           data_descriptor: dict,
                           execution_context: dict,
+                          annotations: dict,
                           stream_type: str):
         """
         This method will check if the stream already exist with the same data (as provided in params) except annotations.
@@ -95,30 +99,29 @@ class StoreMetadata:
                     raise Exception("Update failed: name is not same..")
                 elif (result[0][3] != description):
                     raise Exception("Update failed: description is not same..")
-                elif (sorted(json.loads(json.dumps(result[0][4])).items()) != sorted(
-                        json.loads(json.dumps(data_descriptor)).items())):
+                elif (json.loads(result[0][4]) != data_descriptor):
                     raise Exception("Update failed: data descriptor is not same.")
-                elif (sorted(json.loads(json.dumps(result[0][5])).items()) != sorted(
-                        json.loads(json.dumps(execution_context)).items())):
+                elif (json.loads(result[0][5])!= execution_context):
                     raise Exception("Update failed: execution context is not same.")
+                elif (json.loads(result[0][6]) == annotations):
+                    return "annotations are same!"
                 elif (result[0][7] != stream_type):
                     raise Exception("Update failed: type is not same.")
                 else:
                     return True
-            else:
-                return False
-
-    def is_id_created(self, parent_stream_id):
-
-        # qry = "select json_extract(execution_context, '$.execution_context.processing_module.input_streams[*].name') as parent_stream_id from stream"
-        # vals = { 'identifier': str(stream_identifier) }
-        # self.cursor.execute(qry, vals)
-        # result = self.cursor.fetchall()
-        # if result:
-        #     return result[0][0]
-        # else:
+        else:
             return False
 
-    def cleanJson(self, jsonObj):
-        cleaned = json.dumps(jsonObj).strip().replace('\\"', '\"')
-        return cleaned
+
+    def is_id_created(self, owner_id, name):
+        #if stream name, id, and owner are same then return true
+        #qry = "SELECT * from stream where JSON_SEARCH(execution_context, 'all', '"+name+"', null, '$.execution_context.processing_module.output_streams[*].name')  is not null and owner='"+owner_id+"'"
+        qry = "SELECT * from stream where owner=%s and name=%s"
+        vals = owner_id, name
+        self.cursor.execute(qry, vals)
+        result = self.cursor.fetchall()
+        if result:
+            return result[0][0]
+        else:
+            return False
+
