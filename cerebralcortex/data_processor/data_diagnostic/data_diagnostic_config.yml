@@ -11,8 +11,8 @@ sampling_rate:
 battery_marker:
   phone_powered_off: 0 #min=0 and max=100
   phone_battery_down: 10
-  autosense_powered_off: 4 #Min=0 and Max=6
-  autosense_battery_down: 1 #Min=0 and Max=6
+  autosense_powered_off: 0 #Min=0 and Max=6
+  autosense_battery_down: 0.5 #Min=0 and Max=6
   motionsense_powered_off: 1 #min= and max=
   motionsense_battery_down: 10 #min= and max=
 
@@ -26,7 +26,10 @@ attachment_marker:
   gsr_off_body: 1800
 
 packet_loss_marker:
-  acceptable_packet_loss: 0.33 #min=0 and max=1.0
+  #min=0 and max=1.0
+  ecg_acceptable_packet_loss: 0.33
+  rip_acceptable_packet_loss: 0.33
+  motionsense_acceptable_packet_loss: 0.33
 
 sensor_unavailable_marker:
   #Threshold to distinguish between a wireless disconnection and sensor-off
@@ -34,16 +37,41 @@ sensor_unavailable_marker:
   motionsense: 0.005
 
 labels:
-  sensor_unavailable: 4
-  data_lost: 6
-  sensor_off_body: 8
-  sensor_on_body: 9
-  improper_attachment: 10
-  #delay_in_attachment: 12
-  sensor_battery_down: 14
-  phone_battery_down: 16
-  sensor_powered_off: 18
+  autosense_unavailable: 4
+  motionsense_unavailable: 4
+  #attachment labels
+  ecg_improper_attachment: 10
+  ecg_off_body: 8
+  ecg_on_body: 9
+  rip_improper_attachment: 10
+  rip_off_body: 8
+  rip_on_body: 9
+  motionsense_improper_attachment: 10
+  motionsense_off_body: 8
+  motionsense__on_body: 9
+  #packet loss labels
+  ecg_packet_loss: 6
+  rip_packet_loss: 6
+  motionsense_packet_loss: 6
+  #battery labels
   phone_powered_off: 20
+  phone_battery_down: 16
+  autosesen_powered_off: 18
+  autosense_battery_down: 14
+  motionsense_powered_off: 18
+  motionsense_battery_down: 14
+
+
+sensor_names:
+  autosense: rip
+  autosense: ecg
+  motionsense: motionsense
+
+algo_names:
+  battery_marker: battery
+  attachment_marker: attachment
+  sensor_unavailable_marker: sensor_unavailable
+  packet_loss_marker: packet_loss
   #acceptable_data: 22
 
 #!#Value is in percentage of battery remaining. Min=0 and Max=100

@@ -55,18 +55,18 @@ class StoreMetadata:
         if isIDCreated:
             stream_identifier = isIDCreated
             isStreamCreated = True
-            
 
         if (isStreamCreated == True):
-            qry = "UPDATE " + self.datastreamTable + " set annotations=JSON_ARRAY_APPEND(annotations, '$',  %s) where identifier=%s"
+
+            qry = "UPDATE " + self.datastreamTable + " set annotations=JSON_ARRAY_APPEND(annotations, '$.annotations',  %s) where identifier=%s"
             vals = json.dumps(annotations), str(stream_identifier)
             exe = 1
         elif (isStreamCreated == False):
             qry = "INSERT INTO " + self.datastreamTable + " (identifier, owner, name, description, data_descriptor, execution_context, annotations, type) VALUES(%s, %s, %s, %s, %s, %s, %s, %s)"
-            vals = str(stream_identifier), str(stream_owner_id), str(name), str(description), str(
-                json.dumps(data_descriptor)), str(json.dumps(execution_context)), json.dumps(annotations), stream_type
+            vals = str(stream_identifier), str(stream_owner_id), str(name), str(description), json.dumps(
+                data_descriptor), json.dumps(execution_context), json.dumps(annotations), stream_type
             exe = 1
-        if exe==1:
+        if exe == 1:
             self.cursor.execute(qry, vals)
             self.dbConnection.commit()
             self.cursor.close()
@@ -88,7 +88,7 @@ class StoreMetadata:
         :param stream_type:
         """
         qry = "select * from " + self.datastreamTable + " where identifier = %(identifier)s"
-        vals = { 'identifier': str(stream_identifier) }
+        vals = {'identifier': str(stream_identifier)}
         self.cursor.execute(qry, vals)
         result = self.cursor.fetchall()
         if result:
@@ -101,9 +101,11 @@ class StoreMetadata:
                     raise Exception("Update failed: description is not same..")
                 elif (json.loads(result[0][4]) != data_descriptor):
                     raise Exception("Update failed: data descriptor is not same.")
-                elif (json.loads(result[0][5])!= execution_context):
+                elif (json.loads(result[0][5]) != execution_context):
                     raise Exception("Update failed: execution context is not same.")
                 elif (json.loads(result[0][6]) == annotations):
+                    return "annotations are same!"
+                elif (json.loads(result[0][6]) != annotations):
                     return "annotations are same!"
                 elif (result[0][7] != stream_type):
                     raise Exception("Update failed: type is not same.")
@@ -111,11 +113,11 @@ class StoreMetadata:
                     return True
         else:
             return False
-
-
+    def append_annotations(self, existing_annotations:dict, new_annotations:dict):
+        return dict(existing_annotations.items() + new_annotations.items())
     def is_id_created(self, owner_id, name):
-        #if stream name, id, and owner are same then return true
-        #qry = "SELECT * from stream where JSON_SEARCH(execution_context, 'all', '"+name+"', null, '$.execution_context.processing_module.output_streams[*].name')  is not null and owner='"+owner_id+"'"
+        # if stream name, id, and owner are same then return true
+        # qry = "SELECT * from stream where JSON_SEARCH(execution_context, 'all', '"+name+"', null, '$.execution_context.processing_module.output_streams[*].name')  is not null and owner='"+owner_id+"'"
         qry = "SELECT * from stream where owner=%s and name=%s"
         vals = owner_id, name
         self.cursor.execute(qry, vals)
@@ -124,4 +126,3 @@ class StoreMetadata:
             return result[0][0]
         else:
             return False
-
