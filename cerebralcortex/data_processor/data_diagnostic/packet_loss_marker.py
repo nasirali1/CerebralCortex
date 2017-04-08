@@ -60,6 +60,5 @@ def packet_loss_marker(stream_id, CC_obj, config, type: str):
         if (available_packets/expected_packets)< threshold_val:
             results[key] = label
 
-
     merged_windows = merge_consective_windows(results)
     store(stream_id, merged_windows, CC_obj, config, type, config["algo_names"]["packet_loss"])

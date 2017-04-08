@@ -34,6 +34,7 @@ packet_loss_marker:
 sensor_unavailable_marker:
   #Threshold to distinguish between a wireless disconnection and sensor-off
   ecg: 4000
+  rip: 4000
   motionsense: 0.005
 
 labels:

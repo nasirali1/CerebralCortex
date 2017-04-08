@@ -6,9 +6,16 @@ import uuid
 
 
 def store(parent_stream_id, data, CC_obj, config, stream_name, algo_type):
-    input_streams = {"name": stream_name, "id": parent_stream_id};
+    if isinstance(parent_stream_id, list):
+        #in sensor-unavailable algos, I simply passed whole input stream object
+        input_streams = parent_stream_id
+        parent_stream_id = input_streams[0]["id"]
+    else:
+        input_streams = [{"name": stream_name, "id": str(parent_stream_id)}];
+
+
     """TO-DO"""
-    stream_uuid = 123 #uuid.uuid4()
+    stream_uuid = 123  # uuid.uuid4()
     result = dd(algo_type, stream_name, config, input_streams, stream_uuid)
 
     # if stream_name == "ecg" or stream_name == "autosense":
@@ -42,35 +49,35 @@ def store(parent_stream_id, data, CC_obj, config, stream_name, algo_type):
 
     CC_obj.save_datastream(ds)
 
+
 def dd(algo_type, stream_name, config, input_streams, stream_uuid):
-    if algo_type==config["algo_names"]["attachment_marker"]:
+    if algo_type == config["algo_names"]["attachment_marker"]:
         result = attachment_marker(stream_name, input_streams, stream_uuid)
-    elif algo_type==config["algo_names"]["battery_marker"]:
+    elif algo_type == config["algo_names"]["battery_marker"]:
         result = battery_data_marker(stream_name, input_streams, stream_uuid)
-    elif algo_type==config["algo_names"]["sensor_unavailable_marker"]:
+    elif algo_type == config["algo_names"]["sensor_unavailable_marker"]:
         pass
-    elif algo_type==config["algo_names"]["packet_loss_marker"]:
+    elif algo_type == config["algo_names"]["packet_loss_marker"]:
         result = packet_loss_marker(stream_name, input_streams, stream_uuid)
     return result
+
 
 def attachment_marker(type, input_streams, generated_stream_id):
     config = Configuration(filepath="data_diagnostic_config.yml").config
 
-    #if type == "ecg" or type == "rip":
+    # if type == "ecg" or type == "rip":
     if type == "ecg":
         name = 'ecg_attachment_marker'
         input_param = {"window_size": config["general"]["window_size"],
-                           "ecg_vairance_threshold": config["attachment_marker"]["ecg_on_body"]}
+                       "ecg_vairance_threshold": config["attachment_marker"]["ecg_on_body"]}
     elif type == "rip":
         name = 'rip_attachment_marker'
         input_param = {"window_size": config["general"]["window_size"],
-                           "rip_vairance_threshold": config["attachment_marker"]["rip_on_body"]}
-
+                       "rip_vairance_threshold": config["attachment_marker"]["rip_on_body"]}
     elif type == "motionsense":
         name = 'motionsense_attachment_marker'
         input_param = {"window_size": config["general"]["window_size"],
                        "motionsense_vairance_threshold": config["attachment_marker"]["motionsense_on_body"]}
-
     else:
         raise ValueError("Incorrect sensor type")
 

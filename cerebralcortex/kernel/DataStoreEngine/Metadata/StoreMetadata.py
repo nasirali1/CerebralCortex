@@ -115,9 +115,9 @@ class StoreMetadata:
             return False
     def append_annotations(self, existing_annotations:dict, new_annotations:dict):
         return dict(existing_annotations.items() + new_annotations.items())
+
     def is_id_created(self, owner_id, name):
         # if stream name, id, and owner are same then return true
-        # qry = "SELECT * from stream where JSON_SEARCH(execution_context, 'all', '"+name+"', null, '$.execution_context.processing_module.output_streams[*].name')  is not null and owner='"+owner_id+"'"
         qry = "SELECT * from stream where owner=%s and name=%s"
         vals = owner_id, name
         self.cursor.execute(qry, vals)
@@ -126,3 +126,5 @@ class StoreMetadata:
             return result[0][0]
         else:
             return False
+
+

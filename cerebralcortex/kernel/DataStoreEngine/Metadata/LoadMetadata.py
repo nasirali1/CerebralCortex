@@ -136,3 +136,36 @@ class LoadMetadata:
             raise "No record found."
         else:
             return results
+
+    def get_child_stream_id(self, owner_id, name):
+        # if stream name, id, and owner are same then return true
+        #qry = "SELECT * from stream where JSON_SEARCH(execution_context, 'all', '"+parent_stream_id+"', null, '$.execution_context.processing_module.input_streams[*].id')  is not null and owner='"+owner_id+"' and name='"+name+"'"
+        qry = "SELECT * from stream where owner='"+owner_id+"' and name='"+name+"'"
+        vals = owner_id, name
+        self.cursor.execute(qry)
+        result = self.cursor.fetchall()
+        if result:
+            return result[0][0]
+        else:
+            return False
+    """TO-DO: update accel names"""
+    def get_autosense_accel_id_by_owner_id(self, owner_id, type):
+        if type=="x":
+            name = "autosense-x"
+        elif type=="y":
+            name = "autosense-y"
+        elif type=="z":
+            name = "autosense-z"
+        elif type=="motionsense":
+            name = "motionsense_accel"
+        else:
+            raise ValueError("Unknown type. Only acceptable types are x, y, z, or motionsense.")
+
+        qry = "SELECT * from stream where owner='"+owner_id+"' and name='"+name+"'"
+        vals = owner_id, name
+        self.cursor.execute(qry)
+        result = self.cursor.fetchall()
+        if result:
+            return result[0][0]
+        else:
+            return False

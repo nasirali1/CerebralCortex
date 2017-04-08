@@ -40,8 +40,8 @@ def battery_marker(stream_id, CC_obj, config, type: str) -> OrderedDict:
     """
     results = OrderedDict()
 
-    stream = CC_obj.get_datastream(stream_id, type="all")
-    windowed_data = window(stream.data, config['general']['window_size'], True)
+    stream = CC_obj.get_datastream(stream_id, type="data")
+    windowed_data = window(stream, config['general']['window_size'], True)
 
     for key, data in windowed_data.items():
         dp = []
