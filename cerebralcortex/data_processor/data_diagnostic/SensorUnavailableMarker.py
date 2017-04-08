@@ -71,17 +71,6 @@ def autosense_calculate_magnitude(accel_x, accel_y, accel_z):
 
 
     return magnitudeList
-    # windowed_data = window(datapointsList, window_size, False)
-    #
-    # del accel_x[:]
-    # del accel_y[:]
-    # del accel_z[:]
-    # del datapointsList[:]
-    #
-    # WirelessDisconnection(datapointsList, "autoSenseWirelessDC")
-    # print("wow")
-
-    #print("done")
 
 """TO-DO"""
 #Write a separate method for motionsense magnitude calculation

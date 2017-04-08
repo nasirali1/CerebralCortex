@@ -47,12 +47,21 @@ def attachment_marker(stream_id, CC_obj, config) -> OrderedDict:
     threshold_val = None
     name = stream._name
 
-    if name=="ecg":
+    if name == "ecg":
         threshold_val = config['attachment_marker']['ecg_on_body']
-    elif name=="rip":
+        label_on = config['labels']['ecg_on_body']
+        label_off = config['labels']['ecg_off_body']
+        label_attachment = config['labels']['ecg_improper_attachment']
+    elif name == "rip":
         threshold_val = config['attachment_marker']['rip_on_body']
-    elif name=="motionsense":
+        label_on = config['labels']['rip_on_body']
+        label_off = config['labels']['rip_off_body']
+        label_attachment = config['labels']['rip_improper_attachment']
+    elif name == "motionsense":
         threshold_val = config['attachment_marker']['motionsense_on_body']
+        label_on = config['labels']['motionsense_on_body']
+        label_off = config['labels']['motionsense_off_body']
+        label_attachment = config['labels']['motionsense_improper_attachment']
     else:
         raise ValueError("Incorrect sensor type.")
 
@@ -61,19 +70,19 @@ def attachment_marker(stream_id, CC_obj, config) -> OrderedDict:
         normal_values = outlier_detection(data)
 
         if stat.variance(normal_values) < threshold_val:
-            results[key] = config['labels']['sensor_off_body']
+            results[key] = label_on
         else:
-            results[key] = config['labels']['sensor_on_body']
+            results[key] = label_off
 
     merged_windows = merge_consective_windows(results)
-    store(stream_id, merged_windows, CC_obj, name)
-    print(merged_windows)
-    return merged_windows
+    store(stream_id, merged_windows, CC_obj, config, name, config["algo_names"]["attachment_marker"])
 
 
 """TO-DO"""
-#This method is not being used. Need to make sure whether GSR values actually respresent GSR data.
-def gsr_response(stream_id, start_time, end_time, CC_obj, config):
+
+
+# This method is not being used. Need to make sure whether GSR values actually respresent GSR data.
+def gsr_response(stream_id, start_time, end_time, label_attachment, label_off, CC_obj, config):
     datapoints = CC_obj.get_datastream(stream_id, start_time=start_time, end_time=end_time, type="data")
 
     vals = []
@@ -81,10 +90,9 @@ def gsr_response(stream_id, start_time, end_time, CC_obj, config):
         vals.append(dp.sample)
 
     if stat.median(stat.array(vals)) < config["attachment_marker"]["improper_attachment"]:
-        return config["labels"]["improper_attachment"]
+        return label_attachment
     elif stat.median(stat.array(vals)) > config["attachment_marker"]["gsr_off_body"]:
-        return config["labels"]["sensor_off_body"]
-
+        return label_off
 
 
 def outlier_detection(window_data: list) -> list:

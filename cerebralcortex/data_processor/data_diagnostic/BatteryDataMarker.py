@@ -24,11 +24,12 @@
 from typing import List
 import numpy as np
 
-from cerebralcortex.kernel.datatypes.datapoint import DataPoint
+from cerebralcortex.data_processor.data_diagnostic.post_processing import *
 from cerebralcortex.data_processor.signalprocessing.window import window
 from cerebralcortex.data_processor.data_diagnostic.util import *
 
-def battery_marker(datapoints: List[DataPoint], window_size: int, type: str) -> OrderedDict:
+
+def battery_marker(stream_id, CC_obj, config, type: str) -> OrderedDict:
     """
     :param datapoints:
     :param window_size: in seconds
@@ -37,71 +38,78 @@ def battery_marker(datapoints: List[DataPoint], window_size: int, type: str) -> 
                                        (st,et),[label],
                                         ...]
     """
-    windowed_data = window(datapoints, window_size, True)
     results = OrderedDict()
+
+    stream = CC_obj.get_datastream(stream_id, type="all")
+    windowed_data = window(stream.data, config['general']['window_size'], True)
+
     for key, data in windowed_data.items():
         dp = []
         for k in data:
             dp.append(float(k.sample))
 
-        if type=="phone":
-            results[key] = phone_battery(dp)
-
-        elif type=="motionsense":
-            results[key] = phone_battery(dp)
-        elif type=="autosense":
-            results = phone_battery(dp)
+        if type == "phone":
+            results[key] = phone_battery(dp, config)
+        elif type == "motionsense":
+            results[key] = motionsense_battery(dp, config)
+        elif type == "autosense":
+            results[key] = autosense_battery(dp, config)
         else:
             raise ValueError("Incorrect sensor type.")
+
     merged_windows = merge_consective_windows(results)
-    return merged_windows
+    store(stream_id, merged_windows, CC_obj, config, type, config["algo_names"]["battery_marker"])
+    # return merged_windows
 
-def phone_battery(dp: List) -> str:
+
+def phone_battery(dp: List, config) -> str:
     """
 
     :param dp:
     :return:
     """
-    if not dp:
-        return "phone-off"
+    dp_sample_avg = np.mean(dp)
+    if dp_sample_avg <= config['battery_marker']['phone_powered_off']:
+        return config['labels']['sensor_powered_off']
     else:
-        #get sampling rate and check if the current window has acceptable number of samples
+        # get sampling rate and check if the current window has acceptable number of samples
+        # get one minute previous window of powered off phone to see if it was powered of manually or due to low battery
         """TO-DO"""
-        dp_sample_avg = np.mean(dp)
-        if dp_sample_avg<10:
-            return "phone-battery-down"
-    return  None
-
-def motionSenseBatteryMarker(dp: List) -> str:
-    """
-
-    :param dp:
-    :return:
-    """
-    if not dp:
-        return "motionsense-off"
-    else:
-        #get sampling rate and check if the current window has acceptable number of samples
-        """TO-DO"""
-        dp_sample_avg = np.mean(dp)
-        if dp_sample_avg<10:
-            return "motionsense-battery-down"
+        if dp_sample_avg < config['battery_marker']['phone_battery_down']:
+            return config['labels']['phone_battery_down']
     return None
 
-def autosense_battery(dp: List) -> str:
+
+def motionsense_battery(dp: List, config) -> str:
     """
 
     :param dp:
     :return:
     """
-    if not dp:
-        return "sensor-off"
+    dp_sample_avg = np.mean(dp)
+
+    if dp_sample_avg <= config['battery_marker']['motionsense_powered_off']:
+        return config['labels']['motionsense_powered_off']
     else:
-        dp_sample_avg = np.mean(dp)
+        # get sampling rate and check if the current window has acceptable number of samples
+        """TO-DO"""
+        if dp_sample_avg < config['battery_marker']['phone_powered_off']:
+            return config['labels']['motionsense_battery_down']
+    return None
+
+
+def autosense_battery(dp: List, config) -> str:
+    """
+
+    :param dp:
+    :return:
+    """
+    dp_sample_avg = np.mean(dp)
+    if dp_sample_avg <= config['battery_marker']['autosense_powered_off']:
+        return config['labels']['autosesen_powered_off']
+    else:
         # Values (Min=0 and Max=6) in battery voltage.
         voltageValue = (dp_sample_avg / 4096) * 3 * 2
-        if voltageValue<0.5:
-            return "sensor-battery-down"
+        if voltageValue < config['battery_marker']['autosense_battery_down']:
+            return config['labels']['autosense_battery_down']
     return None
-
-
