@@ -51,19 +51,19 @@ def store(parent_stream_id, data, CC_obj, config, stream_name, algo_type):
 
 
 def dd(algo_type, stream_name, config, input_streams, stream_uuid):
+
     if algo_type == config["algo_names"]["attachment_marker"]:
-        result = attachment_marker(stream_name, input_streams, stream_uuid)
+        result = attachment_marker(stream_name, input_streams, stream_uuid, config)
     elif algo_type == config["algo_names"]["battery_marker"]:
-        result = battery_data_marker(stream_name, input_streams, stream_uuid)
+        result = battery_data_marker(stream_name, input_streams, stream_uuid, config)
     elif algo_type == config["algo_names"]["sensor_unavailable_marker"]:
         pass
     elif algo_type == config["algo_names"]["packet_loss_marker"]:
-        result = packet_loss_marker(stream_name, input_streams, stream_uuid)
+        result = packet_loss(stream_name, input_streams, stream_uuid, config)
     return result
 
 
-def attachment_marker(type, input_streams, generated_stream_id):
-    config = Configuration(filepath="data_diagnostic_config.yml").config
+def attachment_marker(type, input_streams, generated_stream_id, config):
 
     # if type == "ecg" or type == "rip":
     if type == "ecg":
@@ -94,25 +94,24 @@ def attachment_marker(type, input_streams, generated_stream_id):
     return {"ec": ec, "dd": dd, "ann": ann}
 
 
-def battery_data_marker(type, input_streams, generated_stream_id):
-    config = Configuration(filepath="data_diagnostic_config.yml").config
+def battery_data_marker(type, input_streams, generated_stream_id, config):
 
     if type == "phone":
         name = 'phone_battery_marker'
         input_param = {"window_size": config["general"]["window_size"],
                        "phone_powered_off_threshold": config["battery_marker"]["phone_powered_off"],
-                       "phone_battery_down_threshold": config["battery_marker"]["phone_powered_down"]}
+                       "phone_battery_down_threshold": config["battery_marker"]["phone_battery_down"]}
     elif type == "autosense":
         name = 'autosense_battery_marker'
         input_param = {"window_size": config["general"]["window_size"],
                        "autosense_powered_off_threshold": config["battery_marker"]["autosense_powered_off"],
-                       "autosense_battery_down_threshold": config["battery_marker"]["autosense_powered_down"]}
+                       "autosense_battery_down_threshold": config["battery_marker"]["autosense_battery_down"]}
 
     elif type == "motionsense":
         name = 'motionsense_battery_marker'
         input_param = {"window_size": config["general"]["window_size"],
                        "motionsense_powered_off_threshold": config["battery_marker"]["motionsense_powered_off"],
-                       "motionsense_battery_down_threshold": config["battery_marker"]["motionsense_powered_down"]}
+                       "motionsense_battery_down_threshold": config["battery_marker"]["motionsense_battery_down"]}
     else:
         raise ValueError("Incorrect sensor type")
 
@@ -128,8 +127,7 @@ def battery_data_marker(type, input_streams, generated_stream_id):
     return {"ec": ec, "dd": dd, "ann": ann}
 
 
-def packet_loss_marker(type, input_streams, generated_stream_id):
-    config = Configuration(filepath="data_diagnostic_config.yml").config
+def packet_loss(type, input_streams, generated_stream_id, config):
 
     if type == "ecg":
         name = 'ecg_packet_loss_marker'
@@ -159,8 +157,34 @@ def packet_loss_marker(type, input_streams, generated_stream_id):
     return {"ec": ec, "dd": dd, "ann": ann}
 
 
-def sensor_unavailable():
-    pass
+def sensor_unavailable(type, input_streams, generated_stream_id, config):
+
+    if type == "ecg":
+        name = 'autosense_unavailable_marker'
+        input_param = {"window_size": config["general"]["window_size"],
+                       "sensor_unavailable_threshold": config["sensor_unavailable_marker"]["ecg"]}
+    elif type == "rip":
+        name = 'autosense_unavailable_marker'
+        input_param = {"window_size": config["general"]["window_size"],
+                       "sensor_unavailable_threshold": config["sensor_unavailable_marker"]["rip"]}
+
+    elif type == "motionsense":
+        name = 'motionsense_unavailable_marker'
+        input_param = {"window_size": config["general"]["window_size"],
+                       "sensor_unavailable_threshold": config["sensor_unavailable_marker"]["motionsense"]}
+    else:
+        raise ValueError("Incorrect sensor type")
+
+    output_stream = [{"name": name, "id": str(generated_stream_id)}];
+    algo_description = "This algorithm analyze battery-off stream to analyze whether battery was actually powered off or a person walked away from the phone."
+    module_description = 'This is a data-diagnostic module that helps to identify the causes of missing data.'
+    method = 'cerebralcortex.data_processor.data_diagnostic.packet_loss_marker'
+
+    ec = get_execution_context(name, module_description, input_param, input_streams, output_stream, method,
+                               algo_description)
+    dd = get_data_descriptor()
+    ann = get_annotations()
+    return {"ec": ec, "dd": dd, "ann": ann}
 
 
 def get_data_descriptor():

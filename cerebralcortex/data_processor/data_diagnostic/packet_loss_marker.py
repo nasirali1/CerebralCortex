@@ -32,7 +32,7 @@ def packet_loss_marker(stream_id, CC_obj, config, type: str):
 
     #only create windows if a window has data in it
     stream = CC_obj.get_datastream(stream_id, type="data")
-    windowed_data = window(stream.data, config['general']['window_size'], False)
+    windowed_data = window(stream, config['general']['window_size'], False)
 
     results = OrderedDict()
 
@@ -61,4 +61,4 @@ def packet_loss_marker(stream_id, CC_obj, config, type: str):
             results[key] = label
 
     merged_windows = merge_consective_windows(results)
-    store(stream_id, merged_windows, CC_obj, config, type, config["algo_names"]["packet_loss"])
+    store(stream_id, merged_windows, CC_obj, config, type, config["algo_names"]["packet_loss_marker"])

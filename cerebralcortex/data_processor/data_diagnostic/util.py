@@ -30,6 +30,7 @@ def merge_consective_windows(data: OrderedDict) -> OrderedDict:
     element = None
     start = None
     end = None
+    val = None
     for key, val in data.items():
         if element is None:
             element = val

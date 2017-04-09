@@ -148,8 +148,9 @@ class LoadMetadata:
             return result[0][0]
         else:
             return False
+
     """TO-DO: update accel names"""
-    def get_autosense_accel_id_by_owner_id(self, owner_id, type):
+    def get_accelerometer_id_by_owner_id(self, owner_id, type):
         if type=="x":
             name = "autosense-x"
         elif type=="y":
