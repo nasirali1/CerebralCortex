@@ -57,8 +57,7 @@ class StoreMetadata:
             isStreamCreated = True
 
         if (isStreamCreated == True):
-
-            qry = "UPDATE " + self.datastreamTable + " set annotations=JSON_ARRAY_APPEND(annotations, '$.annotations',  %s) where identifier=%s"
+            qry = "UPDATE " + self.datastreamTable + " set annotations=JSON_ARRAY_APPEND(annotations, '$.annotations',  CAST(%s AS JSON)) where identifier=%s"
             vals = json.dumps(annotations), str(stream_identifier)
             exe = 1
         elif (isStreamCreated == False):

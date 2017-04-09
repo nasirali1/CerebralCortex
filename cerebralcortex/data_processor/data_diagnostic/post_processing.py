@@ -227,16 +227,10 @@ def get_execution_context(name, module_description, input_param, input_streams, 
 
 def get_annotations():
     annotations = {
-        "annotations": [
-            {
+
                 "name": "study",
                 "identifier": "5b7fb6f3-7bf6-4031-881c-a25faf112dd9"
-            },
-            {
-                "name": "study",
-                "identifier": "5b7fb6f3-7bf6-4031-881c-a25faf112dd9"
-            }
-        ]
+
     }
     return json.dumps(annotations)
 
@@ -246,3 +240,4 @@ def map_data_to_datapoints(data):
     for key, value in data.items():
         datapoint_list.append(DataPoint(key[0], key[1], value))
     return datapoint_list
+

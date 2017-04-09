@@ -73,16 +73,6 @@ algo_names:
   attachment_marker: attachment
   sensor_unavailable_marker: sensor_unavailable
   packet_loss_marker: packet_loss
-  #acceptable_data: 22
-
-#!#Value is in percentage of battery remaining. Min=0 and Max=100
-#PHONE_BATTERY_DOWN = 0
-#PHONE_POWERED_OFF = 10
-#
-#!Sensor battery voltage. Min=0 and Max=6
-#MOTIONSENSE_BATTERY_DOWN = 1
-#AUTOSENSE_BATTERY_DOWN = 1
-#AUTOSENSE_POWERED_OFF = 4
 
 
 
