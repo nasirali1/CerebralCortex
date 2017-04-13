@@ -23,20 +23,23 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 from typing import List
 import numpy as np
+import uuid
+from collections import OrderedDict
 
-from cerebralcortex.data_processor.data_diagnostic.post_processing import *
+from cerebralcortex.data_processor.data_diagnostic.post_processing import store
 from cerebralcortex.data_processor.signalprocessing.window import window
-from cerebralcortex.data_processor.data_diagnostic.util import *
+from cerebralcortex.data_processor.data_diagnostic.util import merge_consective_windows
+from cerebralcortex.CerebralCortex import CerebralCortex
 
 
-def battery_marker(stream_id, CC_obj, config, type: str) -> OrderedDict:
+def battery_marker(stream_id: uuid, CC_obj: CerebralCortex, config: dict, name: str):
     """
-    :param datapoints:
-    :param window_size: in seconds
-    :param type: acceptable types are: phone, autosense, motionsense
-    :return: OrderedDict representing [(st,et),[label],
-                                       (st,et),[label],
-                                        ...]
+    This algorithm uses battery percentages to decide whether phone was powered-off or battery was low.
+    All the labeled data (st, et, label) with its metadata are then stored in a datastore.
+    :param stream_id:
+    :param CC_obj:
+    :param config:
+    :param name:
     """
     results = OrderedDict()
 
@@ -48,42 +51,40 @@ def battery_marker(stream_id, CC_obj, config, type: str) -> OrderedDict:
         for k in data:
             dp.append(float(k.sample))
 
-        if type == "phone":
+        if name == "phone":
             results[key] = phone_battery(dp, config)
-        elif type == "motionsense":
+        elif name == "motionsense":
             results[key] = motionsense_battery(dp, config)
-        elif type == "autosense":
+        elif name == "autosense":
             results[key] = autosense_battery(dp, config)
         else:
             raise ValueError("Incorrect sensor type.")
 
     merged_windows = merge_consective_windows(results)
-    store(stream_id, merged_windows, CC_obj, config, type, config["algo_names"]["battery_marker"])
-    # return merged_windows
+    store(stream_id, merged_windows, CC_obj, config, name, config["algo_names"]["battery_marker"])
 
 
-def phone_battery(dp: List, config) -> str:
+def phone_battery(dp: list, config: dict) -> str:
     """
-
+    labels a window as sensor powerd-off or low battery and returns the label
     :param dp:
+    :param config:
     :return:
     """
     dp_sample_avg = np.mean(dp)
     if dp_sample_avg <= config['battery_marker']['phone_powered_off']:
         return config['labels']['sensor_powered_off']
     else:
-        # get sampling rate and check if the current window has acceptable number of samples
-        # get one minute previous window of powered off phone to see if it was powered of manually or due to low battery
-        """TO-DO"""
         if dp_sample_avg < config['battery_marker']['phone_battery_down']:
             return config['labels']['phone_battery_down']
     return None
 
 
-def motionsense_battery(dp: List, config) -> str:
+def motionsense_battery(dp: list, config: dict) -> str:
     """
-
+    labels a window as sensor powerd-off or low battery and returns the label
     :param dp:
+    :param config:
     :return:
     """
     dp_sample_avg = np.mean(dp)
@@ -91,17 +92,16 @@ def motionsense_battery(dp: List, config) -> str:
     if dp_sample_avg <= config['battery_marker']['motionsense_powered_off']:
         return config['labels']['motionsense_powered_off']
     else:
-        # get sampling rate and check if the current window has acceptable number of samples
-        """TO-DO"""
         if dp_sample_avg < config['battery_marker']['phone_powered_off']:
             return config['labels']['motionsense_battery_down']
     return None
 
 
-def autosense_battery(dp: List, config) -> str:
+def autosense_battery(dp: list, config:dict) -> str:
     """
-
+    labels a window as sensor powerd-off or low battery and returns the label
     :param dp:
+    :param config:
     :return:
     """
     dp_sample_avg = np.mean(dp)

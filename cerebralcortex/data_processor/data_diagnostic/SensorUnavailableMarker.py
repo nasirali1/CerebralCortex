@@ -1,25 +1,53 @@
+# Copyright (c) 2016, MD2K Center of Excellence
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+# * Redistributions of source code must retain the above copyright notice, this
+# list of conditions and the following disclaimer.
+#
+# * Redistributions in binary form must reproduce the above copyright notice,
+# this list of conditions and the following disclaimer in the documentation
+# and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+# OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 import numpy as np
 import math
-from datetime import datetime, timedelta
-
-from cerebralcortex.kernel.datatypes.datapoint import DataPoint
+import uuid
+from datetime import timedelta
+from collections import OrderedDict
 from cerebralcortex.kernel.DataStoreEngine.Metadata.Metadata import Metadata
-from cerebralcortex.data_processor.data_diagnostic.util import *
-from cerebralcortex.data_processor.data_diagnostic.post_processing import *
+from cerebralcortex.data_processor.data_diagnostic.util import merge_consective_windows
+from cerebralcortex.data_processor.data_diagnostic.post_processing import store
+from cerebralcortex.CerebralCortex import CerebralCortex
+from cerebralcortex.data_processor.signalprocessing.window import window
 
 """TO-DO: use advanced sensor quality algorithms to detect whether a window contains good or bad data."""
 
-def WirelessDisconnection(stream_id, CC_obj, config, type: str):
+
+def WirelessDisconnection(stream_id: uuid, CC_obj: CerebralCortex, config: dict, name: str):
     """
     Analyze whether a disconnection was due to a wireless disconnection
     or due to sensor powered off. This method automatically loads related
-    accelerometer streams of an owner. If an owner owns more than one
-    accelerometer (for example, more than one motionsense accelerometer)
-    then this might not work.
+    accelerometer streams of an owner. All the labeled data (st, et, label)
+    with its metadata are then stored in a datastore.
+    Note: If an owner owns more than one accelerometer (for example, more
+    than one motionsense accelerometer) then this might not work.
     :param stream_id: stream_id should be of "battery-powered-off"
     :param CC_obj:
     :param config:
-    :param type:
+    :param name:
     """
 
     results = OrderedDict()
@@ -28,20 +56,20 @@ def WirelessDisconnection(stream_id, CC_obj, config, type: str):
     stream_info = CC_obj.get_datastream(stream_id, type="metadata")
 
     owner_id = stream_info._owner
-    """TO-DO: change type variable with this name (after finalizing the standard stream names)"""
+    """TO-DO: change names (after finalizing the standard stream names)"""
     stream_name = stream_info._name
 
-    if type == "ecg":
+    if name == "ecg":
         threshold = config['sensor_unavailable_marker']['ecg']
         battery_off_stream_name = config['battery_marker']['autosense_powered_off']
         battery_off_type = "autosense_battery_marker"
         label = config['labels']['autosense_unavailable']
-    if type == "rip":
+    if name == "rip":
         threshold = config['sensor_unavailable_marker']['rip']
         battery_off_stream_name = config['battery_marker']['autosense_powered_off']
         label = config['labels']['autosense_unavailable']
         battery_off_type = "autosense_battery_marker"
-    elif type == "motionsense":
+    elif name == "motionsense":
         threshold = config['sensor_unavailable_marker']['motionsense']
         battery_off_stream_name = config['battery_marker']['motionsense_powered_off']
         label = config['labels']['motionsense_unavailable']
@@ -57,7 +85,7 @@ def WirelessDisconnection(stream_id, CC_obj, config, type: str):
                 # get a window prior to a battery powered off
                 start_time = dp.start_time - timedelta(seconds=config['general']['window_size'])
                 end_time = dp.start_time
-                if type == "motionsense":
+                if name == "motionsense":
                     motionsense_accel_stream_id = Metadata.get_accelerometer_id_by_owner_id(owner_id, "motionsense")
                     motionsense_accel_xyz = CC_obj.get_datastream(motionsense_accel_stream_id, start_time=start_time,
                                                                   end_time=end_time, type="data")
@@ -79,10 +107,17 @@ def WirelessDisconnection(stream_id, CC_obj, config, type: str):
         input_streams = [{"name": stream_name, "id": str(stream_id)}, {"name": stream_name, "id": str(x)},
                          {"name": stream_name, "id": str(y)}, {"name": stream_name, "id": str(z)}]
         merged_windows = merge_consective_windows(results)
-        store(input_streams, merged_windows, CC_obj, config, type, config["algo_names"]["sensor_unavailable_marker"])
+        store(input_streams, merged_windows, CC_obj, config, name, config["algo_names"]["sensor_unavailable_marker"])
 
 
-def autosense_calculate_magnitude(accel_x, accel_y, accel_z):
+def autosense_calculate_magnitude(accel_x: float, accel_y: float, accel_z: float) -> list:
+    """
+    compute magnitude of x, y, and z
+    :param accel_x:
+    :param accel_y:
+    :param accel_z:
+    :return: magnitude values of a window as list
+    """
     magnitudeList = []
     max_list_size = len(max(accel_x, accel_y, accel_z, key=len))
 
@@ -97,7 +132,12 @@ def autosense_calculate_magnitude(accel_x, accel_y, accel_z):
     return magnitudeList
 
 
-def motionsense_calculate_magnitude(accel_xyz):
+def motionsense_calculate_magnitude(accel_xyz: window) -> list:
+    """
+    compute magnitude of x, y, and z
+    :param accel_xyz:
+    :return: magnitude values of a window as list
+    """
     magnitudeList = []
 
     for i in range(len(accel_xyz)):
