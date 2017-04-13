@@ -22,24 +22,25 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import statistics as stat
+import uuid
+import stat
+from datetime import datetime
+from collections import OrderedDict
 
 from cerebralcortex.data_processor.signalprocessing.window import window
-from cerebralcortex.data_processor.data_diagnostic.util import *
-from cerebralcortex.data_processor.data_diagnostic.post_processing import *
+from cerebralcortex.data_processor.data_diagnostic.util import merge_consective_windows, outlier_detection
+from cerebralcortex.data_processor.data_diagnostic.post_processing import store
+from cerebralcortex.CerebralCortex import CerebralCortex
 
 
-def attachment_marker(stream_id, CC_obj, config) -> OrderedDict:
+def attachment_marker(stream_id: uuid, CC_obj: CerebralCortex, config: dict):
     """
-    This method accepts one window at a time
-    :param datapoints:
-    :param window_size: in seconds
-    :param type: acceptable types are: phone, autosense, motionsense
-    :return: OrderedDict representing [(st,et),[label],
-                                       (st,et),[label],
-                                        ...]
+    Label sensor data as sensor-on-body, sensor-off-body, or improper-attachment.
+    All the labeled data (st, et, label) with its metadata are then stored in a datastore
+    :param stream_id: UUID
+    :param CC_obj: CerebralCortex object
+    :param config: Data diagnostics configurations
     """
-
     stream = CC_obj.get_datastream(stream_id, type="all")
     windowed_data = window(stream.data, config['general']['window_size'], False)
 
@@ -78,11 +79,24 @@ def attachment_marker(stream_id, CC_obj, config) -> OrderedDict:
     store(stream_id, merged_windows, CC_obj, config, name, config["algo_names"]["attachment_marker"])
 
 
-"""TO-DO"""
+"""
+TO-DO
+gsr_response method is not being used. Need to make sure whether GSR values actually respresent GSR data.
+"""
 
 
-# This method is not being used. Need to make sure whether GSR values actually respresent GSR data.
-def gsr_response(stream_id, start_time, end_time, label_attachment, label_off, CC_obj, config):
+def gsr_response(stream_id: uuid, start_time: datetime, end_time: datetime, label_attachment: str, label_off: str, CC_obj: CerebralCortex, config: dict) -> str:
+    """
+    This method analyzes Galvanic skin response to label a window as improper attachment or sensor-off-body
+    :param stream_id: UUID
+    :param start_time:
+    :param end_time:
+    :param label_attachment:
+    :param label_off:
+    :param CC_obj:
+    :param config:
+    :return: string
+    """
     datapoints = CC_obj.get_datastream(stream_id, start_time=start_time, end_time=end_time, type="data")
 
     vals = []
@@ -93,28 +107,3 @@ def gsr_response(stream_id, start_time, end_time, label_attachment, label_off, C
         return label_attachment
     elif stat.median(stat.array(vals)) > config["attachment_marker"]["gsr_off_body"]:
         return label_off
-
-
-def outlier_detection(window_data: list) -> list:
-    """
-    removes outliers from a list
-    This algorithm is modified version of Chauvenet's_criterion (https://en.wikipedia.org/wiki/Chauvenet's_criterion)
-    :param window_data:
-    :return:
-    """
-    if not window_data:
-        raise ValueError("List is empty.")
-
-    vals = []
-    for dp in window_data:
-        vals.append(float(dp.sample))
-
-    median = stat.median(vals)
-    standard_deviation = stat.stdev(vals)
-    normal_values = list()
-
-    for val in window_data:
-        if (abs(float(val.sample)) - median) < standard_deviation:
-            normal_values.append(float(val.sample))
-
-    return normal_values

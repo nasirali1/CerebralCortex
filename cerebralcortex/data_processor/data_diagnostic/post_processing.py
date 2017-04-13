@@ -240,4 +240,3 @@ def map_data_to_datapoints(data):
     for key, value in data.items():
         datapoint_list.append(DataPoint(key[0], key[1], value))
     return datapoint_list
-

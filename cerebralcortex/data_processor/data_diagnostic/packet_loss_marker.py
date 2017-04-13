@@ -21,31 +21,39 @@
 # CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-from typing import List
 
-from cerebralcortex.kernel.datatypes.datapoint import DataPoint
+import uuid
+from collections import OrderedDict
+
 from cerebralcortex.data_processor.signalprocessing.window import window
-from cerebralcortex.data_processor.data_diagnostic.util import *
-from cerebralcortex.data_processor.data_diagnostic.post_processing import *
+from cerebralcortex.data_processor.data_diagnostic.util import merge_consective_windows
+from cerebralcortex.data_processor.data_diagnostic.post_processing import store
+from cerebralcortex.CerebralCortex import CerebralCortex
 
-def packet_loss_marker(stream_id, CC_obj, config, type: str):
-
-    #only create windows if a window has data in it
+def packet_loss_marker(stream_id: uuid, CC_obj: CerebralCortex, config: dict, name: str):
+    """
+    Label a window as packet-loss if received packets are less than the expected packets.
+    All the labeled data (st, et, label) with its metadata are then stored in a datastore.
+    :param stream_id:
+    :param CC_obj:
+    :param config:
+    :param name:
+    """
     stream = CC_obj.get_datastream(stream_id, type="data")
+    # only create windows if a window has data in it
     windowed_data = window(stream, config['general']['window_size'], False)
 
     results = OrderedDict()
 
-
-    if type=="ecg":
+    if name == "ecg":
         sampling_rate = config["sampling_rate"]["ecg"]
         threshold_val = config["packet_loss_marker"]["ecg_acceptable_packet_loss"]
         label = config["labels"]["ecg_packet_loss"]
-    elif type=="rip":
+    elif name == "rip":
         sampling_rate = config["sampling_rate"]["rip"]
         threshold_val = config["packet_loss_marker"]["rip_acceptable_packet_loss"]
         label = config["labels"]["rip_packet_loss"]
-    elif type=="motionsense":
+    elif name == "motionsense":
         sampling_rate = config["sampling_rate"]["motionsense"]
         threshold_val = config["packet_loss_marker"]["motionsense_acceptable_packet_loss"]
         label = config["labels"]["motionsense_packet_loss"]
@@ -57,8 +65,8 @@ def packet_loss_marker(stream_id, CC_obj, config, type: str):
         available_packets = len(data)
         expected_packets = sampling_rate * config['general']['window_size']
 
-        if (available_packets/expected_packets)< threshold_val:
+        if (available_packets / expected_packets) < threshold_val:
             results[key] = label
 
     merged_windows = merge_consective_windows(results)
-    store(stream_id, merged_windows, CC_obj, config, type, config["algo_names"]["packet_loss_marker"])
+    store(stream_id, merged_windows, CC_obj, config, name, config["algo_names"]["packet_loss_marker"])
