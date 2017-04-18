@@ -55,7 +55,6 @@ class LoadData:
         if end_time != "":
             where_clause += " and start_time<=cast('"+end_time+"' as timestamp)"
 
-        print(where_clause)
         if type == "all":
             datapoints = self.map_dataframe_to_datapoint(
                 self.load_data_from_cassandra(self.datapointTable, where_clause))
@@ -83,7 +82,6 @@ class LoadData:
             # dp = DataPoint(self.get_epoch_time(row["start_time"]), self.get_epoch_time(row["end_time"]), row["sample"])
             localtz = timezone('US/Central')
             start_time = localtz.localize(row["start_time"])
-            # print(row["end_time"])
             if row["end_time"] != None:
                 end_time = localtz.localize(row["end_time"])
             else:
