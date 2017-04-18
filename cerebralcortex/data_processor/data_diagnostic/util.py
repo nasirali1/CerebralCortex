@@ -123,9 +123,9 @@ def motionsense_magnitude(accel_xyz: List[DataPoint]) -> DataPoint:
     """
     magnitudeList = []
 
-    for i in range(len(accel_xyz)):
-        data = accel_xyz[i].sample
+    for dp in accel_xyz:
+        data = dp.sample
         magnitude = math.sqrt(math.pow(data[0], 2) + math.pow(data[1], 2) + math.pow(data[2], 2))
-        magnitudeList.append(DataPoint(accel_xyz[i].start_time, accel_xyz[i].end_time, magnitude))
+        magnitudeList.append(DataPoint(dp.start_time, dp.end_time, magnitude))
 
     return magnitudeList

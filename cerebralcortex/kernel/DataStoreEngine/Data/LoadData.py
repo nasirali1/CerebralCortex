@@ -25,9 +25,8 @@
 import json
 from datetime import datetime
 from pytz import timezone
-import re
 from cerebralcortex.kernel.DataStoreEngine.Metadata.Metadata import Metadata
-from cerebralcortex.kernel.datatypes.datastream import *
+from cerebralcortex.kernel.datatypes.datastream import DataStream, DataPoint
 
 
 class LoadData:

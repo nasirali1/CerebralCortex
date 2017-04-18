@@ -142,7 +142,7 @@ class LoadMetadata:
         # if stream name, id, and owner are same then return true
         #qry = "SELECT * from stream where JSON_SEARCH(execution_context, 'all', '"+parent_stream_id+"', null, '$.execution_context.processing_module.input_streams[*].id')  is not null and owner='"+owner_id+"' and name='"+name+"'"
         qry = "SELECT * from stream where owner='"+owner_id+"' and name='"+name+"'"
-        vals = owner_id, name
+
         self.cursor.execute(qry)
         result = self.cursor.fetchall()
         if result:

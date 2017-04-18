@@ -1,3 +1,27 @@
+# Copyright (c) 2016, MD2K Center of Excellence
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+# * Redistributions of source code must retain the above copyright notice, this
+# list of conditions and the following disclaimer.
+#
+# * Redistributions in binary form must reproduce the above copyright notice,
+# this list of conditions and the following disclaimer in the documentation
+# and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+# OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 import json
 import uuid
 from collections import OrderedDict
@@ -19,8 +43,7 @@ def store(input_streams: dict, data: OrderedDict, CC_obj: CerebralCortex, config
     parent_stream_id = input_streams[0]["id"]
     stream_name = input_streams[0]["name"]
 
-    """TO-DO: use dynamic UUID"""
-    stream_uuid = 123  # uuid.uuid4()
+    stream_uuid = uuid.uuid4()
     result = process_data(stream_uuid, stream_name, input_streams, algo_type, config)
 
     data_descriptor = json.loads(result["dd"])
@@ -209,7 +232,7 @@ def packet_loss(generated_stream_id: uuid, type: str, input_streams: dict, confi
     return {"ec": ec, "dd": dd, "anno": anno}
 
 """TO-DO: Only return data descriptor for one sensor"""
-def get_data_descriptor(algo_type, sensor_type, config):
+def get_data_descriptor(algo_type, config):
     if algo_type==config["algo_names"]["battery_marker"]:
         dd = {"phone_powered_off": config["labels"]["phone_powered_off"],
               "phone_battery_down": config["labels"]["phone_battery_down"],

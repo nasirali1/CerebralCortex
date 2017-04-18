@@ -151,8 +151,8 @@ def motionsense_calculate_magnitude(accel_xyz: window) -> list:
     """
     magnitudeList = []
 
-    for i in range(len(accel_xyz)):
-        data = accel_xyz[i].sample
+    for dp in accel_xyz:
+        data = dp.sample
         magnitude = math.sqrt(math.pow(data[0], 2) + math.pow(data[1], 2) + math.pow(data[2], 2));
         magnitudeList.append(magnitude)
 
