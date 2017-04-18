@@ -48,8 +48,8 @@ class CerebralCortex:
 
         self.configuration = Configuration(filepath=configuration_file).config
 
-    def get_datastream(self, stream_identifier, start_time: int = "", end_time: int = "", type="all"):
-        return Data(self.sc, self.sqlContext, self.configuration).get_stream(stream_identifier, start_time, end_time, type)
+    def get_datastream(self, stream_identifier, start_time: int = "", end_time: int = "", data_type="all"):
+        return Data(self.sc, self.sqlContext, self.configuration).get_stream(stream_identifier, start_time, end_time, data_type)
 
 
     def save_datastream(self, datastream):

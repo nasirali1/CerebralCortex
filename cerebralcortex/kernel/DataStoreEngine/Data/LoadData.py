@@ -30,20 +30,20 @@ from cerebralcortex.kernel.datatypes.datastream import DataStream, DataPoint
 
 
 class LoadData:
-    def get_stream(self, stream_id: datetime, start_time: datetime = "", end_time: int = "", type="all") -> DataStream:
+    def get_stream(self, stream_id: datetime, start_time: datetime = "", end_time: int = "", data_type="all") -> DataStream:
 
         """
         :param stream_id:
         :param start_time:
         :param end_time:
-        :param type: this parameter accepts only three types (i.e., all, data, metadata)
+        :param data_type: this parameter accepts only three types (i.e., all, data, metadata)
         :return: spark dataframe
         """
         stream_id = str(stream_id)
         start_time = str(start_time)
         end_time = str(end_time)
 
-        where_clause = "identifier=" + stream_id
+        where_clause = "identifier='" + stream_id +"'"
 
         if stream_id == None:
             raise Exception("Stream identifier cannot be null.")
@@ -54,13 +54,13 @@ class LoadData:
         if end_time != "":
             where_clause += " and start_time<=cast('"+end_time+"' as timestamp)"
 
-        if type == "all":
+        if data_type == "all":
             datapoints = self.map_dataframe_to_datapoint(
                 self.load_data_from_cassandra(self.datapointTable, where_clause))
             stream = self.map_datapoint_and_metadata_to_datastream(stream_id, datapoints)
-        elif type == "data":
+        elif data_type == "data":
             return self.map_dataframe_to_datapoint(self.load_data_from_cassandra(self.datapointTable, where_clause))
-        elif type == "metadata":
+        elif data_type == "metadata":
             datapoints = []
             stream = self.map_datapoint_and_metadata_to_datastream(stream_id, datapoints)
         else:
@@ -104,13 +104,13 @@ class LoadData:
 
         ownerID = datastream_info[0][1]
         name = datastream_info[0][2]
-        description = datastream_info[0][3]
-        data_descriptor = json.loads(datastream_info[0][4])
-        execution_context = json.loads(datastream_info[0][5])
-        annotations = json.loads(datastream_info[0][6])
-        stream_type = datastream_info[0][7]
+        #description = datastream_info[0][3]
+        data_descriptor = json.loads(datastream_info[0][3])
+        execution_context = json.loads(datastream_info[0][4])
+        annotations = json.loads(datastream_info[0][5])
+        stream_type = datastream_info[0][6]
 
-        return DataStream(stream_id, ownerID, name, description, data_descriptor, execution_context, annotations,
+        return DataStream(stream_id, ownerID, name, data_descriptor, execution_context, annotations,
                           stream_type, data)
 
     def load_data_from_cassandra(self, table_name: str, where_clause: str) -> object:

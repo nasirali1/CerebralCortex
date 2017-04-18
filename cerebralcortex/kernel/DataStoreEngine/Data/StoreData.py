@@ -34,7 +34,6 @@ class StoreData:
         stream_identifier = datastream.identifier
         ownerID = datastream.user
         name = datastream.name
-        description = datastream.description
         data_descriptor = datastream.data_descriptor
         execution_context = datastream.execution_context
         annotations = datastream.annotations
@@ -44,11 +43,12 @@ class StoreData:
 
 
         if data:
-            Metadata(self.configuration).store_stream_info(stream_identifier, ownerID, name, description,
+            Metadata(self.configuration).store_stream_info(stream_identifier, ownerID, name,
                                                            data_descriptor, execution_context,
                                                            annotations,
                                                            stream_type)
             dataframe = self.map_datapoint_to_dataframe(stream_identifier, data)
+
             self.store_data(dataframe, self.datapointTable)
 
     def store_data(self, dataframe_data: object, table_name: str):
@@ -73,7 +73,7 @@ class StoreData:
         for i in datapoints:
             day = i.start_time
             day = day.strftime("%Y%m%d")
-            dp = stream_id, day, i.start_time, i.end_time, i.sample
+            dp = str(stream_id), day, i.start_time, i.end_time, i.sample
             temp.append(dp)
 
         temp_RDD = self.sparkContext.parallelize(temp)

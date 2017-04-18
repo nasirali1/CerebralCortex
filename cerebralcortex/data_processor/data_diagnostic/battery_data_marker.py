@@ -41,7 +41,7 @@ def battery_marker(stream_id: uuid, CC_obj: CerebralCortex, config: dict):
     """
     results = OrderedDict()
 
-    stream = CC_obj.get_datastream(stream_id, type="all")
+    stream = CC_obj.get_datastream(stream_id, data_type="all")
     windowed_data = window(stream.data, config['general']['window_size'], True)
 
     name = stream._name
@@ -61,7 +61,7 @@ def battery_marker(stream_id: uuid, CC_obj: CerebralCortex, config: dict):
             raise ValueError("Incorrect sensor type.")
 
     merged_windows = merge_consective_windows(results)
-    input_streams = [{"id": stream_id, "name": name}]
+    input_streams = [{"id": str(stream_id), "name": name}]
     store(input_streams, merged_windows, CC_obj, config, config["algo_names"]["battery_marker"])
 
 

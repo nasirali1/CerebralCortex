@@ -90,7 +90,7 @@ class LoadMetadata:
         :param records_limit: range (e.g., 1,10 or 130,200)
         :return: list
         """
-        whereClause = "identifier=" + str(stream_id)
+        whereClause = "identifier='" + str(stream_id)+"'"
 
         if (stream_owner_id != ""):
             whereClause += " and owner=" + str(stream_owner_id)
@@ -171,7 +171,6 @@ class LoadMetadata:
             raise ValueError("Unknown type. Only acceptable types are x, y, z, or motionsense.")
 
         qry = "SELECT * from stream where owner='"+owner_id+"' and name='"+name+"'"
-        vals = owner_id, name
         self.cursor.execute(qry)
         result = self.cursor.fetchall()
         if result:

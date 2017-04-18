@@ -26,7 +26,7 @@ import json
 import uuid
 from collections import OrderedDict
 
-from cerebralcortex.kernel.datatypes.datastream import DataStream, Stream
+from cerebralcortex.kernel.datatypes.datastream import DataStream
 from cerebralcortex.CerebralCortex import CerebralCortex
 from cerebralcortex.data_processor.data_diagnostic.util import map_data_to_datapoints
 
@@ -50,15 +50,14 @@ def store(input_streams: dict, data: OrderedDict, CC_obj: CerebralCortex, config
     execution_context = json.loads(result["ec"])
     annotations = json.loads(result["anno"])
 
-    metadata = CC_obj.get_datastream(parent_stream_id, type="metadata")
+    metadata = CC_obj.get_datastream(parent_stream_id, data_type="metadata")
 
     owner = metadata._owner
     name = execution_context["execution_context"]["processing_module"]["output_streams"][0]["name"]
-    description = "This field is redundant and shall be removed"
     stream_type = "datastream"
     datapoints = map_data_to_datapoints(data)
 
-    ds = DataStream(stream_uuid, owner, name, description, data_descriptor, execution_context, annotations,
+    ds = DataStream(stream_uuid, owner, name, data_descriptor, execution_context, annotations,
                     stream_type, datapoints)
 
     CC_obj.save_datastream(ds)
@@ -160,25 +159,25 @@ def battery_data_marker(generated_stream_id: uuid, stream_name: str, input_strea
     return {"ec": ec, "dd": dd, "anno": anno}
 
 
-def sensor_unavailable(generated_stream_id: uuid, type: str, input_streams: dict, config: dict) -> dict:
+def sensor_unavailable(generated_stream_id: uuid, sensor_type: str, input_streams: dict, config: dict) -> dict:
     """
 
     :param generated_stream_id:
-    :param type:
+    :param sensor_type:
     :param input_streams:
     :param config:
     :return:
     """
-    if type == config["sensor_types"]["autosense_ecg"]:
+    if sensor_type == config["sensor_types"]["autosense_ecg"]:
         name = 'autosense_unavailable_marker'
         input_param = {"window_size": config["general"]["window_size"],
                        "sensor_unavailable_threshold": config["sensor_unavailable_marker"]["ecg"]}
-    elif type == config["sensor_types"]["autosense_rip"]:
+    elif sensor_type == config["sensor_types"]["autosense_rip"]:
         name = 'autosense_unavailable_marker'
         input_param = {"window_size": config["general"]["window_size"],
                        "sensor_unavailable_threshold": config["sensor_unavailable_marker"]["rip"]}
 
-    elif type == config["sensor_types"]["motionsense_accel"]:
+    elif sensor_type == config["sensor_types"]["motionsense_accel"]:
         name = 'motionsense_unavailable_marker'
         input_param = {"window_size": config["general"]["window_size"],
                        "sensor_unavailable_threshold": config["sensor_unavailable_marker"]["motionsense"]}
@@ -196,25 +195,25 @@ def sensor_unavailable(generated_stream_id: uuid, type: str, input_streams: dict
     return {"ec": ec, "dd": dd, "anno": anno}
 
 
-def packet_loss(generated_stream_id: uuid, type: str, input_streams: dict, config: dict) -> dict:
+def packet_loss(generated_stream_id: uuid, sensor_type: str, input_streams: dict, config: dict) -> dict:
     """
 
     :param generated_stream_id:
-    :param type:
+    :param sensor_type:
     :param input_streams:
     :param config:
     :return:
     """
-    if type == config["sensor_types"]["autosense_ecg"]:
+    if sensor_type == config["sensor_types"]["autosense_ecg"]:
         name = 'ecg_packet_loss_marker'
         input_param = {"window_size": config["general"]["window_size"],
                        "ecg_acceptable_packet_loss": config["packet_loss_marker"]["ecg_acceptable_packet_loss"]}
-    elif type == config["sensor_types"]["autosense_rip"]:
+    elif sensor_type == config["sensor_types"]["autosense_rip"]:
         name = 'rip_packet_loss_marker'
         input_param = {"window_size": config["general"]["window_size"],
                        "rip_acceptable_packet_loss": config["packet_loss_marker"]["rip_acceptable_packet_loss"]}
 
-    elif type == config["sensor_types"]["motionsense_accel"]:
+    elif sensor_type == config["sensor_types"]["motionsense_accel"]:
         name = 'motionsense_packet_loss_marker'
         input_param = {"window_size": config["general"]["window_size"],
                        "rip_acceptable_packet_loss": config["packet_loss_marker"]["motionsense_acceptable_packet_loss"]}
