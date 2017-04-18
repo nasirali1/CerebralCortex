@@ -25,7 +25,7 @@ def store(input_streams: dict, data: OrderedDict, CC_obj: CerebralCortex, config
 
     data_descriptor = json.loads(result["dd"])
     execution_context = json.loads(result["ec"])
-    annotations = json.loads(result["ann"])
+    annotations = json.loads(result["anno"])
 
     metadata = CC_obj.get_datastream(parent_stream_id, type="metadata")
 
@@ -90,10 +90,10 @@ def attachment_marker(generated_stream_id: uuid, stream_name: str, input_streams
 
     ec = get_execution_context(name, input_param, input_streams, output_stream, method,
                                algo_description, config)
-    dd = get_data_descriptor()
-    ann = get_annotations()
+    dd = get_data_descriptor(config["algo_names"]["attachment_marker"], config)
+    anno = get_annotations()
 
-    return {"ec": ec, "dd": dd, "ann": ann}
+    return {"ec": ec, "dd": dd, "anno": anno}
 
 
 def battery_data_marker(generated_stream_id: uuid, stream_name: str, input_streams: dict, config: dict) -> dict:
@@ -132,9 +132,9 @@ def battery_data_marker(generated_stream_id: uuid, stream_name: str, input_strea
 
     ec = get_execution_context(name, input_param, input_streams, output_stream, method,
                                algo_description, config)
-    dd = get_data_descriptor()
-    ann = get_annotations()
-    return {"ec": ec, "dd": dd, "ann": ann}
+    dd = get_data_descriptor(config["algo_names"]["battery_marker"], config)
+    anno = get_annotations()
+    return {"ec": ec, "dd": dd, "anno": anno}
 
 
 def sensor_unavailable(generated_stream_id: uuid, type: str, input_streams: dict, config: dict) -> dict:
@@ -168,9 +168,9 @@ def sensor_unavailable(generated_stream_id: uuid, type: str, input_streams: dict
 
     ec = get_execution_context(name, input_param, input_streams, output_stream, method,
                                algo_description, config)
-    dd = get_data_descriptor()
-    ann = get_annotations()
-    return {"ec": ec, "dd": dd, "ann": ann}
+    dd = get_data_descriptor(config["algo_names"]["sensor_unavailable_marker"], config)
+    anno = get_annotations()
+    return {"ec": ec, "dd": dd, "anno": anno}
 
 
 def packet_loss(generated_stream_id: uuid, type: str, input_streams: dict, config: dict) -> dict:
@@ -204,17 +204,43 @@ def packet_loss(generated_stream_id: uuid, type: str, input_streams: dict, confi
 
     ec = get_execution_context(name, input_param, input_streams, output_stream, method,
                                algo_description, config)
-    dd = get_data_descriptor()
-    ann = get_annotations()
-    return {"ec": ec, "dd": dd, "ann": ann}
+    dd = get_data_descriptor(config["algo_names"]["packet_loss_marker"], config)
+    anno = get_annotations()
+    return {"ec": ec, "dd": dd, "anno": anno}
 
+"""TO-DO: Only return data descriptor for one sensor"""
+def get_data_descriptor(algo_type, sensor_type, config):
+    if algo_type==config["algo_names"]["battery_marker"]:
+        dd = {"phone_powered_off": config["labels"]["phone_powered_off"],
+              "phone_battery_down": config["labels"]["phone_battery_down"],
+              "autosesen_powered_off": config["labels"]["autosesen_powered_off"],
+              "autosense_battery_down": config["labels"]["autosense_battery_down"],
+              "motionsense_powered_off": config["labels"]["motionsense_powered_off"],
+              "motionsense_battery_down": config["labels"]["motionsense_battery_down"]}
+    elif algo_type==config["algo_names"]["attachment_marker"]:
+        dd = {"ecg_improper_attachment": config["labels"]["ecg_improper_attachment"],
+              "ecg_off_body": config["labels"]["ecg_off_body"],
+              "ecg_on_body": config["labels"]["ecg_on_body"],
+              "rip_improper_attachment": config["labels"]["rip_improper_attachment"],
+              "rip_off_body": config["labels"]["rip_off_body"],
+              "rip_on_body": config["labels"]["rip_on_body"],
+              "motionsense_improper_attachment": config["labels"]["motionsense_improper_attachment"],
+              "motionsense_off_body": config["labels"]["motionsense_off_body"],
+              "motionsense__on_body": config["labels"]["motionsense__on_body"]}
+    elif algo_type==config["algo_names"]["sensor_unavailable_marker"]:
+        dd = {"autosense_unavailable": config["labels"][""], "motionsense_unavailable": config["labels"]["motionsense_unavailable"]}
+    elif algo_type==config["algo_names"]["packet_loss_marker"]:
+        dd = {"ecg_packet_loss": config["labels"]["ecg_packet_loss"],
+              "rip_packet_loss": config["labels"]["rip_packet_loss"],
+              "motionsense_packet_loss": config["labels"]["motionsense_packet_loss"]}
 
-def get_data_descriptor():
     data_descriptor = {
         "data_descriptor": [
             {
-                "type": "number",
-                "unit": "none"
+                "type": "label",
+                "unit": "window",
+                "labels": dd
+
             }
         ]
     }
