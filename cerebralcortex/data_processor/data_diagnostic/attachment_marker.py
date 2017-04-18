@@ -52,19 +52,16 @@ def attachment_marker(stream_id: uuid, CC_obj: CerebralCortex, config: dict):
         threshold_val = config['attachment_marker']['ecg_on_body']
         label_on = config['labels']['ecg_on_body']
         label_off = config['labels']['ecg_off_body']
-        label_attachment = config['labels']['ecg_improper_attachment']
         windowed_data = window(stream.data, config['general']['window_size'], False)
     elif name == config["sensor_types"]["autosense_rip"]:
         threshold_val = config['attachment_marker']['rip_on_body']
         label_on = config['labels']['rip_on_body']
         label_off = config['labels']['rip_off_body']
-        label_attachment = config['labels']['rip_improper_attachment']
         windowed_data = window(stream.data, config['general']['window_size'], False)
     elif name == config["sensor_types"]["motionsense_accel"]:
         threshold_val = config['attachment_marker']['motionsense_on_body']
         label_on = config['labels']['motionsense_on_body']
         label_off = config['labels']['motionsense_off_body']
-        label_attachment = config['labels']['motionsense_improper_attachment']
         motionsense_accel_magni = motionsense_magnitude(stream.data)
         windowed_data = window(motionsense_accel_magni, config['general']['window_size'], False)
     else:
