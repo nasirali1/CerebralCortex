@@ -26,7 +26,7 @@ import uuid
 from collections import OrderedDict
 
 from cerebralcortex.data_processor.signalprocessing.window import window
-from cerebralcortex.data_processor.data_diagnostic.util import merge_consective_windows
+from cerebralcortex.data_processor.data_diagnostic.util import merge_consective_windows, motionsense_magnitude
 from cerebralcortex.data_processor.data_diagnostic.post_processing import store
 from cerebralcortex.CerebralCortex import CerebralCortex
 
@@ -39,8 +39,6 @@ def packet_loss_marker(stream_id: uuid, CC_obj: CerebralCortex, config: dict):
     :param config:
     """
     stream = CC_obj.get_datastream(stream_id, type="all")
-    # only create windows if a window has data in it
-    windowed_data = window(stream.data, config['general']['window_size'], False)
 
     name = stream._name
     results = OrderedDict()
@@ -49,14 +47,18 @@ def packet_loss_marker(stream_id: uuid, CC_obj: CerebralCortex, config: dict):
         sampling_rate = config["sampling_rate"]["ecg"]
         threshold_val = config["packet_loss_marker"]["ecg_acceptable_packet_loss"]
         label = config["labels"]["ecg_packet_loss"]
+        windowed_data = window(stream.data, config['general']['window_size'], False)
     elif name == config["sensor_types"]["autosense_rip"]:
         sampling_rate = config["sampling_rate"]["rip"]
         threshold_val = config["packet_loss_marker"]["rip_acceptable_packet_loss"]
         label = config["labels"]["rip_packet_loss"]
+        windowed_data = window(stream.data, config['general']['window_size'], False)
     elif name == config["sensor_types"]["motionsense_accel"]:
         sampling_rate = config["sampling_rate"]["motionsense"]
         threshold_val = config["packet_loss_marker"]["motionsense_acceptable_packet_loss"]
         label = config["labels"]["motionsense_packet_loss"]
+        motionsense_accel_magni = motionsense_magnitude(stream.data)
+        windowed_data = window(motionsense_accel_magni, config['general']['window_size'], False)
     else:
         raise ValueError("Incorrect sensor type.")
 

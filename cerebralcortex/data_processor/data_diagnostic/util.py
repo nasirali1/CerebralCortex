@@ -24,6 +24,7 @@
 
 from datetime import datetime
 from pytz import timezone
+import math
 from collections import OrderedDict
 import statistics as stat
 import csv
@@ -112,3 +113,18 @@ def map_data_to_datapoints(data: list) -> DataPoint:
     for key, value in data.items():
         datapoint_list.append(DataPoint(key[0], key[1], value))
     return datapoint_list
+
+def motionsense_magnitude(accel_xyz: list[DataPoint]) -> DataPoint:
+    """
+    compute magnitude of x, y, and z
+    :param accel_xyz:
+    :return: list of DataPoint
+    """
+    magnitudeList = []
+
+    for i in range(len(accel_xyz)):
+        data = accel_xyz[i].sample
+        magnitude = math.sqrt(math.pow(data[0], 2) + math.pow(data[1], 2) + math.pow(data[2], 2))
+        magnitudeList.append(DataPoint(accel_xyz[i].start_time, accel_xyz[i].end_time, magnitude))
+
+    return magnitudeList
