@@ -45,15 +45,15 @@ def packet_loss_marker(stream_id: uuid, CC_obj: CerebralCortex, config: dict):
     name = stream._name
     results = OrderedDict()
 
-    if name == "ecg":
+    if name == config["sensor_types"]["autosense_ecg"]:
         sampling_rate = config["sampling_rate"]["ecg"]
         threshold_val = config["packet_loss_marker"]["ecg_acceptable_packet_loss"]
         label = config["labels"]["ecg_packet_loss"]
-    elif name == "rip":
+    elif name == config["sensor_types"]["autosense_rip"]:
         sampling_rate = config["sampling_rate"]["rip"]
         threshold_val = config["packet_loss_marker"]["rip_acceptable_packet_loss"]
         label = config["labels"]["rip_packet_loss"]
-    elif name == "motionsense":
+    elif name == config["sensor_types"]["motionsense_accel"]:
         sampling_rate = config["sampling_rate"]["motionsense"]
         threshold_val = config["packet_loss_marker"]["motionsense_acceptable_packet_loss"]
         label = config["labels"]["motionsense_packet_loss"]

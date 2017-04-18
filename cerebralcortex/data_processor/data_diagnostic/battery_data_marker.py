@@ -52,11 +52,11 @@ def battery_marker(stream_id: uuid, CC_obj: CerebralCortex, config: dict):
         for k in data:
             dp.append(float(k.sample))
 
-        if name == "phone":
+        if name == config["sensor_types"]["phone_battery"]:
             results[key] = phone_battery(dp, config)
-        elif name == "motionsense":
+        elif name == config["sensor_types"]["motionsense_battery"]:
             results[key] = motionsense_battery(dp, config)
-        elif name == "autosense":
+        elif name == config["sensor_types"]["autosense_battery"]:
             results[key] = autosense_battery(dp, config)
         else:
             raise ValueError("Incorrect sensor type.")
