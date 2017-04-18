@@ -57,20 +57,19 @@ def WirelessDisconnection(stream_id: uuid, CC_obj: CerebralCortex, config: dict)
     owner_id = stream_info._owner
     name = stream_info._name
 
-    """TO-DO: change names (after finalizing the standard stream names)"""
     stream_name = stream_info._name
 
-    if name == "ecg":
+    if name == config["sensor_types"]["autosense_ecg"]:
         threshold = config['sensor_unavailable_marker']['ecg']
         #battery_off_stream_name = config['battery_marker']['autosense_powered_off']
         battery_off_type = "autosense_battery_marker"
         label = config['labels']['autosense_unavailable']
-    if name == "rip":
+    if name == config["sensor_types"]["autosense_rip"]:
         threshold = config['sensor_unavailable_marker']['rip']
         #battery_off_stream_name = config['battery_marker']['autosense_powered_off']
         label = config['labels']['autosense_unavailable']
         battery_off_type = "autosense_battery_marker"
-    elif name == "motionsense":
+    elif name == config["sensor_types"]["motionsense_accel"]:
         threshold = config['sensor_unavailable_marker']['motionsense']
         #battery_off_stream_name = config['battery_marker']['motionsense_powered_off']
         label = config['labels']['motionsense_unavailable']
@@ -86,7 +85,7 @@ def WirelessDisconnection(stream_id: uuid, CC_obj: CerebralCortex, config: dict)
                 # get a window prior to a battery powered off
                 start_time = dp.start_time - timedelta(seconds=config['general']['window_size'])
                 end_time = dp.start_time
-                if name == "motionsense":
+                if name == config["sensor_types"]["motionsense_accel"]:
                     motionsense_accel_stream_id = Metadata.get_accelerometer_id_by_owner_id(owner_id, "motionsense", "id")
                     motionsense_accel_xyz = CC_obj.get_datastream(motionsense_accel_stream_id, start_time=start_time,
                                                                   end_time=end_time, type="data")
@@ -104,7 +103,7 @@ def WirelessDisconnection(stream_id: uuid, CC_obj: CerebralCortex, config: dict)
             if np.var(magnitudeVals) > threshold:
                 key = (dp.start_time, dp.end_time)
                 results[key] = label
-        if name == "motionsense":
+        if name == config["sensor_types"]["motionsense_accel"]:
             input_streams = [{"name": stream_name, "id": str(stream_id)},
                              {"name": Metadata.get_accelerometer_id_by_owner_id(owner_id, "motionsense", "name"), "id": str(x)}]
         else:
