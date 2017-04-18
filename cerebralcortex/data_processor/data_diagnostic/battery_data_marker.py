@@ -32,19 +32,20 @@ from cerebralcortex.data_processor.data_diagnostic.util import merge_consective_
 from cerebralcortex.CerebralCortex import CerebralCortex
 
 
-def battery_marker(stream_id: uuid, CC_obj: CerebralCortex, config: dict, name: str):
+def battery_marker(stream_id: uuid, CC_obj: CerebralCortex, config: dict):
     """
     This algorithm uses battery percentages to decide whether phone was powered-off or battery was low.
     All the labeled data (st, et, label) with its metadata are then stored in a datastore.
     :param stream_id:
     :param CC_obj:
     :param config:
-    :param name:
     """
     results = OrderedDict()
 
-    stream = CC_obj.get_datastream(stream_id, type="data")
-    windowed_data = window(stream, config['general']['window_size'], True)
+    stream = CC_obj.get_datastream(stream_id, type="all")
+    windowed_data = window(stream.data, config['general']['window_size'], True)
+
+    name = stream._name
 
     for key, data in windowed_data.items():
         dp = []
@@ -61,7 +62,8 @@ def battery_marker(stream_id: uuid, CC_obj: CerebralCortex, config: dict, name: 
             raise ValueError("Incorrect sensor type.")
 
     merged_windows = merge_consective_windows(results)
-    store(stream_id, merged_windows, CC_obj, config, name, config["algo_names"]["battery_marker"])
+    input_streams = [{"id": stream_id, "name": name}]
+    store(input_streams, merged_windows, CC_obj, config, config["algo_names"]["battery_marker"])
 
 
 def phone_battery(dp: list, config: dict) -> str:

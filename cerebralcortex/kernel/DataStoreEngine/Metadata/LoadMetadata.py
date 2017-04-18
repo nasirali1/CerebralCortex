@@ -22,6 +22,7 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+import uuid
 
 class LoadMetadata:
 
@@ -150,14 +151,21 @@ class LoadMetadata:
             return False
 
     """TO-DO: update accel names"""
-    def get_accelerometer_id_by_owner_id(self, owner_id, type):
-        if type=="x":
+    def get_accelerometer_id_by_owner_id(self, owner_id: uuid, sensor_type: str, data_type="id") -> str:
+        """
+        Returns accelerometer id based on provided sensor type. accepted types for autosense are x, y, z and for
+        motionsense accepted type is motionsense
+        :param owner_id:
+        :param sensor_type:
+        :return: accelerometer id
+        """
+        if sensor_type== "x":
             name = "autosense-x"
-        elif type=="y":
+        elif sensor_type== "y":
             name = "autosense-y"
-        elif type=="z":
+        elif sensor_type== "z":
             name = "autosense-z"
-        elif type=="motionsense":
+        elif sensor_type== "motionsense":
             name = "motionsense_accel"
         else:
             raise ValueError("Unknown type. Only acceptable types are x, y, z, or motionsense.")
@@ -167,6 +175,11 @@ class LoadMetadata:
         self.cursor.execute(qry)
         result = self.cursor.fetchall()
         if result:
-            return result[0][0]
+            if data_type=="id":
+                return result[0][0]
+            elif data_type=="name":
+                return result[0][1]
+            else:
+                raise ValueError("Unknow data type. Only acceptable data-types are id or name.")
         else:
             return False

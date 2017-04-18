@@ -30,19 +30,19 @@ from cerebralcortex.data_processor.data_diagnostic.util import merge_consective_
 from cerebralcortex.data_processor.data_diagnostic.post_processing import store
 from cerebralcortex.CerebralCortex import CerebralCortex
 
-def packet_loss_marker(stream_id: uuid, CC_obj: CerebralCortex, config: dict, name: str):
+def packet_loss_marker(stream_id: uuid, CC_obj: CerebralCortex, config: dict):
     """
     Label a window as packet-loss if received packets are less than the expected packets.
     All the labeled data (st, et, label) with its metadata are then stored in a datastore.
     :param stream_id:
     :param CC_obj:
     :param config:
-    :param name:
     """
-    stream = CC_obj.get_datastream(stream_id, type="data")
+    stream = CC_obj.get_datastream(stream_id, type="all")
     # only create windows if a window has data in it
-    windowed_data = window(stream, config['general']['window_size'], False)
+    windowed_data = window(stream.data, config['general']['window_size'], False)
 
+    name = stream._name
     results = OrderedDict()
 
     if name == "ecg":
@@ -69,4 +69,5 @@ def packet_loss_marker(stream_id: uuid, CC_obj: CerebralCortex, config: dict, na
             results[key] = label
 
     merged_windows = merge_consective_windows(results)
-    store(stream_id, merged_windows, CC_obj, config, name, config["algo_names"]["packet_loss_marker"])
+    input_streams = [{"id": stream_id, "name": name}]
+    store(input_streams, merged_windows, CC_obj, config, config["algo_names"]["packet_loss_marker"])

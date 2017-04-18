@@ -28,6 +28,7 @@ from collections import OrderedDict
 import statistics as stat
 import csv
 
+from cerebralcortex.kernel.datatypes.datastream import DataPoint
 
 def datetime_to_epoch(date_obj):
     localtz = timezone('US/Central')
@@ -101,3 +102,13 @@ def outlier_detection(window_data: list) -> list:
             normal_values.append(float(val.sample))
 
     return normal_values
+
+def map_data_to_datapoints(data: list) -> DataPoint:
+    """
+    :param data:
+    :return:
+    """
+    datapoint_list = []
+    for key, value in data.items():
+        datapoint_list.append(DataPoint(key[0], key[1], value))
+    return datapoint_list

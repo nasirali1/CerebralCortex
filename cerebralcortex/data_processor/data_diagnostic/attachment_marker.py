@@ -23,7 +23,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import uuid
-import stat
+import statistics as stat
 from datetime import datetime
 from collections import OrderedDict
 
@@ -76,7 +76,8 @@ def attachment_marker(stream_id: uuid, CC_obj: CerebralCortex, config: dict):
             results[key] = label_off
 
     merged_windows = merge_consective_windows(results)
-    store(stream_id, merged_windows, CC_obj, config, name, config["algo_names"]["attachment_marker"])
+    input_streams = [{"id": stream_id, "name": name}]
+    store(input_streams, merged_windows, CC_obj, config, config["algo_names"]["attachment_marker"])
 
 
 """
