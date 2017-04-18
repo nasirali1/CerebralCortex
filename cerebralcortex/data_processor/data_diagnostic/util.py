@@ -25,6 +25,7 @@
 from datetime import datetime
 from pytz import timezone
 import math
+from typing import List
 from collections import OrderedDict
 import statistics as stat
 import csv
@@ -114,7 +115,7 @@ def map_data_to_datapoints(data: list) -> DataPoint:
         datapoint_list.append(DataPoint(key[0], key[1], value))
     return datapoint_list
 
-def motionsense_magnitude(accel_xyz: list[DataPoint]) -> DataPoint:
+def motionsense_magnitude(accel_xyz: List[DataPoint]) -> DataPoint:
     """
     compute magnitude of x, y, and z
     :param accel_xyz:

@@ -1,21 +1,27 @@
 import json
 import uuid
+from collections import OrderedDict
 
 from cerebralcortex.kernel.datatypes.datastream import DataStream, Stream
 from cerebralcortex.CerebralCortex import CerebralCortex
 from cerebralcortex.data_processor.data_diagnostic.util import map_data_to_datapoints
 
 
-
-def store(input_streams: dict, data: Stream, CC_obj: CerebralCortex, config: dict, algo_type: str):
-
+def store(input_streams: dict, data: OrderedDict, CC_obj: CerebralCortex, config: dict, algo_type: str):
+    """
+    Store diagnostic results with its metadata in the data-store
+    :param input_streams:
+    :param data:
+    :param CC_obj:
+    :param config:
+    :param algo_type:
+    """
     parent_stream_id = input_streams[0]["id"]
     stream_name = input_streams[0]["name"]
 
-
     """TO-DO: use dynamic UUID"""
     stream_uuid = 123  # uuid.uuid4()
-    result = process_data(stream_uuid, stream_name, input_streams, algo_type, config )
+    result = process_data(stream_uuid, stream_name, input_streams, algo_type, config)
 
     data_descriptor = json.loads(result["dd"])
     execution_context = json.loads(result["ec"])
@@ -35,9 +41,15 @@ def store(input_streams: dict, data: Stream, CC_obj: CerebralCortex, config: dic
     CC_obj.save_datastream(ds)
 
 
-
-def process_data(stream_uuid, stream_name, input_streams, algo_type, config):
-
+def process_data(stream_uuid: uuid, stream_name: str, input_streams: dict, algo_type: str, config: dict) -> dict:
+    """
+    :param stream_uuid:
+    :param stream_name:
+    :param input_streams:
+    :param algo_type:
+    :param config:
+    :return:
+    """
     if algo_type == config["algo_names"]["attachment_marker"]:
         result = attachment_marker(stream_uuid, stream_name, input_streams, config)
     elif algo_type == config["algo_names"]["battery_marker"]:
@@ -49,9 +61,14 @@ def process_data(stream_uuid, stream_name, input_streams, algo_type, config):
     return result
 
 
-
-def attachment_marker(generated_stream_id, stream_name, input_streams, config):
-
+def attachment_marker(generated_stream_id: uuid, stream_name: str, input_streams: dict, config: dict) -> dict:
+    """
+    :param generated_stream_id:
+    :param stream_name:
+    :param input_streams:
+    :param config:
+    :return:
+    """
     if stream_name == config["sensor_types"]["autosense_ecg"]:
         name = 'ecg_attachment_marker'
         input_param = {"window_size": config["general"]["window_size"],
@@ -79,8 +96,15 @@ def attachment_marker(generated_stream_id, stream_name, input_streams, config):
     return {"ec": ec, "dd": dd, "ann": ann}
 
 
-def battery_data_marker(generated_stream_id, stream_name, input_streams, config):
+def battery_data_marker(generated_stream_id: uuid, stream_name: str, input_streams: dict, config: dict) -> dict:
+    """
 
+    :param generated_stream_id:
+    :param stream_name:
+    :param input_streams:
+    :param config:
+    :return:
+    """
     if stream_name == config["sensor_types"]["phone_battery"]:
         name = 'phone_battery_marker'
         input_param = {"window_size": config["general"]["window_size"],
@@ -113,8 +137,15 @@ def battery_data_marker(generated_stream_id, stream_name, input_streams, config)
     return {"ec": ec, "dd": dd, "ann": ann}
 
 
-def sensor_unavailable(generated_stream_id, type, input_streams, config):
+def sensor_unavailable(generated_stream_id: uuid, type: str, input_streams: dict, config: dict) -> dict:
+    """
 
+    :param generated_stream_id:
+    :param type:
+    :param input_streams:
+    :param config:
+    :return:
+    """
     if type == config["sensor_types"]["autosense_ecg"]:
         name = 'autosense_unavailable_marker'
         input_param = {"window_size": config["general"]["window_size"],
@@ -142,8 +173,15 @@ def sensor_unavailable(generated_stream_id, type, input_streams, config):
     return {"ec": ec, "dd": dd, "ann": ann}
 
 
-def packet_loss(generated_stream_id, type, input_streams, config):
+def packet_loss(generated_stream_id: uuid, type: str, input_streams: dict, config: dict) -> dict:
+    """
 
+    :param generated_stream_id:
+    :param type:
+    :param input_streams:
+    :param config:
+    :return:
+    """
     if type == config["sensor_types"]["autosense_ecg"]:
         name = 'ecg_packet_loss_marker'
         input_param = {"window_size": config["general"]["window_size"],
@@ -171,8 +209,6 @@ def packet_loss(generated_stream_id, type, input_streams, config):
     return {"ec": ec, "dd": dd, "ann": ann}
 
 
-
-
 def get_data_descriptor():
     data_descriptor = {
         "data_descriptor": [
@@ -185,8 +221,18 @@ def get_data_descriptor():
     return json.dumps(data_descriptor)
 
 
-def get_execution_context(name, input_param, input_streams, output_streams, method,
-                          algo_description, config):
+def get_execution_context(name: str, input_param: dict, input_streams: dict, output_streams: dict, method: str,
+                          algo_description: str, config: dict) -> dict:
+    """
+    :param name:
+    :param input_param:
+    :param input_streams:
+    :param output_streams:
+    :param method:
+    :param algo_description:
+    :param config:
+    :return:
+    """
     author = ["Ali"]
     version = '0.0.1'
     ref = 'url of pub'
@@ -212,8 +258,8 @@ def get_execution_context(name, input_param, input_streams, output_streams, meth
 
 
 def get_annotations():
+    """
+    :return:
+    """
     annotations = {}
     return json.dumps(annotations)
-
-
-
