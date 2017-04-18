@@ -1,4 +1,4 @@
-# Copyright (c) 2017, MD2K Center of Excellence
+# Copyright (c) 2016, MD2K Center of Excellence
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -21,19 +21,18 @@
 # CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+from typing import List
+import numpy as np
 import uuid
 from collections import OrderedDict
 
-import numpy as np
-
-from cerebralcortex.CerebralCortex import CerebralCortex
 from cerebralcortex.data_processor.data_diagnostic.post_processing import store
-from cerebralcortex.data_processor.data_diagnostic.util import merge_consective_windows
 from cerebralcortex.data_processor.signalprocessing.window import window
-from cerebralcortex.kernel.DataStoreEngine.dataset import DataSet
+from cerebralcortex.data_processor.data_diagnostic.util import merge_consective_windows
+from cerebralcortex.CerebralCortex import CerebralCortex
 
 
-def battery_marker(stream_id: uuid, CC_obj: CerebralCortex, config: dict, start_time=None, end_time=None):
+def battery_marker(stream_id: uuid, CC_obj: CerebralCortex, config: dict):
     """
     This algorithm uses battery percentages to decide whether phone was powered-off or battery was low.
     All the labeled data (st, et, label) with its metadata are then stored in a datastore.
@@ -43,9 +42,7 @@ def battery_marker(stream_id: uuid, CC_obj: CerebralCortex, config: dict, start_
     """
     results = OrderedDict()
 
-    # stream = CC_obj.get_datastream(stream_id, data_type="all")
-
-    stream = CC_obj.get_datastream(stream_id, data_type=DataSet.COMPLETE, start_time=start_time, end_time=end_time)
+    stream = CC_obj.get_datastream(stream_id, type="all")
     windowed_data = window(stream.data, config['general']['window_size'], True)
 
     name = stream._name
@@ -55,17 +52,17 @@ def battery_marker(stream_id: uuid, CC_obj: CerebralCortex, config: dict, start_
         for k in data:
             dp.append(float(k.sample))
 
-        if name == config["sensor_types"]["phone_battery"]:
+        if name == "phone":
             results[key] = phone_battery(dp, config)
-        elif name == config["sensor_types"]["motionsense_battery"]:
+        elif name == "motionsense":
             results[key] = motionsense_battery(dp, config)
-        elif name == config["sensor_types"]["autosense_battery"]:
+        elif name == "autosense":
             results[key] = autosense_battery(dp, config)
         else:
             raise ValueError("Incorrect sensor type.")
 
     merged_windows = merge_consective_windows(results)
-    input_streams = [{"id": str(stream_id), "name": name}]
+    input_streams = [{"id": stream_id, "name": name}]
     store(input_streams, merged_windows, CC_obj, config, config["algo_names"]["battery_marker"])
 
 
@@ -76,15 +73,12 @@ def phone_battery(dp: list, config: dict) -> str:
     :param config:
     :return:
     """
-    if not dp:
-        dp_sample_avg = 0
-    else:
-        dp_sample_avg = np.mean(dp)
-
+    dp_sample_avg = np.mean(dp)
     if dp_sample_avg <= config['battery_marker']['phone_powered_off']:
-        return config['labels']['phone_powered_off']
-    elif dp_sample_avg <= config['battery_marker']['phone_battery_down']:
-        return config['labels']['phone_battery_down']
+        return config['labels']['sensor_powered_off']
+    else:
+        if dp_sample_avg < config['battery_marker']['phone_battery_down']:
+            return config['labels']['phone_battery_down']
     return None
 
 
@@ -95,30 +89,24 @@ def motionsense_battery(dp: list, config: dict) -> str:
     :param config:
     :return:
     """
-    if not dp:
-        dp_sample_avg = 0
-    else:
-        dp_sample_avg = np.mean(dp)
+    dp_sample_avg = np.mean(dp)
 
     if dp_sample_avg <= config['battery_marker']['motionsense_powered_off']:
         return config['labels']['motionsense_powered_off']
-    elif dp_sample_avg <= config['battery_marker']['phone_powered_off']:
-        return config['labels']['motionsense_battery_down']
+    else:
+        if dp_sample_avg < config['battery_marker']['phone_powered_off']:
+            return config['labels']['motionsense_battery_down']
     return None
 
 
-def autosense_battery(dp: list, config: dict) -> str:
+def autosense_battery(dp: list, config:dict) -> str:
     """
     labels a window as sensor powerd-off or low battery and returns the label
     :param dp:
     :param config:
     :return:
     """
-    if not dp:
-        dp_sample_avg = 0
-    else:
-        dp_sample_avg = np.mean(dp)
-
+    dp_sample_avg = np.mean(dp)
     if dp_sample_avg <= config['battery_marker']['autosense_powered_off']:
         return config['labels']['autosesen_powered_off']
     else:
