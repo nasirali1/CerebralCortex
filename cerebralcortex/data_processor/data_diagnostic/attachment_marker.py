@@ -41,7 +41,7 @@ def attachment_marker(stream_id: uuid, CC_obj: CerebralCortex, config: dict):
     :param CC_obj: CerebralCortex object
     :param config: Data diagnostics configurations
     """
-    stream = CC_obj.get_datastream(stream_id, type="all")
+    stream = CC_obj.get_datastream(stream_id, data_type="all")
 
 
     results = OrderedDict()
@@ -77,7 +77,7 @@ def attachment_marker(stream_id: uuid, CC_obj: CerebralCortex, config: dict):
             results[key] = label_off
 
     merged_windows = merge_consective_windows(results)
-    input_streams = [{"id": stream_id, "name": name}]
+    input_streams = [{"id": str(stream_id), "name": name}]
     store(input_streams, merged_windows, CC_obj, config, config["algo_names"]["attachment_marker"])
 
 
@@ -99,7 +99,7 @@ def gsr_response(stream_id: uuid, start_time: datetime, end_time: datetime, labe
     :param config:
     :return: string
     """
-    datapoints = CC_obj.get_datastream(stream_id, start_time=start_time, end_time=end_time, type="data")
+    datapoints = CC_obj.get_datastream(stream_id, start_time=start_time, end_time=end_time, data_type="data")
 
     vals = []
     for dp in datapoints:

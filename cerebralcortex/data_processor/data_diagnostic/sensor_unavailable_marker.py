@@ -52,7 +52,7 @@ def wireless_disconnection(stream_id: uuid, CC_obj: CerebralCortex, config: dict
     results = OrderedDict()
     threshold = 0
 
-    stream_info = CC_obj.get_datastream(stream_id, type="metadata")
+    stream_info = CC_obj.get_datastream(stream_id, data_type="metadata")
 
     owner_id = stream_info._owner
     name = stream_info._name
@@ -77,7 +77,7 @@ def wireless_disconnection(stream_id: uuid, CC_obj: CerebralCortex, config: dict
 
     battery_off_stream_id = Metadata(CC_obj.configuration).get_child_stream_id(owner_id, battery_off_type)
 
-    battery_off_data = CC_obj.get_datastream(battery_off_stream_id, type="data")
+    battery_off_data = CC_obj.get_datastream(battery_off_stream_id, data_type="data")
 
     if battery_off_data:
         if name == config["sensor_types"]["motionsense_accel"]:
@@ -104,12 +104,12 @@ def wireless_disconnection(stream_id: uuid, CC_obj: CerebralCortex, config: dict
                 end_time = dp.start_time
                 if name == config["sensor_types"]["motionsense_accel"]:
                     motionsense_accel_xyz = CC_obj.get_datastream(motionsense_accel_stream_id, start_time=start_time,
-                                                                  end_time=end_time, type="data")
+                                                                  end_time=end_time, data_type="data")
                     magnitudeVals = motionsense_calculate_magnitude(motionsense_accel_xyz)
                 else:
-                    autosense_acc_x = CC_obj.get_datastream(x, start_time=start_time, end_time=end_time, type="data")
-                    autosense_acc_y = CC_obj.get_datastream(y, start_time=start_time, end_time=end_time, type="data")
-                    autosense_acc_z = CC_obj.get_datastream(z, start_time=start_time, end_time=end_time, type="data")
+                    autosense_acc_x = CC_obj.get_datastream(x, start_time=start_time, end_time=end_time, data_type="data")
+                    autosense_acc_y = CC_obj.get_datastream(y, start_time=start_time, end_time=end_time, data_type="data")
+                    autosense_acc_z = CC_obj.get_datastream(z, start_time=start_time, end_time=end_time, data_type="data")
 
                     magnitudeVals = autosense_calculate_magnitude(autosense_acc_x, autosense_acc_y, autosense_acc_z)
 
