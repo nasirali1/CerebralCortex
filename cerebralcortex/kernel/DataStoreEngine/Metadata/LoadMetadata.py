@@ -134,51 +134,60 @@ class LoadMetadata:
         self.cursor.close()
         self.dbConnection.close()
         if len(results) == 0:
-            raise "No record found."
+            raise ValueError("No record found.")
         else:
             return results
 
-    def get_child_stream_id(self, owner_id, name):
-        # if stream name, id, and owner are same then return true
-        #qry = "SELECT * from stream where JSON_SEARCH(execution_context, 'all', '"+parent_stream_id+"', null, '$.execution_context.processing_module.input_streams[*].id')  is not null and owner='"+owner_id+"' and name='"+name+"'"
-        qry = "SELECT * from stream where owner='"+owner_id+"' and name='"+name+"'"
-
-        self.cursor.execute(qry)
-        result = self.cursor.fetchall()
-        if result:
-            return result[0][0]
-        else:
-            return False
-
-    """TO-DO: update accel names"""
-    def get_accelerometer_id_by_owner_id(self, owner_id: uuid, sensor_type: str, data_type="id") -> str:
+    def get_stream_id_name(self, owner_id: uuid, name: str, data_type: str = "id") -> str:
         """
-        Returns accelerometer id based on provided sensor type. accepted types for autosense are x, y, z and for
-        motionsense accepted type is motionsense
+        This method will return an ID of a stream if the data_type is set to "id" OR stream name if data_type is set to "name"
         :param owner_id:
-        :param sensor_type:
-        :return: accelerometer id
+        :param name:
+        :param data_type:
+        :return:
         """
-        if sensor_type== "x":
-            name = "autosense-x"
-        elif sensor_type== "y":
-            name = "autosense-y"
-        elif sensor_type== "z":
-            name = "autosense-z"
-        elif sensor_type== "motionsense":
-            name = "motionsense_accel"
-        else:
-            raise ValueError("Unknown type. Only acceptable types are x, y, z, or motionsense.")
-
-        qry = "SELECT * from stream where owner='"+owner_id+"' and name='"+name+"'"
-        self.cursor.execute(qry)
+        qry = "SELECT * from "+self.datastreamTable+" where owner=%s and name=%s"
+        vals = owner_id, name
+        self.cursor.execute(qry, vals)
         result = self.cursor.fetchall()
         if result:
             if data_type=="id":
                 return result[0][0]
             elif data_type=="name":
-                return result[0][1]
+                return result[0][2]
             else:
                 raise ValueError("Unknow data type. Only acceptable data-types are id or name.")
         else:
             return False
+
+    # def get_accelerometer_id_by_owner_id(self, owner_id: uuid, sensor_type: str, data_type="id") -> str:
+    #     """
+    #     Returns accelerometer id based on provided sensor type. accepted types for autosense are x, y, z and for
+    #     motionsense accepted type is motionsense
+    #     :param owner_id:
+    #     :param sensor_type:
+    #     :return: accelerometer id
+    #     """
+    #     if sensor_type== "x":
+    #         name = "autosense-x"
+    #     elif sensor_type== "y":
+    #         name = "autosense-y"
+    #     elif sensor_type== "z":
+    #         name = "autosense-z"
+    #     elif sensor_type== "motionsense":
+    #         name = "motionsense_accel"
+    #     else:
+    #         raise ValueError("Unknown type. Only acceptable types are x, y, z, or motionsense.")
+    #
+    #     qry = "SELECT * from stream where owner='"+owner_id+"' and name='"+name+"'"
+    #     self.cursor.execute(qry)
+    #     result = self.cursor.fetchall()
+    #     if result:
+    #         if data_type=="id":
+    #             return result[0][0]
+    #         elif data_type=="name":
+    #             return result[0][1]
+    #         else:
+    #             raise ValueError("Unknow data type. Only acceptable data-types are id or name.")
+    #     else:
+    #         return False

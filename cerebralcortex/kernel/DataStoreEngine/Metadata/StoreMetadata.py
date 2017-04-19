@@ -46,8 +46,8 @@ class StoreMetadata:
         :param stream_type:
         """
         exe = 0
-        isStreamCreated = self.is_stream_created(stream_identifier, stream_owner_id, name, data_descriptor,
-                                                 execution_context, annotations, stream_type)
+        isStreamCreated = self.append_annotations(stream_identifier, stream_owner_id, name, data_descriptor,
+                                                  execution_context, annotations, stream_type)
         isIDCreated = self.is_id_created(stream_owner_id, name)
 
         if isIDCreated:
@@ -59,7 +59,7 @@ class StoreMetadata:
             vals = json.dumps(annotations), str(stream_identifier)
             exe = 1
         elif (isStreamCreated == False):
-            qry = "INSERT INTO " + self.datastreamTable + " (identifier, owner, name, data_descriptor, execution_context, annotations, type) VALUES(%s, %s, %s, %s, %s, %s, %s)"
+            qry = "INSERT INTO " + self.datastreamTable + " (identifier, owner, name, data_descriptor, execution_context, annotations, type) VALUES(%s, %s, %s, %s, %s, %s, %s, %s)"
             vals = str(stream_identifier), str(stream_owner_id), str(name), json.dumps(
                 data_descriptor), json.dumps(execution_context), json.dumps(annotations), stream_type
             exe = 1
@@ -69,11 +69,11 @@ class StoreMetadata:
             self.cursor.close()
             self.dbConnection.close()
 
-    def is_stream_created(self, stream_identifier: uuid, stream_owner_id: uuid, name: str,
-                          data_descriptor: dict,
-                          execution_context: dict,
-                          annotations: dict,
-                          stream_type: str):
+    def append_annotations(self, stream_identifier: uuid, stream_owner_id: uuid, name: str,
+                           data_descriptor: dict,
+                           execution_context: dict,
+                           annotations: dict,
+                           stream_type: str):
         """
         This method will check if the stream already exist with the same data (as provided in params) except annotations.
         :param stream_identifier:
@@ -97,22 +97,21 @@ class StoreMetadata:
                     raise Exception("Update failed: data descriptor is not same.")
                 elif (json.loads(result[0][4]) != execution_context):
                     raise Exception("Update failed: execution context is not same.")
-                elif (json.loads(result[0][5]) == annotations):
-                    return "annotations are same!"
-                elif (json.loads(result[0][5]) != annotations):
-                    return "annotations are same!"
                 elif (result[0][6] != stream_type):
                     raise Exception("Update failed: type is not same.")
+                elif (json.loads(result[0][5]) == annotations):
+                    return "annotations are same."
+                elif (json.loads(result[0][5]) != annotations):
+                    return "annotations are same!"
                 else:
                     return True
         else:
             return False
-    def append_annotations(self, existing_annotations:dict, new_annotations:dict):
-        return dict(existing_annotations.items() + new_annotations.items())
+
 
     def is_id_created(self, owner_id, name):
         # if stream name, id, and owner are same then return true
-        qry = "SELECT * from stream where owner=%s and name=%s"
+        qry = "SELECT * from "+self.datastreamTable+" where owner=%s and name=%s"
         vals = owner_id, name
         self.cursor.execute(qry, vals)
         result = self.cursor.fetchall()

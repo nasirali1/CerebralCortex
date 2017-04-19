@@ -75,27 +75,28 @@ def wireless_disconnection(stream_id: uuid, CC_obj: CerebralCortex, config: dict
         label = config['labels']['motionsense_unavailable']
         battery_off_type = "motionsense_battery_marker"
 
-    battery_off_stream_id = Metadata(CC_obj.configuration).get_child_stream_id(owner_id, battery_off_type)
+    battery_off_stream_id = Metadata(CC_obj.configuration).get_stream_id_name(owner_id, battery_off_type, "id")
 
     battery_off_data = CC_obj.get_datastream(battery_off_stream_id, data_type="data")
 
     if battery_off_data:
         if name == config["sensor_types"]["motionsense_accel"]:
-            motionsense_accel_stream_id = Metadata.get_accelerometer_id_by_owner_id(owner_id,
-                                                                                    config["sensor_types"][
+            motionsense_accel_stream_id = Metadata.get_stream_id_name(owner_id,
+                                                                      config["sensor_types"][
                                                                                         "motionsense_accel"],
                                                                                     "id")
             input_streams = [{"name": stream_name, "id": str(stream_id)},
-                             {"name": Metadata.get_accelerometer_id_by_owner_id(owner_id, "motionsense", "name"),
+                             {"name": Metadata.get_stream_id_name(owner_id, config["sensor_types"][
+                                 "motionsense_accel"], "name"),
                               "id": str(motionsense_accel_stream_id)}]
         else:
-            x = Metadata.get_accelerometer_id_by_owner_id(owner_id, "x", "id")
-            y = Metadata.get_accelerometer_id_by_owner_id(owner_id, "y", "id")
-            z = Metadata.get_accelerometer_id_by_owner_id(owner_id, "z", "id")
+            x = Metadata.get_stream_id_name(owner_id, "x", "id")
+            y = Metadata.get_stream_id_name(owner_id, "y", "id")
+            z = Metadata.get_stream_id_name(owner_id, "z", "id")
             input_streams = [{"id": str(stream_id), "name": stream_name},
-                             {"id": str(x), "name": Metadata.get_accelerometer_id_by_owner_id(owner_id, "x", "name")},
-                             {"id": str(y), "name": Metadata.get_accelerometer_id_by_owner_id(owner_id, "y", "name")},
-                             {"id": str(z), "name": Metadata.get_accelerometer_id_by_owner_id(owner_id, "z", "name")}]
+                             {"id": str(x), "name": Metadata.get_stream_id_name(owner_id, "x", "name")},
+                             {"id": str(y), "name": Metadata.get_stream_id_name(owner_id, "y", "name")},
+                             {"id": str(z), "name": Metadata.get_stream_id_name(owner_id, "z", "name")}]
 
         for dp in battery_off_data:
             if dp.start_time != "" and dp.end_time != "":
