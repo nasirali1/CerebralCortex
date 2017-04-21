@@ -148,7 +148,7 @@ class LoadMetadata:
         :return:
         """
         if start_time != None and end_time!=None:
-            qry = "SELECT * from "+self.datastreamTable+" where owner=%s and name=%s"
+            qry = "SELECT identifier from "+self.datastreamTable+" where owner=%s and name=%s"
             vals = owner_id, stream_name
         else:
             qry = "SELECT * from "+self.datastreamTable+" where owner=%s and name=%s"
@@ -158,7 +158,7 @@ class LoadMetadata:
         self.cursor.execute(qry, vals)
         rows = self.cursor.fetchall()
         if rows:
-                return rows[0][0]
+                return rows[0]["identifier"]
         else:
             return False
 
@@ -186,7 +186,7 @@ class LoadMetadata:
                 self.cursor.execute(qry, (owner_id))
 
         rows = self.cursor.fetchall()
-        return rows[0][0]
+        return rows[0]["identifier"]
         # for row in rows:
         #     stream_ids.append(row[0])
         #

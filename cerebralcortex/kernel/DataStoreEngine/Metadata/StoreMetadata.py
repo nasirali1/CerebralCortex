@@ -88,26 +88,25 @@ class StoreMetadata:
         self.cursor.execute(qry, vals)
         result = self.cursor.fetchall()
         if result:
-            if (result[0][0] == str(stream_identifier)):
-                if (result[0][1] != stream_owner_id):
+            if (result[0]["identifier"] == str(stream_identifier)):
+                if (result[0]["owner"] != stream_owner_id):
                     raise Exception("Update failed: owner ID is not same..")
-                elif (result[0][2] != name):
+                elif (result[0]["name"] != name):
                     raise Exception("Update failed: name is not same..")
-                elif (json.loads(result[0][3]) != data_descriptor):
+                elif (json.loads(result[0]["data_descriptor"]) != data_descriptor):
                     raise Exception("Update failed: data descriptor is not same.")
-                elif (json.loads(result[0][4]) != execution_context):
+                elif (json.loads(result[0]["execution_context"]) != execution_context):
                     raise Exception("Update failed: execution context is not same.")
-                elif (result[0][6] != stream_type):
+                elif (result[0]["stream_type"] != stream_type):
                     raise Exception("Update failed: type is not same.")
-                elif (json.loads(result[0][5]) == annotations):
+                elif (json.loads(result[0]["annotations"]) == annotations):
                     return "annotations are same."
-                elif (json.loads(result[0][5]) != annotations):
+                elif (json.loads(result[0]["annotations"]) != annotations):
                     return "annotations are same!"
                 else:
                     return True
         else:
             return False
-
 
     def is_id_created(self, owner_id, name):
         # if stream name, id, and owner are same then return true
@@ -116,7 +115,7 @@ class StoreMetadata:
         self.cursor.execute(qry, vals)
         result = self.cursor.fetchall()
         if result:
-            return result[0][0]
+            return result[0]["identifier"]
         else:
             return False
 

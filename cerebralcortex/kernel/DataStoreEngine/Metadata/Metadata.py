@@ -41,7 +41,7 @@ class Metadata(LoadMetadata, StoreMetadata):
         self.datastreamTable = self.configuration['mysql']['datastream_table']
         self.dbConnection = mysql.connector.connect(user=self.dbUser, password=self.dbPassword, database=self.database)
 
-        self.cursor = self.dbConnection.cursor()
+        self.cursor = self.dbConnection.cursor(dictionary=True)
 
     def delete_stream(self, stream_id):
         qry = "delete from "+self.datastreamTable+" where identifier='%s'"

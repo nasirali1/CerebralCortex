@@ -103,13 +103,13 @@ class LoadData:
         # query datastream(mysql) for metadata
         datastream_info = Metadata(self.configuration).get_stream_info(stream_id)
 
-        ownerID = datastream_info[0][1]
-        name = datastream_info[0][2]
+        ownerID = datastream_info[0]["owner"]
+        name = datastream_info[0]["name"]
         #description = datastream_info[0][3]
-        data_descriptor = json.loads(datastream_info[0][3])
-        execution_context = json.loads(datastream_info[0][4])
-        annotations = json.loads(datastream_info[0][5])
-        stream_type = datastream_info[0][6]
+        data_descriptor = json.loads(datastream_info[0]["data_descriptor"])
+        execution_context = json.loads(datastream_info[0]["execution_context"])
+        annotations = json.loads(datastream_info[0]["annotations"])
+        stream_type = datastream_info[0]["type"]
 
         return DataStream(stream_id, ownerID, name, data_descriptor, execution_context, annotations,
                           stream_type, data)

@@ -66,13 +66,13 @@ class TestDataStoreEngine(unittest.TestCase):
 
     def test_get_stream_info(self):
         stream_info = Metadata(self.configuration).get_stream_info("6db98dfb-d6e8-4b27-8d55-95b20fa0f754")
-        self.assertEqual(stream_info[0][0], "6db98dfb-d6e8-4b27-8d55-95b20fa0f754")
-        self.assertEqual(stream_info[0][1], "06634264-56bc-4c92-abd7-377dbbad79dd")
-        self.assertEqual(stream_info[0][2], "data-diagnostic")
-        self.assertEqual(stream_info[0][3], "{}")
-        self.assertEqual(stream_info[0][4], "{}")
-        self.assertEqual(stream_info[0][5], "{}")
-        self.assertEqual(stream_info[0][6], "datastream")
+        self.assertEqual(stream_info[0]["identifier"], "6db98dfb-d6e8-4b27-8d55-95b20fa0f754")
+        self.assertEqual(stream_info[0]["owner"], "06634264-56bc-4c92-abd7-377dbbad79dd")
+        self.assertEqual(stream_info[0]["name"], "data-diagnostic")
+        self.assertEqual(stream_info[0]["data_descriptor"], "{}")
+        self.assertEqual(stream_info[0]["execution_context"], "{}")
+        self.assertEqual(stream_info[0]["annotations"], "{}")
+        self.assertEqual(stream_info[0]["type"], "datastream")
 
     def test_append_annotations(self):
         self.assertRaises(Exception, Metadata(self.configuration).append_annotations, "6db98dfb-d6e8-4b27-8d55-95b20fa0f754",
