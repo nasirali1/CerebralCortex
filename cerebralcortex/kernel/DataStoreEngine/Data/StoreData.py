@@ -43,10 +43,13 @@ class StoreData:
 
 
         if data:
+            total_dp = len(data)-1
+            new_start_time = data[0].start_time
+            new_end_time = data[total_dp].start_time
             Metadata(self.configuration).store_stream_info(stream_identifier, ownerID, name,
                                                            data_descriptor, execution_context,
                                                            annotations,
-                                                           stream_type)
+                                                           stream_type, new_start_time, new_end_time)
             dataframe = self.map_datapoint_to_dataframe(stream_identifier, data)
 
             self.store_data(dataframe, self.datapointTable)

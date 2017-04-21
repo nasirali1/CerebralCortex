@@ -92,15 +92,15 @@ def attachment_marker(generated_stream_id: uuid, stream_name: str, input_streams
     :return:
     """
     if stream_name == config["sensor_types"]["autosense_ecg"]:
-        name = 'ecg_attachment_marker'
+        name = config["output_stream_names"]["ddt_ecg_attachment"]
         input_param = {"window_size": config["general"]["window_size"],
                        "ecg_vairance_threshold": config["attachment_marker"]["ecg_on_body"]}
     elif stream_name == config["sensor_types"]["autosense_rip"]:
-        name = 'rip_attachment_marker'
+        name = config["output_stream_names"]["ddt_rip_attachment"]
         input_param = {"window_size": config["general"]["window_size"],
                        "rip_vairance_threshold": config["attachment_marker"]["rip_on_body"]}
     elif stream_name == config["sensor_types"]["motionsense_accel"]:
-        name = 'motionsense_attachment_marker'
+        name = config["output_stream_names"]["ddt_motionsense_attachment"]
         input_param = {"window_size": config["general"]["window_size"],
                        "motionsense_vairance_threshold": config["attachment_marker"]["motionsense_on_body"]}
     else:
@@ -128,18 +128,18 @@ def battery_data_marker(generated_stream_id: uuid, stream_name: str, input_strea
     :return:
     """
     if stream_name == config["sensor_types"]["phone_battery"]:
-        name = 'phone_battery_marker'
+        name = config["output_stream_names"]["ddt_phone_battery"]
         input_param = {"window_size": config["general"]["window_size"],
                        "phone_powered_off_threshold": config["battery_marker"]["phone_powered_off"],
                        "phone_battery_down_threshold": config["battery_marker"]["phone_battery_down"]}
     elif stream_name == config["sensor_types"]["autosense_battery"]:
-        name = 'autosense_battery_marker'
+        name = config["output_stream_names"]["ddt_autosense_battery"]
         input_param = {"window_size": config["general"]["window_size"],
                        "autosense_powered_off_threshold": config["battery_marker"]["autosense_powered_off"],
                        "autosense_battery_down_threshold": config["battery_marker"]["autosense_battery_down"]}
 
     elif stream_name == config["sensor_types"]["motionsense_battery"]:
-        name = 'motionsense_battery_marker'
+        name = config["output_stream_names"]["ddt_motionsense_battery"]
         input_param = {"window_size": config["general"]["window_size"],
                        "motionsense_powered_off_threshold": config["battery_marker"]["motionsense_powered_off"],
                        "motionsense_battery_down_threshold": config["battery_marker"]["motionsense_battery_down"]}
@@ -169,16 +169,16 @@ def sensor_unavailable(generated_stream_id: uuid, sensor_type: str, input_stream
     :return:
     """
     if sensor_type == config["sensor_types"]["autosense_ecg"]:
-        name = 'autosense_unavailable_marker'
+        name = config["output_stream_names"]["ddt_autosense_unavailable"]
         input_param = {"window_size": config["general"]["window_size"],
                        "sensor_unavailable_threshold": config["sensor_unavailable_marker"]["ecg"]}
     elif sensor_type == config["sensor_types"]["autosense_rip"]:
-        name = 'autosense_unavailable_marker'
+        name = config["output_stream_names"]["ddt_autosense_unavailable"]
         input_param = {"window_size": config["general"]["window_size"],
                        "sensor_unavailable_threshold": config["sensor_unavailable_marker"]["rip"]}
 
     elif sensor_type == config["sensor_types"]["motionsense_accel"]:
-        name = 'motionsense_unavailable_marker'
+        name = config["output_stream_names"]["ddt_motionsense_unavailable"]
         input_param = {"window_size": config["general"]["window_size"],
                        "sensor_unavailable_threshold": config["sensor_unavailable_marker"]["motionsense"]}
     else:
@@ -205,16 +205,16 @@ def packet_loss(generated_stream_id: uuid, sensor_type: str, input_streams: dict
     :return:
     """
     if sensor_type == config["sensor_types"]["autosense_ecg"]:
-        name = 'ecg_packet_loss_marker'
+        name = config["output_stream_names"]["ddt_ecg_packet_loss"]
         input_param = {"window_size": config["general"]["window_size"],
                        "ecg_acceptable_packet_loss": config["packet_loss_marker"]["ecg_acceptable_packet_loss"]}
     elif sensor_type == config["sensor_types"]["autosense_rip"]:
-        name = 'rip_packet_loss_marker'
+        name = config["output_stream_names"]["ddt_rip_packet_loss"]
         input_param = {"window_size": config["general"]["window_size"],
                        "rip_acceptable_packet_loss": config["packet_loss_marker"]["rip_acceptable_packet_loss"]}
 
     elif sensor_type == config["sensor_types"]["motionsense_accel"]:
-        name = 'motionsense_packet_loss_marker'
+        name = config["output_stream_names"]["ddt_motionsense_packet_loss"]
         input_param = {"window_size": config["general"]["window_size"],
                        "rip_acceptable_packet_loss": config["packet_loss_marker"]["motionsense_acceptable_packet_loss"]}
     else:
