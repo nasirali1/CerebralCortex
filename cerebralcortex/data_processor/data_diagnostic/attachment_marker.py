@@ -72,9 +72,9 @@ def attachment_marker(stream_id: uuid, CC_obj: CerebralCortex, config: dict, sta
         normal_values = outlier_detection(data)
 
         if stat.variance(normal_values) < threshold_val:
-            results[key] = label_on
-        else:
             results[key] = label_off
+        else:
+            results[key] = label_on
 
     merged_windows = merge_consective_windows(results)
     input_streams = [{"id": str(stream_id), "name": name}]
