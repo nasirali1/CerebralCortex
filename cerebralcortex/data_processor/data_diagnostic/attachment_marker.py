@@ -28,12 +28,12 @@ from datetime import datetime
 from collections import OrderedDict
 
 from cerebralcortex.data_processor.signalprocessing.window import window
-from cerebralcortex.data_processor.data_diagnostic.util import merge_consective_windows, outlier_detection, motionsense_magnitude
+from cerebralcortex.data_processor.data_diagnostic.util import merge_consective_windows, outlier_detection, motionsense_magnitude, get_stream_data
 from cerebralcortex.data_processor.data_diagnostic.post_processing import store
 from cerebralcortex.CerebralCortex import CerebralCortex
 
 
-def attachment_marker(stream_id: uuid, CC_obj: CerebralCortex, config: dict):
+def attachment_marker(stream_id: uuid, CC_obj: CerebralCortex, config: dict, start_time=None, end_time=None):
     """
     Label sensor data as sensor-on-body, sensor-off-body, or improper-attachment.
     All the labeled data (st, et, label) with its metadata are then stored in a datastore
@@ -41,8 +41,8 @@ def attachment_marker(stream_id: uuid, CC_obj: CerebralCortex, config: dict):
     :param CC_obj: CerebralCortex object
     :param config: Data diagnostics configurations
     """
-    stream = CC_obj.get_datastream(stream_id, data_type="all")
 
+    stream = get_stream_data(stream_id, CC_obj, start_time=start_time,end_time=end_time,data_type="all")
 
     results = OrderedDict()
     threshold_val = None

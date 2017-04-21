@@ -23,6 +23,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import uuid
+import datetime
 
 class LoadMetadata:
 
@@ -130,64 +131,63 @@ class LoadMetadata:
         :return: results of a query
         """
         self.cursor.execute(qry)
-        results = self.cursor.fetchall()
+        rows = self.cursor.fetchall()
         self.cursor.close()
         self.dbConnection.close()
-        if len(results) == 0:
+        if len(rows) == 0:
             raise ValueError("No record found.")
         else:
-            return results
+            return rows
 
-    def get_stream_id_name(self, owner_id: uuid, name: str, data_type: str = "id") -> str:
+    def get_stream_id_by_owner_id(self, owner_id: uuid, stream_name: str, start_time=None, end_time=None) -> str:
         """
-        This method will return an ID of a stream if the data_type is set to "id" OR stream name if data_type is set to "name"
+        returns a stream id of an owner
         :param owner_id:
-        :param name:
+        :param stream_name:
         :param data_type:
         :return:
         """
-        qry = "SELECT * from "+self.datastreamTable+" where owner=%s and name=%s"
-        vals = owner_id, name
+        if start_time != None and end_time!=None:
+            qry = "SELECT * from "+self.datastreamTable+" where owner=%s and name=%s"
+            vals = owner_id, stream_name
+        else:
+            qry = "SELECT * from "+self.datastreamTable+" where owner=%s and name=%s"
+            vals = owner_id, stream_name
+
+
         self.cursor.execute(qry, vals)
-        result = self.cursor.fetchall()
-        if result:
-            if data_type=="id":
-                return result[0][0]
-            elif data_type=="name":
-                return result[0][2]
-            else:
-                raise ValueError("Unknow data type. Only acceptable data-types are id or name.")
+        rows = self.cursor.fetchall()
+        if rows:
+                return rows[0][0]
         else:
             return False
 
-    # def get_accelerometer_id_by_owner_id(self, owner_id: uuid, sensor_type: str, data_type="id") -> str:
-    #     """
-    #     Returns accelerometer id based on provided sensor type. accepted types for autosense are x, y, z and for
-    #     motionsense accepted type is motionsense
-    #     :param owner_id:
-    #     :param sensor_type:
-    #     :return: accelerometer id
-    #     """
-    #     if sensor_type== "x":
-    #         name = "autosense-x"
-    #     elif sensor_type== "y":
-    #         name = "autosense-y"
-    #     elif sensor_type== "z":
-    #         name = "autosense-z"
-    #     elif sensor_type== "motionsense":
-    #         name = "motionsense_accel"
-    #     else:
-    #         raise ValueError("Unknown type. Only acceptable types are x, y, z, or motionsense.")
-    #
-    #     qry = "SELECT * from stream where owner='"+owner_id+"' and name='"+name+"'"
-    #     self.cursor.execute(qry)
-    #     result = self.cursor.fetchall()
-    #     if result:
-    #         if data_type=="id":
-    #             return result[0][0]
-    #         elif data_type=="name":
-    #             return result[0][1]
-    #         else:
-    #             raise ValueError("Unknow data type. Only acceptable data-types are id or name.")
-    #     else:
-    #         return False
+    def get_stream_ids_of_owner(self, owner_id: uuid, stream_name: str=None, start_time:datetime=None, end_time:datetime=None) -> str:
+        """
+        It returns all the stream ids that an owner owns
+        :param owner_id:
+        :return:
+        """
+        stream_ids = []
+
+        if start_time!=None and end_time!=None:
+            if stream_name!=None:
+                qry = "SELECT identifier, name from "+self.datastreamTable+" where owner=%s and name=%s and start_time<=%s and end_time>=%s"
+                self.cursor.execute(qry, (owner_id, stream_name, start_time, end_time))
+            else:
+                qry = "SELECT identifier, name from "+self.datastreamTable+" where owner=%s and start_time<=%s and end_time>=%s"
+                self.cursor.execute(qry, (owner_id, start_time, end_time))
+        else:
+            if stream_name!=None:
+                qry = "SELECT * from "+self.datastreamTable+" where owner=%s and name=%s"
+                self.cursor.execute(qry, (owner_id, stream_name))
+            else:
+                qry = "SELECT identifier, name from "+self.datastreamTable+" where owner=%s"
+                self.cursor.execute(qry, (owner_id))
+
+        rows = self.cursor.fetchall()
+        return rows[0][0]
+        # for row in rows:
+        #     stream_ids.append(row[0])
+        #
+        # return stream_ids

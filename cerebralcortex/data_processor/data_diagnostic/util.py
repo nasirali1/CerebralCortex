@@ -22,15 +22,18 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from datetime import datetime
-from pytz import timezone
-import math
-from typing import List
-from collections import OrderedDict
 import statistics as stat
 import csv
+import math
+import uuid
 
-from cerebralcortex.kernel.datatypes.datastream import DataPoint
+from datetime import datetime
+from pytz import timezone
+from typing import List
+from collections import OrderedDict
+
+from cerebralcortex.kernel.datatypes.datastream import DataPoint, Stream
+from cerebralcortex.CerebralCortex import CerebralCortex
 
 def datetime_to_epoch(date_obj):
     localtz = timezone('US/Central')
@@ -105,6 +108,7 @@ def outlier_detection(window_data: list) -> list:
 
     return normal_values
 
+
 def map_data_to_datapoints(data: list) -> DataPoint:
     """
     :param data:
@@ -114,6 +118,7 @@ def map_data_to_datapoints(data: list) -> DataPoint:
     for key, value in data.items():
         datapoint_list.append(DataPoint(key[0], key[1], value))
     return datapoint_list
+
 
 def motionsense_magnitude(accel_xyz: List[DataPoint]) -> DataPoint:
     """
@@ -129,3 +134,24 @@ def motionsense_magnitude(accel_xyz: List[DataPoint]) -> DataPoint:
         magnitudeList.append(DataPoint(dp.start_time, dp.end_time, magnitude))
 
     return magnitudeList
+
+
+def get_stream_data(stream_id: uuid, CC_obj: CerebralCortex, start_time: datetime=None, end_time: datetime=None, data_type: str="all") -> Stream:
+    """
+
+    :param stream_id:
+    :param CC_obj:
+    :param start_time:
+    :param end_time:
+    :param data_type:
+    :return:
+    """
+    # if start_time != None:
+    #     stream = CC_obj.get_datastream(stream_id, data_type=data_type, start_time=start_time)
+    # elif end_time != None:
+    #     stream = CC_obj.get_datastream(stream_id, data_type=data_type, end_time=end_time)
+    # elif start_time != None and end_time != None:
+    #     stream = CC_obj.get_datastream(stream_id, data_type=data_type, start_time=start_time, end_time=end_time)
+    # else:
+    stream = CC_obj.get_datastream(stream_id, data_type=data_type, start_time=start_time, end_time=end_time)
+    return stream

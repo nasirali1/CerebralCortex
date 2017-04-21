@@ -28,7 +28,7 @@ import uuid
 from datetime import timedelta
 from collections import OrderedDict
 from cerebralcortex.kernel.DataStoreEngine.Metadata.Metadata import Metadata
-from cerebralcortex.data_processor.data_diagnostic.util import merge_consective_windows
+from cerebralcortex.data_processor.data_diagnostic.util import merge_consective_windows, get_stream_data
 from cerebralcortex.data_processor.data_diagnostic.post_processing import store
 from cerebralcortex.CerebralCortex import CerebralCortex
 from cerebralcortex.data_processor.signalprocessing.window import window
@@ -36,7 +36,7 @@ from cerebralcortex.data_processor.signalprocessing.window import window
 """TO-DO: use advanced sensor quality algorithms to detect whether a window contains good or bad data."""
 
 
-def wireless_disconnection(stream_id: uuid, CC_obj: CerebralCortex, config: dict):
+def wireless_disconnection(stream_id: uuid, CC_obj: CerebralCortex, config: dict, start_time=None, end_time=None):
     """
     Analyze whether a sensor was unavailable due to a wireless disconnection
     or due to sensor powered off. This method automatically loads related
@@ -52,7 +52,9 @@ def wireless_disconnection(stream_id: uuid, CC_obj: CerebralCortex, config: dict
     results = OrderedDict()
     threshold = 0
 
-    stream_info = CC_obj.get_datastream(stream_id, data_type="metadata")
+    #stream_info = CC_obj.get_datastream(stream_id, data_type="metadata")
+
+    stream_info = get_stream_data(stream_id, CC_obj, start_time=start_time,end_time=end_time,data_type="metadata")
 
     owner_id = stream_info._owner
     name = stream_info._name
@@ -61,42 +63,38 @@ def wireless_disconnection(stream_id: uuid, CC_obj: CerebralCortex, config: dict
 
     if name == config["sensor_types"]["autosense_ecg"]:
         threshold = config['sensor_unavailable_marker']['ecg']
-        # battery_off_stream_name = config['battery_marker']['autosense_powered_off']
-        battery_off_type = "autosense_battery_marker"
+        battery_off_stream_name = config['sensor_types']['autosense_battery']
         label = config['labels']['autosense_unavailable']
     if name == config["sensor_types"]["autosense_rip"]:
         threshold = config['sensor_unavailable_marker']['rip']
-        # battery_off_stream_name = config['battery_marker']['autosense_powered_off']
         label = config['labels']['autosense_unavailable']
-        battery_off_type = "autosense_battery_marker"
+        battery_off_stream_name = config['sensor_types']['autosense_battery']
     elif name == config["sensor_types"]["motionsense_accel"]:
         threshold = config['sensor_unavailable_marker']['motionsense']
-        # battery_off_stream_name = config['battery_marker']['motionsense_powered_off']
         label = config['labels']['motionsense_unavailable']
-        battery_off_type = "motionsense_battery_marker"
+        battery_off_stream_name = config['sensor_types']['motionsense_battery']
 
-    battery_off_stream_id = Metadata(CC_obj.configuration).get_stream_id_name(owner_id, battery_off_type, "id")
+    battery_off_stream_id = Metadata(CC_obj.configuration).get_stream_id_by_owner_id(owner_id, battery_off_stream_name)
 
-    battery_off_data = CC_obj.get_datastream(battery_off_stream_id, data_type="data")
+    #battery_off_data = CC_obj.get_datastream(battery_off_stream_id, data_type="data")
+    battery_off_data = get_stream_data(battery_off_stream_id, CC_obj, start_time=start_time,end_time=end_time,data_type="data")
 
     if battery_off_data:
         if name == config["sensor_types"]["motionsense_accel"]:
-            motionsense_accel_stream_id = Metadata.get_stream_id_name(owner_id,
-                                                                      config["sensor_types"][
+            motionsense_accel_stream_id = Metadata.get_stream_id_by_owner_id(owner_id,
+                                                                             config["sensor_types"][
                                                                                         "motionsense_accel"],
                                                                                     "id")
-            input_streams = [{"name": stream_name, "id": str(stream_id)},
-                             {"name": Metadata.get_stream_id_name(owner_id, config["sensor_types"][
-                                 "motionsense_accel"], "name"),
-                              "id": str(motionsense_accel_stream_id)}]
+            input_streams = [{"id": str(stream_id), "name": str(stream_name)},
+                             {"id": str(motionsense_accel_stream_id), "name": config["sensor_types"]["motionsense_accel"]}]
         else:
-            x = Metadata.get_stream_id_name(owner_id, "x", "id")
-            y = Metadata.get_stream_id_name(owner_id, "y", "id")
-            z = Metadata.get_stream_id_name(owner_id, "z", "id")
+            x = Metadata(CC_obj.configuration).get_stream_id_by_owner_id(owner_id, config["sensor_types"]["autosense_accel_x"])
+            y = Metadata(CC_obj.configuration).get_stream_id_by_owner_id(owner_id, config["sensor_types"]["autosense_accel_y"])
+            z = Metadata(CC_obj.configuration).get_stream_id_by_owner_id(owner_id, config["sensor_types"]["autosense_accel_z"])
             input_streams = [{"id": str(stream_id), "name": stream_name},
-                             {"id": str(x), "name": Metadata.get_stream_id_name(owner_id, "x", "name")},
-                             {"id": str(y), "name": Metadata.get_stream_id_name(owner_id, "y", "name")},
-                             {"id": str(z), "name": Metadata.get_stream_id_name(owner_id, "z", "name")}]
+                             {"id": str(x), "name": config["sensor_types"]["autosense_accel_x"]},
+                             {"id": str(y), "name": config["sensor_types"]["autosense_accel_y"]},
+                             {"id": str(z), "name": config["sensor_types"]["autosense_accel_z"]}]
 
         for dp in battery_off_data:
             if dp.start_time != "" and dp.end_time != "":
@@ -114,9 +112,9 @@ def wireless_disconnection(stream_id: uuid, CC_obj: CerebralCortex, config: dict
 
                     magnitudeVals = autosense_calculate_magnitude(autosense_acc_x, autosense_acc_y, autosense_acc_z)
 
-            if np.var(magnitudeVals) > threshold:
-                key = (dp.start_time, dp.end_time)
-                results[key] = label
+                if np.var(magnitudeVals) > threshold:
+                    key = (dp.start_time, dp.end_time)
+                    results[key] = label
 
         merged_windows = merge_consective_windows(results)
         store(input_streams, merged_windows, CC_obj, config, config["algo_names"]["sensor_unavailable_marker"])

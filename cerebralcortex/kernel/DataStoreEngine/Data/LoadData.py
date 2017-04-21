@@ -23,6 +23,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import json
+import uuid
 from datetime import datetime
 from pytz import timezone
 from cerebralcortex.kernel.DataStoreEngine.Metadata.Metadata import Metadata
@@ -30,7 +31,7 @@ from cerebralcortex.kernel.datatypes.datastream import DataStream, DataPoint
 
 
 class LoadData:
-    def get_stream(self, stream_id: datetime, start_time: datetime = "", end_time: int = "", data_type="all") -> DataStream:
+    def get_stream(self, stream_id: uuid, start_time: datetime = None, end_time: datetime = None, data_type="all") -> DataStream:
 
         """
         :param stream_id:
@@ -39,19 +40,19 @@ class LoadData:
         :param data_type: this parameter accepts only three types (i.e., all, data, metadata)
         :return: spark dataframe
         """
-        stream_id = str(stream_id)
+        stream_id = stream_id
         start_time = str(start_time)
         end_time = str(end_time)
 
         where_clause = "identifier='" + stream_id +"'"
 
-        if stream_id == None:
+        if stream_id == 'None':
             raise Exception("Stream identifier cannot be null.")
 
-        if start_time != "":
+        if start_time != 'None':
             where_clause += " and start_time>=cast('"+start_time+"' as timestamp)"
 
-        if end_time != "":
+        if end_time != 'None':
             where_clause += " and start_time<=cast('"+end_time+"' as timestamp)"
 
         if data_type == "all":

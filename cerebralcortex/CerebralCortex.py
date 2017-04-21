@@ -22,6 +22,7 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 from uuid import UUID
+import datetime
 
 from pyspark.sql import SQLContext
 from pyspark.sql import SparkSession
@@ -48,7 +49,7 @@ class CerebralCortex:
 
         self.configuration = Configuration(filepath=configuration_file).config
 
-    def get_datastream(self, stream_identifier, start_time: int = "", end_time: int = "", data_type="all"):
+    def get_datastream(self, stream_identifier, start_time: datetime = None, end_time: datetime = None, data_type="all"):
         return Data(self.sc, self.sqlContext, self.configuration).get_stream(stream_identifier, start_time, end_time, data_type)
 
 

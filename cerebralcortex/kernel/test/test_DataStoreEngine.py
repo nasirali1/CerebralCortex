@@ -23,10 +23,14 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import os
 import unittest
+import datetime
 
 from cerebralcortex.CerebralCortex import CerebralCortex
 from cerebralcortex.configuration import Configuration
 from cerebralcortex.kernel.DataStoreEngine.Metadata.Metadata import Metadata
+from cerebralcortex.kernel.DataStoreEngine.Data.Data import LoadData, StoreData
+from cerebralcortex.kernel.datatypes.datapoint import DataPoint
+from cerebralcortex.kernel.datatypes.datastream import DataStream
 
 
 # @unittest.skip("Skipped test class: Figure out a way to test with MySQLand Cassandra")
@@ -53,9 +57,9 @@ class TestDataStoreEngine(unittest.TestCase):
                                                        stream_type)
 
     def test_get_stream_id_name(self):
-        stream_id = Metadata(self.configuration).get_stream_id_name("06634264-56bc-4c92-abd7-377dbbad79dd",
+        stream_id = Metadata(self.configuration).get_stream_id_by_owner_id("06634264-56bc-4c92-abd7-377dbbad79dd",
                                                                     "data-diagnostic", "id")
-        stream_name = Metadata(self.configuration).get_stream_id_name("06634264-56bc-4c92-abd7-377dbbad79dd",
+        stream_name = Metadata(self.configuration).get_stream_id_by_owner_id("06634264-56bc-4c92-abd7-377dbbad79dd",
                                                                       "data-diagnostic", "name")
         self.assertEqual(stream_id, "6db98dfb-d6e8-4b27-8d55-95b20fa0f754")
         self.assertEqual(stream_name, "data-diagnostic")
@@ -95,6 +99,26 @@ class TestDataStoreEngine(unittest.TestCase):
 
     def test_delete_stream(self):
         Metadata(self.configuration).delete_stream("6db98dfb-d6e8-4b27-8d55-95b20fa0f754")
+
+    def test_store_stream(self):
+        data_descriptor = {}
+        execution_context = {}
+        annotations = {}
+        stream_type = "datastream"
+        ts = datetime.datetime.now()
+        datapoints = dp = DataPoint(start_time=ts, end_time=ts, sample={'Foo': 123})
+
+        ds = DataStream("6db98dfb-d6e8-4b27-8d55-95b20fa0f754",
+                                                   "06634264-56bc-4c92-abd7-377dbbad79dd", "data-diagnostic",
+                                                   data_descriptor, execution_context,
+                                                   annotations,
+                                                   stream_type, datapoints)
+        self.CC.save_datastream(ds)
+
+    def test_get_stream(self):
+        datapoints = dp = DataPoint(start_time=ts, end_time=ts, sample={'Foo': 123})
+        stream = self.CC.get_datastream("6db98dfb-d6e8-4b27-8d55-95b20fa0f754", data_type="all")
+        self.assertEqual(stream.data, datapoints)
 
 
 if __name__ == '__main__':

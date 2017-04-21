@@ -39,10 +39,6 @@ class Metadata(LoadMetadata, StoreMetadata):
         self.dbUser = self.configuration['mysql']['db_user']
         self.dbPassword = self.configuration['mysql']['db_pass']
         self.datastreamTable = self.configuration['mysql']['datastream_table']
-        #self.spanstreamTable = self.configuration['mysql']['spanstream_table']
-        #self.processingModuleTable = self.configuration['mysql']['processing_module_table']
-        #self.userTable = self.configuration['mysql']['user_table']
-       # self.studyTable = self.configuration['mysql']['study_table']
         self.dbConnection = mysql.connector.connect(user=self.dbUser, password=self.dbPassword, database=self.database)
 
         self.cursor = self.dbConnection.cursor()

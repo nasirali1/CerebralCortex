@@ -250,7 +250,7 @@ def get_data_descriptor(algo_type, config):
               "motionsense_off_body": config["labels"]["motionsense_off_body"],
               "motionsense__on_body": config["labels"]["motionsense__on_body"]}
     elif algo_type==config["algo_names"]["sensor_unavailable_marker"]:
-        dd = {"autosense_unavailable": config["labels"][""], "motionsense_unavailable": config["labels"]["motionsense_unavailable"]}
+        dd = {"autosense_unavailable": config["labels"]["autosense_unavailable"], "motionsense_unavailable": config["labels"]["motionsense_unavailable"]}
     elif algo_type==config["algo_names"]["packet_loss_marker"]:
         dd = {"ecg_packet_loss": config["labels"]["ecg_packet_loss"],
               "rip_packet_loss": config["labels"]["rip_packet_loss"],

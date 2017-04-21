@@ -59,7 +59,7 @@ class StoreMetadata:
             vals = json.dumps(annotations), str(stream_identifier)
             exe = 1
         elif (isStreamCreated == False):
-            qry = "INSERT INTO " + self.datastreamTable + " (identifier, owner, name, data_descriptor, execution_context, annotations, type) VALUES(%s, %s, %s, %s, %s, %s, %s, %s)"
+            qry = "INSERT INTO " + self.datastreamTable + " (identifier, owner, name, data_descriptor, execution_context, annotations, type) VALUES(%s, %s, %s, %s, %s, %s, %s)"
             vals = str(stream_identifier), str(stream_owner_id), str(name), json.dumps(
                 data_descriptor), json.dumps(execution_context), json.dumps(annotations), stream_type
             exe = 1
