@@ -27,11 +27,11 @@ from collections import OrderedDict
 
 from cerebralcortex.data_processor.data_diagnostic.post_processing import store
 from cerebralcortex.data_processor.signalprocessing.window import window
-from cerebralcortex.data_processor.data_diagnostic.util import merge_consective_windows
+from cerebralcortex.data_processor.data_diagnostic.util import merge_consective_windows, get_stream_data
 from cerebralcortex.CerebralCortex import CerebralCortex
 
 
-def battery_marker(stream_id: uuid, CC_obj: CerebralCortex, config: dict):
+def battery_marker(stream_id: uuid, CC_obj: CerebralCortex, config: dict, start_time=None, end_time=None):
     """
     This algorithm uses battery percentages to decide whether phone was powered-off or battery was low.
     All the labeled data (st, et, label) with its metadata are then stored in a datastore.
@@ -41,7 +41,9 @@ def battery_marker(stream_id: uuid, CC_obj: CerebralCortex, config: dict):
     """
     results = OrderedDict()
 
-    stream = CC_obj.get_datastream(stream_id, data_type="all")
+    #stream = CC_obj.get_datastream(stream_id, data_type="all")
+
+    stream = get_stream_data(stream_id, CC_obj, start_time=start_time,end_time=end_time,data_type="all")
     windowed_data = window(stream.data, config['general']['window_size'], True)
 
     name = stream._name
@@ -72,9 +74,13 @@ def phone_battery(dp: list, config: dict) -> str:
     :param config:
     :return:
     """
-    dp_sample_avg = np.mean(dp)
+    if not dp:
+        dp_sample_avg = 0
+    else:
+        dp_sample_avg = np.mean(dp)
+
     if dp_sample_avg <= config['battery_marker']['phone_powered_off']:
-        return config['labels']['sensor_powered_off']
+        return config['labels']['phone_powered_off']
     else:
         if dp_sample_avg < config['battery_marker']['phone_battery_down']:
             return config['labels']['phone_battery_down']
@@ -88,7 +94,10 @@ def motionsense_battery(dp: list, config: dict) -> str:
     :param config:
     :return:
     """
-    dp_sample_avg = np.mean(dp)
+    if not dp:
+        dp_sample_avg = 0
+    else:
+        dp_sample_avg = np.mean(dp)
 
     if dp_sample_avg <= config['battery_marker']['motionsense_powered_off']:
         return config['labels']['motionsense_powered_off']
@@ -105,7 +114,11 @@ def autosense_battery(dp: list, config:dict) -> str:
     :param config:
     :return:
     """
-    dp_sample_avg = np.mean(dp)
+    if not dp:
+        dp_sample_avg = 0
+    else:
+        dp_sample_avg = np.mean(dp)
+
     if dp_sample_avg <= config['battery_marker']['autosense_powered_off']:
         return config['labels']['autosesen_powered_off']
     else:
