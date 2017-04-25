@@ -230,7 +230,7 @@ def packet_loss(generated_stream_id: uuid, sensor_type: str, input_streams: dict
     anno = get_annotations()
     return {"ec": ec, "dd": dd, "anno": anno}
 
-"""TO-DO: Only return data descriptor for one sensor"""
+#TO-DO: Only return data descriptor for one sensor
 def get_data_descriptor(algo_type, config):
     if algo_type==config["algo_names"]["battery_marker"]:
         dd = {"phone_powered_off": config["labels"]["phone_powered_off"],

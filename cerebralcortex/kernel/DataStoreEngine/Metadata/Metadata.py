@@ -42,10 +42,3 @@ class Metadata(LoadMetadata, StoreMetadata):
         self.dbConnection = mysql.connector.connect(user=self.dbUser, password=self.dbPassword, database=self.database)
 
         self.cursor = self.dbConnection.cursor(dictionary=True)
-
-    def delete_stream(self, stream_id):
-        qry = "delete from "+self.datastreamTable+" where identifier='%s'"
-        self.cursor.execute(qry, stream_id)
-        self.dbConnection.commit()
-        self.cursor.close()
-        self.dbConnection.close()

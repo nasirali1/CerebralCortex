@@ -168,7 +168,6 @@ class LoadMetadata:
         :param owner_id:
         :return:
         """
-        stream_ids = []
 
         if start_time!=None and end_time!=None:
             if stream_name!=None:
@@ -187,7 +186,4 @@ class LoadMetadata:
 
         rows = self.cursor.fetchall()
         return rows[0]["identifier"]
-        # for row in rows:
-        #     stream_ids.append(row[0])
-        #
-        # return stream_ids
+

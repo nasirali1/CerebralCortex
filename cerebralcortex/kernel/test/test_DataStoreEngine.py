@@ -29,7 +29,6 @@ from pytz import timezone
 from cerebralcortex.CerebralCortex import CerebralCortex
 from cerebralcortex.configuration import Configuration
 from cerebralcortex.kernel.DataStoreEngine.Metadata.Metadata import Metadata
-from cerebralcortex.kernel.DataStoreEngine.Data.Data import LoadData, StoreData
 from cerebralcortex.kernel.datatypes.datapoint import DataPoint
 from cerebralcortex.kernel.datatypes.datastream import DataStream
 
@@ -142,13 +141,6 @@ class TestDataStoreEngine(unittest.TestCase):
         self.assertEqual(stream.data[0].end_time, end_time)
         self.assertEqual(stream.data[0].sample, sample)
 
-    def test_get_stream(self):
-        start_time = datetime.datetime(2017, 4, 24, 0, 0, 1)
-        end_time = datetime.datetime(2017, 4, 24, 0, 0, 2)
-
-        datapoints = dp = DataPoint(start_time=start_time, end_time=end_time, sample={"Foo": 123})
-        stream = self.CC.get_datastream("6db98dfb-d6e8-4b27-8d55-95b20fa0f754", data_type="all")
-        #self.assertEqual(stream.data, datapoints)
 
 
 if __name__ == '__main__':
