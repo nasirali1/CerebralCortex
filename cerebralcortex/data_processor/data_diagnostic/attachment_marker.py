@@ -81,10 +81,8 @@ def attachment_marker(stream_id: uuid, CC_obj: CerebralCortex, config: dict, sta
     store(input_streams, merged_windows, CC_obj, config, config["algo_names"]["attachment_marker"])
 
 
-"""
-TO-DO
-gsr_response method is not being used. Need to make sure whether GSR values actually respresent GSR data.
-"""
+#TO-DO gsr_response method is not being used. Need to make sure whether GSR values actually respresent GSR data.
+
 
 
 def gsr_response(stream_id: uuid, start_time: datetime, end_time: datetime, label_attachment: str, label_off: str, CC_obj: CerebralCortex, config: dict) -> str:

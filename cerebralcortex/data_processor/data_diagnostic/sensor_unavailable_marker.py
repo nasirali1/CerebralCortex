@@ -33,7 +33,7 @@ from cerebralcortex.data_processor.data_diagnostic.post_processing import store
 from cerebralcortex.CerebralCortex import CerebralCortex
 from cerebralcortex.data_processor.signalprocessing.window import window
 
-"""TO-DO: use advanced sensor quality algorithms to detect whether a window contains good or bad data."""
+#TO-DO: use advanced sensor quality algorithms to detect whether a window contains good or bad data.
 
 
 def wireless_disconnection(stream_id: uuid, CC_obj: CerebralCortex, config: dict, start_time=None, end_time=None):
