@@ -24,6 +24,7 @@
 import os
 import unittest
 import datetime
+from pytz import timezone
 
 from cerebralcortex.CerebralCortex import CerebralCortex
 from cerebralcortex.configuration import Configuration
@@ -49,26 +50,29 @@ class TestDataStoreEngine(unittest.TestCase):
         execution_context = {}
         annotations = {}
         stream_type = "datastream"
+        start_time = datetime.datetime(2017, 4, 24, 0, 0, 1)
+        end_time = datetime.datetime(2017, 4, 24, 0, 0, 2)
 
         Metadata(self.configuration).store_stream_info("6db98dfb-d6e8-4b27-8d55-95b20fa0f754",
-                                                       "06634264-56bc-4c92-abd7-377dbbad79dd", "data-diagnostic",
+                                                       "06634264-56bc-4c92-abd7-377dbbad79dd", "data-diagnostic-test",
                                                        data_descriptor, execution_context,
                                                        annotations,
-                                                       stream_type)
+                                                       stream_type, start_time, end_time)
 
     def test_get_stream_id_name(self):
         stream_id = Metadata(self.configuration).get_stream_id_by_owner_id("06634264-56bc-4c92-abd7-377dbbad79dd",
-                                                                    "data-diagnostic", "id")
-        stream_name = Metadata(self.configuration).get_stream_id_by_owner_id("06634264-56bc-4c92-abd7-377dbbad79dd",
-                                                                      "data-diagnostic", "name")
+                                                                    "data-diagnostic-test")
         self.assertEqual(stream_id, "6db98dfb-d6e8-4b27-8d55-95b20fa0f754")
-        self.assertEqual(stream_name, "data-diagnostic")
 
-    def test_get_stream_info(self):
-        stream_info = Metadata(self.configuration).get_stream_info("6db98dfb-d6e8-4b27-8d55-95b20fa0f754")
+    def test_get_stream_info(self, stream_meta:dict=None):
+        if stream_meta:
+            stream_info = stream_meta
+        else:
+            stream_info = Metadata(self.configuration).get_stream_info("6db98dfb-d6e8-4b27-8d55-95b20fa0f754")
+
         self.assertEqual(stream_info[0]["identifier"], "6db98dfb-d6e8-4b27-8d55-95b20fa0f754")
         self.assertEqual(stream_info[0]["owner"], "06634264-56bc-4c92-abd7-377dbbad79dd")
-        self.assertEqual(stream_info[0]["name"], "data-diagnostic")
+        self.assertEqual(stream_info[0]["name"], "data-diagnostic-test")
         self.assertEqual(stream_info[0]["data_descriptor"], "{}")
         self.assertEqual(stream_info[0]["execution_context"], "{}")
         self.assertEqual(stream_info[0]["annotations"], "{}")
@@ -77,15 +81,15 @@ class TestDataStoreEngine(unittest.TestCase):
     def test_append_annotations(self):
         self.assertRaises(Exception, Metadata(self.configuration).append_annotations, "6db98dfb-d6e8-4b27-8d55-95b20fa0f754",
                           "06634264-56bc-4c92-abd7-377dbbad79dd",
-                          "data-diagnostic", {}, {}, {}, "datastream1")
+                          "data-diagnostic-test", {}, {}, {}, "datastream1")
 
         self.assertRaises(Exception, Metadata(self.configuration).append_annotations, "6db98dfb-d6e8-4b27-8d55-95b20fa0f754",
                           "06634264-56bc-4c92-abd7-377dbbad79dd",
-                          "data-diagnostic", {}, {"some":"none"}, {}, "datastream1")
+                          "data-diagnostic-test", {}, {"some":"none"}, {}, "datastream1")
 
         self.assertRaises(Exception, Metadata(self.configuration).append_annotations, "6db98dfb-d6e8-4b27-8d55-95b20fa0f754",
                           "06634264-56bc-4c92-abd7-377dbbad79dd",
-                          "data-diagnostic", {"a":"b"}, {}, {}, "datastream1")
+                          "data-diagnostic-test", {"a":"b"}, {}, {}, "datastream1")
 
         self.assertRaises(Exception, Metadata(self.configuration).append_annotations, "6db98dfb-d6e8-4b27-8d55-95b20fa0f754",
                           "06634264-56bc-4c92-abd7-377dbbad79dd",
@@ -93,32 +97,58 @@ class TestDataStoreEngine(unittest.TestCase):
 
         annotations_unchanged = Metadata(self.configuration).append_annotations("6db98dfb-d6e8-4b27-8d55-95b20fa0f754",
                                                                                 "06634264-56bc-4c92-abd7-377dbbad79dd",
-                                                                                "data-diagnostic", {}, {}, {}, "datastream")
-        self.assertEqual(annotations_unchanged, "annotations are same.")
+                                                                                "data-diagnostic-test", {}, {}, {}, "datastream")
+        self.assertEqual(annotations_unchanged, "unchanged")
 
 
     def test_delete_stream(self):
         Metadata(self.configuration).delete_stream("6db98dfb-d6e8-4b27-8d55-95b20fa0f754")
 
     def test_store_stream(self):
+        identifier = "6db98dfb-d6e8-4b27-8d55-95b20fa0f754"
+        owner = "06634264-56bc-4c92-abd7-377dbbad79dd"
+        name = "data-diagnostic-test"
         data_descriptor = {}
         execution_context = {}
         annotations = {}
+        datapoints = []
         stream_type = "datastream"
-        ts = datetime.datetime.now()
-        datapoints = dp = DataPoint(start_time=ts, end_time=ts, sample={'Foo': 123})
+        start_time = datetime.datetime(2017, 4, 24, 0, 0, 1)
+        end_time = datetime.datetime(2017, 4, 24, 0, 0, 2)
+        localtz = timezone('US/Central')
+        start_time = localtz.localize(start_time)
+        end_time = localtz.localize(end_time)
+        sample = str({'Foo3': 123})
 
-        ds = DataStream("6db98dfb-d6e8-4b27-8d55-95b20fa0f754",
-                                                   "06634264-56bc-4c92-abd7-377dbbad79dd", "data-diagnostic",
-                                                   data_descriptor, execution_context,
-                                                   annotations,
-                                                   stream_type, datapoints)
+        dp1 = DataPoint(start_time=start_time, end_time=end_time, sample=sample)
+
+        datapoints.append(dp1)
+
+
+        ds = DataStream(identifier, owner, name, data_descriptor, execution_context,
+                                                   annotations, stream_type, start_time, end_time, datapoints)
+
         self.CC.save_datastream(ds)
+        stream = self.CC.get_datastream(identifier, data_type="all")
+        self.assertEqual(stream._identifier, identifier)
+        self.assertEqual(stream._owner, owner)
+        self.assertEqual(stream._name, name)
+        self.assertEqual(stream._data_descriptor, data_descriptor)
+        self.assertEqual(stream._execution_context, execution_context)
+        self.assertEqual(stream._annotations, annotations)
+        self.assertEqual(stream._datastream_type, stream_type)
+
+        self.assertEqual(stream.data[0].start_time, start_time)
+        self.assertEqual(stream.data[0].end_time, end_time)
+        self.assertEqual(stream.data[0].sample, sample)
 
     def test_get_stream(self):
-        datapoints = dp = DataPoint(start_time=ts, end_time=ts, sample={'Foo': 123})
+        start_time = datetime.datetime(2017, 4, 24, 0, 0, 1)
+        end_time = datetime.datetime(2017, 4, 24, 0, 0, 2)
+
+        datapoints = dp = DataPoint(start_time=start_time, end_time=end_time, sample={"Foo": 123})
         stream = self.CC.get_datastream("6db98dfb-d6e8-4b27-8d55-95b20fa0f754", data_type="all")
-        self.assertEqual(stream.data, datapoints)
+        #self.assertEqual(stream.data, datapoints)
 
 
 if __name__ == '__main__':

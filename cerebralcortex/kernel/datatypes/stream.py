@@ -23,6 +23,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 from typing import List
 from uuid import UUID
+import datetime
 
 from cerebralcortex.kernel.datatypes.datapoint import DataPoint
 from cerebralcortex.kernel.datatypes.subtypes import StreamReference, DataDescriptor, ExecutionContext
@@ -38,6 +39,8 @@ class Stream:
                  execution_context: ExecutionContext = None,
                  annotations: List[StreamReference] = None,
                  stream_type: str = None,
+                 start_time: datetime = None,
+                 end_time: datetime = None,
                  data: List[DataPoint] = None
                  ):
         self._identifier = identifier
@@ -48,6 +51,8 @@ class Stream:
         self._datastream_type = stream_type
         self._execution_context = execution_context
         self._annotations = annotations
+        self._start_time = start_time
+        self._end_time = end_time
         self._data = data
 
     def find_annotation_references(self, identifier: int = None, name: str = None):

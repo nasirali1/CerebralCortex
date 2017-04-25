@@ -22,6 +22,8 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+import json
+
 from cerebralcortex.kernel.DataStoreEngine.Metadata.Metadata import Metadata
 from cerebralcortex.kernel.datatypes.datastream import DataStream
 
@@ -43,9 +45,14 @@ class StoreData:
 
 
         if data:
-            total_dp = len(data)-1
-            new_start_time = data[0].start_time
-            new_end_time = data[total_dp].start_time
+            if isinstance(data, list):
+                total_dp = len(data)-1
+                new_start_time = data[0].start_time
+                new_end_time = data[total_dp].start_time
+            else:
+                new_start_time = data.start_time
+                new_end_time = data.start_time
+
             Metadata(self.configuration).store_stream_info(stream_identifier, ownerID, name,
                                                            data_descriptor, execution_context,
                                                            annotations,

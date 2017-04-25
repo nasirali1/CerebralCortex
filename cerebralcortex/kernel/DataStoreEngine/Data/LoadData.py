@@ -86,8 +86,7 @@ class LoadData:
                 end_time = localtz.localize(row["end_time"])
             else:
                 end_time = ""
-            # d1 = row["start_time"].replace(tzinfo=pytz.UTC)
-            # d2 = row["start_time"].replace(tzinfo=pytz.UTC)
+
             dp = DataPoint(start_time, end_time, row["sample"])
             datapointsList.append(dp)
         return datapointsList
@@ -110,9 +109,11 @@ class LoadData:
         execution_context = json.loads(datastream_info[0]["execution_context"])
         annotations = json.loads(datastream_info[0]["annotations"])
         stream_type = datastream_info[0]["type"]
+        start_time = datastream_info[0]["start_time"]
+        end_time = datastream_info[0]["end_time"]
 
         return DataStream(stream_id, ownerID, name, data_descriptor, execution_context, annotations,
-                          stream_type, data)
+                          stream_type, start_time, end_time, data)
 
     def load_data_from_cassandra(self, table_name: str, where_clause: str) -> object:
         """

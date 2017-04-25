@@ -23,6 +23,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 from typing import List
 from uuid import UUID
+import datetime
 
 from cerebralcortex.kernel.datatypes.datapoint import DataPoint
 from cerebralcortex.kernel.datatypes.enumerations import StreamTypes
@@ -41,8 +42,10 @@ class DataStream(Stream):
                  execution_context: ExecutionContext = None,
                  annotations: List[StreamReference] = None,
                  stream_type: str = None,
+                 start_time: datetime = None,
+                 end_time: datetime = None,
                  data: List[DataPoint] = None):
-        super().__init__(identifier, owner, name, data_descriptor, execution_context, annotations, stream_type, data)
+        super().__init__(identifier, owner, name, data_descriptor, execution_context, annotations, stream_type, start_time, end_time, data)
 
         #self._datastream_type = StreamTypes.DATASTREAM
 

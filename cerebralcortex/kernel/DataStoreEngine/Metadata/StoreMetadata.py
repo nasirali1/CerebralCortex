@@ -54,7 +54,8 @@ class StoreMetadata:
 
         if isIDCreated:
             stream_identifier = isIDCreated
-            execution_context["execution_context"]['processing_module']["output_streams"][0]["id"] = stream_identifier
+            if execution_context:
+                execution_context["execution_context"]['processing_module']["output_streams"][0]["id"] = stream_identifier
             new_end_time = self.check_end_time(stream_identifier, end_time)
             is_annotation_changed = self.append_annotations(stream_identifier, stream_owner_id, name, data_descriptor,
                                                              execution_context, annotations, stream_type)
@@ -140,13 +141,18 @@ class StoreMetadata:
             return False
 
     def check_end_time(self, stream_id, end_time):
+        localtz = timezone('US/Central')
+
         qry = "SELECT * from "+self.datastreamTable+" where identifier = %(identifier)s"
         vals = {'identifier': str(stream_id)}
         self.cursor.execute(qry, vals)
         rows = self.cursor.fetchall()
         if rows:
-            localtz = timezone('US/Central')
-            old_end_time = localtz.localize(rows[0]["end_time"])
+            old_end_time = rows[0]["end_time"]
+            if end_time.tzinfo is None:
+                end_time = localtz.localize(end_time)
+            if old_end_time.tzinfo is None:
+                old_end_time = localtz.localize(old_end_time)
             if old_end_time<=end_time:
                 return end_time
             else:
