@@ -1,4 +1,4 @@
-# Copyright (c) 2016, MD2K Center of Excellence
+# Copyright (c) 2017, MD2K Center of Excellence
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -52,8 +52,6 @@ def wireless_disconnection(stream_id: uuid, CC_obj: CerebralCortex, config: dict
     results = OrderedDict()
     threshold = 0
 
-    #stream_info = CC_obj.get_datastream(stream_id, data_type="metadata")
-
     stream_info = get_stream_data(stream_id, CC_obj, start_time=start_time,end_time=end_time,data_type="metadata")
 
     owner_id = stream_info._owner
@@ -76,7 +74,6 @@ def wireless_disconnection(stream_id: uuid, CC_obj: CerebralCortex, config: dict
 
     battery_off_stream_id = Metadata(CC_obj.configuration).get_stream_id_by_owner_id(owner_id, battery_off_stream_name)
 
-    #battery_off_data = CC_obj.get_datastream(battery_off_stream_id, data_type="data")
     battery_off_data = get_stream_data(battery_off_stream_id, CC_obj, start_time=start_time,end_time=end_time,data_type="data")
 
     if battery_off_data:
