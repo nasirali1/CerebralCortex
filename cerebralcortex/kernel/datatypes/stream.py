@@ -140,7 +140,7 @@ class Stream:
 
     @classmethod
     def from_datastream(cls, input_streams: List):
-        result = cls(user=input_streams[0].owner)
+        result = cls(owner=input_streams[0].owner)
 
         # TODO: Something with provenance tracking from datastream list
 

@@ -23,12 +23,10 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import statistics as stat
-import csv
 import math
 import uuid
 
 from datetime import datetime
-from pytz import timezone
 from typing import List
 from collections import OrderedDict
 

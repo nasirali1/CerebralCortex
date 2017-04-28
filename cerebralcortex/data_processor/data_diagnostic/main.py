@@ -33,7 +33,7 @@ from cerebralcortex.configuration import Configuration
 
 
 class DiagnoseData:
-    @classmethod
+
     def diagnose_data(self):
 
         configuration_file = os.path.join(os.path.dirname(__file__), '../../../cerebralcortex.yml')
@@ -44,7 +44,8 @@ class DiagnoseData:
 
         self.diagnose(self,"de5b4a7d-ba1b-44c4-b55e-cd0ca7487734", CC, configuration, stream_name)
 
-    def diagnose(self, owner_id, CC_obj, config, stream_name, start_time=None, end_time=None):
+    @staticmethod
+    def diagnose(owner_id, CC_obj, config, stream_name, start_time=None, end_time=None):
         #get all stream-ids linked to a participant
         """
 
