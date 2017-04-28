@@ -1,4 +1,4 @@
-# Copyright (c) 2016, MD2K Center of Excellence
+# Copyright (c) 2017, MD2K Center of Excellence
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -35,23 +35,7 @@ from collections import OrderedDict
 from cerebralcortex.kernel.datatypes.datastream import DataPoint, Stream
 from cerebralcortex.CerebralCortex import CerebralCortex
 
-def datetime_to_epoch(date_obj):
-    localtz = timezone('US/Central')
 
-    epoch = datetime.utcfromtimestamp(0)
-    epoch = localtz.localize(epoch)
-    return (date_obj - epoch).total_seconds() * 1000.0
-
-
-def write_to_csv(data: OrderedDict, file_name):
-    ofile = open('/home/ali/Documents/' + file_name, "w")
-    writer = csv.writer(ofile, delimiter=",")
-
-    for row, val in data.items():
-        rr = str(row), str(val)
-        writer.writerow(rr)
-
-    ofile.close()
 
 
 def merge_consective_windows(data: OrderedDict) -> OrderedDict:
@@ -109,17 +93,6 @@ def outlier_detection(window_data: list) -> list:
     return normal_values
 
 
-def map_data_to_datapoints(data: list) -> DataPoint:
-    """
-    :param data:
-    :return:
-    """
-    datapoint_list = []
-    for key, value in data.items():
-        datapoint_list.append(DataPoint(key[0], key[1], value))
-    return datapoint_list
-
-
 def motionsense_magnitude(accel_xyz: List[DataPoint]) -> DataPoint:
     """
     compute magnitude of x, y, and z
@@ -146,12 +119,5 @@ def get_stream_data(stream_id: uuid, CC_obj: CerebralCortex, start_time: datetim
     :param data_type:
     :return:
     """
-    # if start_time != None:
-    #     stream = CC_obj.get_datastream(stream_id, data_type=data_type, start_time=start_time)
-    # elif end_time != None:
-    #     stream = CC_obj.get_datastream(stream_id, data_type=data_type, end_time=end_time)
-    # elif start_time != None and end_time != None:
-    #     stream = CC_obj.get_datastream(stream_id, data_type=data_type, start_time=start_time, end_time=end_time)
-    # else:
     stream = CC_obj.get_datastream(stream_id, data_type=data_type, start_time=start_time, end_time=end_time)
     return stream

@@ -86,7 +86,7 @@ class Stream:
 
     #Ali: rename to owner?
     @property
-    def user(self):
+    def owner(self):
         return self._owner
 
     @property
@@ -140,18 +140,18 @@ class Stream:
 
     @classmethod
     def from_datastream(cls, input_streams: List):
-        result = cls(user=input_streams[0].user)
+        result = cls(user=input_streams[0].owner)
 
         # TODO: Something with provenance tracking from datastream list
 
         return result
 
     def __str__(self):
-        return str(self.identifier) + " - " + str(self.user) + " - " + str(self.data)
+        return str(self.identifier) + " - " + str(self.owner) + " - " + str(self.data)
 
     def __repr__(self):
         result = "Stream(" + ', '.join(map(str, [self.identifier,
-                                                 self.user,
+                                                 self.owner,
                                                  self.name,
                                                  self.description,
                                                  self.data_descriptor,

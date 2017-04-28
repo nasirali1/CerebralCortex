@@ -37,7 +37,6 @@ class DataStream(Stream):
                  identifier: UUID = None,
                  owner: UUID = None,
                  name: UUID = None,
-                 #description: str = None,
                  data_descriptor: List[DataDescriptor] = None,
                  execution_context: ExecutionContext = None,
                  annotations: List[StreamReference] = None,

@@ -1,4 +1,4 @@
-# Copyright (c) 2016, MD2K Center of Excellence
+# Copyright (c) 2017, MD2K Center of Excellence
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,6 @@ def packet_loss_marker(stream_id: uuid, CC_obj: CerebralCortex, config: dict, st
     :param CC_obj:
     :param config:
     """
-    #stream = CC_obj.get_datastream(stream_id, data_type="all")
     stream = get_stream_data(stream_id, CC_obj, start_time=start_time,end_time=end_time,data_type="all")
     name = stream._name
     results = OrderedDict()

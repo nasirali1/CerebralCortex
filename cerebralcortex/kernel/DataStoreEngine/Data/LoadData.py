@@ -1,4 +1,4 @@
-# Copyright (c) 2016, MD2K Center of Excellence
+# Copyright (c) 2017, MD2K Center of Excellence
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -40,7 +40,6 @@ class LoadData:
         :param data_type: this parameter accepts only three types (i.e., all, data, metadata)
         :return: spark dataframe
         """
-        stream_id = stream_id
         start_time = str(start_time)
         end_time = str(end_time)
 
@@ -103,7 +102,6 @@ class LoadData:
 
         ownerID = datastream_info[0]["owner"]
         name = datastream_info[0]["name"]
-        #description = datastream_info[0][3]
         data_descriptor = json.loads(datastream_info[0]["data_descriptor"])
         execution_context = json.loads(datastream_info[0]["execution_context"])
         annotations = json.loads(datastream_info[0]["annotations"])
