@@ -67,8 +67,8 @@ class LoadData:
             raise ValueError("Invalid type parameter.")
 
         return stream
-    @staticmethod
-    def map_dataframe_to_datapoint(dataframe: object) -> list:
+
+    def map_dataframe_to_datapoint(self, dataframe: object) -> list:
         """
         Converts a PySpark DataFrame into a list of datapoint objects
         :param dataframe:
@@ -78,7 +78,7 @@ class LoadData:
         rows = dataframe.collect()
 
         for row in rows:
-            localtz = timezone('US/Central')
+            localtz = timezone(self.configuration["time_settings"]["zone"])
             start_time = localtz.localize(row["start_time"])
             if row["end_time"] != None:
                 end_time = localtz.localize(row["end_time"])

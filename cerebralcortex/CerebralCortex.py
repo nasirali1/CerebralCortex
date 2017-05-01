@@ -34,7 +34,7 @@ from cerebralcortex.kernel.DataStoreEngine.Data.Data import Data
 
 
 class CerebralCortex:
-    def __init__(self, configuration_file, master=None, name=None):
+    def __init__(self, configuration_file, master=None, name=None, time_zone=None):
         ss = SparkSession.builder
         if name:
             ss.appName(name)
@@ -48,6 +48,8 @@ class CerebralCortex:
         self.sqlContext = SQLContext(self.sc)  # TODO: This may need to become a sparkSession
 
         self.configuration = Configuration(filepath=configuration_file).config
+        if time_zone:
+            self.configuration["time_settings"]["zone"] = time_zone
 
     def get_datastream(self, stream_identifier, start_time: datetime = None, end_time: datetime = None, data_type="all"):
         return Data(self.sc, self.sqlContext, self.configuration).get_stream(stream_identifier, start_time, end_time, data_type)

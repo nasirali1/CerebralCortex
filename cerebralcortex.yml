@@ -13,4 +13,7 @@ mysql:
   processing_module_table: processing_module
   user_table: user
   study_table: study
+
+time_settings:
+  zone: US/Central
   

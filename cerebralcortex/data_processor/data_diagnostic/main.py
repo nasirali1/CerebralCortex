@@ -39,7 +39,7 @@ class DiagnoseData:
         This method is just an example of how to call diagnostic module
         """
         configuration_file = os.path.join(os.path.dirname(__file__), '../../../cerebralcortex.yml')
-        CC = CerebralCortex(configuration_file, master="local[*]", name="Data Diagnostic App")
+        CC = CerebralCortex(configuration_file, master="local[*]", name="Data Diagnostic App", time_zone="US/Central")
 
         configuration = Configuration(filepath="data_diagnostic_config.yml").config
         stream_name = configuration["sensor_types"]["autosense_rip"]
