@@ -43,7 +43,6 @@ def attachment_marker(stream_id: uuid, CC_obj: CerebralCortex, config: dict, sta
     """
 
     stream = CC_obj.get_datastream(stream_id, data_type="all", start_time=start_time, end_time=end_time)
-    #get_stream_data(stream_id, CC_obj, start_time=start_time,end_time=end_time,data_type="all")
 
     CC_obj.get_datastream(stream_id, data_type="all", start_time=start_time, end_time=end_time)
 

@@ -52,6 +52,8 @@ class CerebralCortex:
         self.sqlContext = SQLContext(self.sc)  # TODO: This may need to become a sparkSession
 
         self.configuration = Configuration(filepath=configuration_file).config
+        if time_zone:
+            self.configuration["time_settings"]["zone"] = time_zone
 
         self.time_zone = time_zone
 

@@ -53,7 +53,6 @@ def wireless_disconnection(stream_id: uuid, CC_obj: CerebralCortex, config: dict
     threshold = 0
 
     stream_info = CC_obj.get_datastream(stream_id, data_type="metadata", start_time=start_time, end_time=end_time)
-    #get_stream_data(stream_id, CC_obj, start_time=start_time,end_time=end_time,data_type="metadata")
 
     owner_id = stream_info._owner
     name = stream_info._name
@@ -62,21 +61,16 @@ def wireless_disconnection(stream_id: uuid, CC_obj: CerebralCortex, config: dict
 
     if name == config["sensor_types"]["autosense_ecg"]:
         threshold = config['sensor_unavailable_marker']['ecg']
-        battery_off_stream_name = config['sensor_types']['autosense_battery']
         label = config['labels']['autosense_unavailable']
     if name == config["sensor_types"]["autosense_rip"]:
         threshold = config['sensor_unavailable_marker']['rip']
         label = config['labels']['autosense_unavailable']
-        battery_off_stream_name = config['sensor_types']['autosense_battery']
     elif name == config["sensor_types"]["motionsense_accel"]:
         threshold = config['sensor_unavailable_marker']['motionsense']
         label = config['labels']['motionsense_unavailable']
-        battery_off_stream_name = config['sensor_types']['motionsense_battery']
 
-    battery_off_stream_id = Metadata(CC_obj.configuration).get_stream_id_by_owner_id(owner_id, battery_off_stream_name)
 
     battery_off_data = CC_obj.get_datastream(stream_id, data_type="data", start_time=start_time, end_time=end_time)
-    #get_stream_data(battery_off_stream_id, CC_obj, start_time=start_time,end_time=end_time,data_type="data")
 
     if battery_off_data:
         if name == config["sensor_types"]["motionsense_accel"]:
