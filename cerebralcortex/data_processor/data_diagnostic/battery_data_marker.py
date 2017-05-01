@@ -82,8 +82,7 @@ def phone_battery(dp: list, config: dict) -> str:
 
     if dp_sample_avg <= config['battery_marker']['phone_powered_off']:
         return config['labels']['phone_powered_off']
-    else:
-        if dp_sample_avg < config['battery_marker']['phone_battery_down']:
+    elif dp_sample_avg <= config['battery_marker']['phone_battery_down']:
             return config['labels']['phone_battery_down']
     return None
 
@@ -102,8 +101,7 @@ def motionsense_battery(dp: list, config: dict) -> str:
 
     if dp_sample_avg <= config['battery_marker']['motionsense_powered_off']:
         return config['labels']['motionsense_powered_off']
-    else:
-        if dp_sample_avg < config['battery_marker']['phone_powered_off']:
+    elif dp_sample_avg <= config['battery_marker']['phone_powered_off']:
             return config['labels']['motionsense_battery_down']
     return None
 
