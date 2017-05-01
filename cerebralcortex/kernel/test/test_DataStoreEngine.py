@@ -100,8 +100,8 @@ class TestDataStoreEngine(unittest.TestCase):
         self.assertEqual(annotations_unchanged, "unchanged")
 
 
-    def test_delete_stream(self):
-        Metadata(self.configuration).delete_stream("6db98dfb-d6e8-4b27-8d55-95b20fa0f754")
+    # def test_delete_stream(self):
+    #     Metadata(self.configuration).delete_stream("6db98dfb-d6e8-4b27-8d55-95b20fa0f754")
 
     def test_store_stream(self):
         identifier = "6db98dfb-d6e8-4b27-8d55-95b20fa0f754"

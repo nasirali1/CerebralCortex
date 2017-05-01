@@ -57,8 +57,9 @@ def store(input_streams: dict, data: OrderedDict, CC_obj: CerebralCortex, config
     name = execution_context["execution_context"]["processing_module"]["output_streams"][0]["name"]
     stream_type = "datastream"
 
-    ds = DataStream(stream_uuid, owner, name, data_descriptor, execution_context, annotations,
-                    stream_type, data)
+
+    ds = DataStream(identifier=stream_uuid, owner=owner, name=name, data_descriptor=data_descriptor, execution_context=execution_context, annotations=annotations,
+                    stream_type=stream_type, data=data)
 
     CC_obj.save_datastream(ds)
 

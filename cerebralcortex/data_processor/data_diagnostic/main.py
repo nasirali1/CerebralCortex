@@ -33,7 +33,7 @@ from cerebralcortex.configuration import Configuration
 
 class DiagnoseData:
     @classmethod
-    def diagnose_data(self):
+    def diagnose_data(cls):
 
         """
         This method is just an example of how to call diagnostic module
@@ -44,7 +44,7 @@ class DiagnoseData:
         configuration = Configuration(filepath="data_diagnostic_config.yml").config
         stream_name = configuration["sensor_types"]["autosense_rip"]
 
-        self.diagnose("de5b4a7d-ba1b-44c4-b55e-cd0ca7487734", CC, configuration, stream_name)
+        cls.diagnose("de5b4a7d-ba1b-44c4-b55e-cd0ca7487734", CC, configuration, stream_name)
 
     @staticmethod
     def diagnose(owner_id, CC_obj, config, stream_name, start_time=None, end_time=None):

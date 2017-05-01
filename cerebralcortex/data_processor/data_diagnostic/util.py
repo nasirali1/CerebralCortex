@@ -36,13 +36,13 @@ from cerebralcortex.CerebralCortex import CerebralCortex
 
 
 
-def merge_consective_windows(data: OrderedDict) -> OrderedDict:
+def merge_consective_windows(data: OrderedDict) -> DataPoint:
     """
     Merge two or more windows if the time difference between them is 0
     :param data:
     :return:
     """
-    merged_windows = OrderedDict()
+    merged_windows = []
     element = None
     start = None
     end = None
@@ -56,12 +56,12 @@ def merge_consective_windows(data: OrderedDict) -> OrderedDict:
             element = val
             end = key[1]
         else:
-            merged_windows[(start, end)] = element
+            merged_windows.append(DataPoint(start, end, element))#[(start, end)] = element
             element = val
             start = key[0]
             end = key[1]
     if val is not None:
-        merged_windows[(start, end)] = val
+        merged_windows.append(DataPoint(start, end, val))#merged_windows[(start, end)] = val
 
     return merged_windows
 

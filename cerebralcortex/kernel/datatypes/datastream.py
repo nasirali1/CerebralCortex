@@ -46,6 +46,6 @@ class DataStream(Stream):
                  data: List[DataPoint] = None):
         super().__init__(identifier, owner, name, data_descriptor, execution_context, annotations, stream_type, start_time, end_time, data)
 
-        self._datastream_type = StreamTypes.DATASTREAM
+        #self._datastream_type = StreamTypes.DATASTREAM
 
 
