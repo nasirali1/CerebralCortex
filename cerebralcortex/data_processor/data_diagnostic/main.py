@@ -31,22 +31,24 @@ from cerebralcortex.data_processor.data_diagnostic.packet_loss_marker import pac
 from cerebralcortex.configuration import Configuration
 
 
-
 class DiagnoseData:
-
+    @classmethod
     def diagnose_data(self):
 
+        """
+        This method is just an example of how to call diagnostic module
+        """
         configuration_file = os.path.join(os.path.dirname(__file__), '../../../cerebralcortex.yml')
         CC = CerebralCortex(configuration_file, master="local[*]", name="Data Diagnostic App")
 
         configuration = Configuration(filepath="data_diagnostic_config.yml").config
         stream_name = configuration["sensor_types"]["autosense_rip"]
 
-        self.diagnose(self,"de5b4a7d-ba1b-44c4-b55e-cd0ca7487734", CC, configuration, stream_name)
+        self.diagnose("de5b4a7d-ba1b-44c4-b55e-cd0ca7487734", CC, configuration, stream_name)
 
     @staticmethod
     def diagnose(owner_id, CC_obj, config, stream_name, start_time=None, end_time=None):
-        #get all stream-ids linked to a participant
+        # get all stream-ids linked to a participant
         """
 
         :param owner_id:
@@ -57,18 +59,22 @@ class DiagnoseData:
         """
         main_stream_id = Metadata(CC_obj.configuration).get_stream_ids_of_owner(owner_id, stream_name)
 
-        #phone battery
-        phone_battery_stream_id = Metadata(CC_obj.configuration).get_stream_ids_of_owner(owner_id, config["sensor_types"]["phone_battery"])
+        # phone battery
+        phone_battery_stream_id = Metadata(CC_obj.configuration).get_stream_ids_of_owner(owner_id,
+                                                                                         config["sensor_types"][
+                                                                                             "phone_battery"])
         battery_marker(phone_battery_stream_id, CC_obj, config, start_time=start_time, end_time=end_time)
 
-
-        if stream_name == config["sensor_types"]["autosense_rip"] or stream_name == config["sensor_types"]["autosense_ecg"]:
-            autosense_battery_stream_id = Metadata(CC_obj.configuration).get_stream_ids_of_owner(owner_id, config["sensor_types"]["autosense_battery"])
+        if stream_name == config["sensor_types"]["autosense_rip"] or stream_name == config["sensor_types"][
+            "autosense_ecg"]:
+            autosense_battery_stream_id = Metadata(CC_obj.configuration).get_stream_ids_of_owner(owner_id,
+                                                                                                 config["sensor_types"][
+                                                                                                     "autosense_battery"])
             battery_marker(autosense_battery_stream_id, CC_obj, config, start_time=start_time, end_time=end_time)
         elif stream_name == config["sensor_types"]["motionsense_battery"]:
-            motionsense_battery_stream_id = Metadata(CC_obj.configuration).get_stream_ids_of_owner(owner_id, config["sensor_types"]["motionsense_battery"])
+            motionsense_battery_stream_id = Metadata(CC_obj.configuration).get_stream_ids_of_owner(owner_id, config[
+                "sensor_types"]["motionsense_battery"])
             battery_marker(motionsense_battery_stream_id, CC_obj, config, start_time=start_time, end_time=end_time)
-
 
         wireless_disconnection(main_stream_id, CC_obj, config, start_time=start_time, end_time=end_time)
         attachment_marker(main_stream_id, CC_obj, config, start_time=start_time, end_time=end_time)

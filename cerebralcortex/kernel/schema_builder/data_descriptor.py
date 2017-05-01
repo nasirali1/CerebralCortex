@@ -21,31 +21,36 @@
 # CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-from typing import List
-from uuid import UUID
-import datetime
-
-from cerebralcortex.kernel.datatypes.datapoint import DataPoint
-from cerebralcortex.kernel.datatypes.enumerations import StreamTypes
-from cerebralcortex.kernel.datatypes.stream import Stream
-from cerebralcortex.kernel.datatypes.subtypes import DataDescriptor, StreamReference
-from cerebralcortex.kernel.datatypes.subtypes import ExecutionContext
 
 
-class DataStream(Stream):
-    def __init__(self,
-                 identifier: UUID = None,
-                 owner: UUID = None,
-                 name: UUID = None,
-                 data_descriptor: List[DataDescriptor] = None,
-                 execution_context: ExecutionContext = None,
-                 annotations: List[StreamReference] = None,
-                 stream_type: str = None,
-                 start_time: datetime = None,
-                 end_time: datetime = None,
-                 data: List[DataPoint] = None):
-        super().__init__(identifier, owner, name, data_descriptor, execution_context, annotations, stream_type, start_time, end_time, data)
+class data_descriptor:
 
-        self._datastream_type = StreamTypes.DATASTREAM
+    @staticmethod
+    def get_data_descriptor(dd_type: str, dd_unit: str, dd_labels: dict) -> dict:
 
+        """
+         Please have a look at /kernel/schema/examples/ for schema and field details
+        :param dd_type:
+        :param dd_unit:
+        :param dd_labels:
+        :return:
+        """
+        if not dd_type:
+            raise ValueError("Type cannot be empty.")
+        elif not dd_unit:
+            raise ValueError("Unit cannot be empty.")
+        elif not dd_labels:
+            raise ValueError("Labels name cannot be empty.")
+        else:
+            data_descriptor = {
+                "data_descriptor": [
+                    {
+                        "type": dd_type,
+                        "unit": dd_unit,
+                        "labels": dd_labels
+
+                    }
+                ]
+            }
+        return data_descriptor
 

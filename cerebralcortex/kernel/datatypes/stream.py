@@ -84,7 +84,6 @@ class Stream:
     def identifier(self):
         return self._identifier
 
-    #Ali: rename to owner?
     @property
     def owner(self):
         return self._owner
@@ -96,16 +95,6 @@ class Stream:
     @name.setter
     def name(self, value):
         self._name = value
-
-    #Ali: remove?
-    # @property
-    # def description(self):
-    #     return self._description
-
-    #Ali: remove?
-    # @description.setter
-    # def description(self, value):
-    #     self._description = value
 
     @property
     def data_descriptor(self):

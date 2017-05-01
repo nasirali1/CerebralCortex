@@ -38,7 +38,8 @@ def packet_loss_marker(stream_id: uuid, CC_obj: CerebralCortex, config: dict, st
     :param CC_obj:
     :param config:
     """
-    stream = get_stream_data(stream_id, CC_obj, start_time=start_time,end_time=end_time,data_type="all")
+    stream = CC_obj.get_datastream(stream_id, data_type="all", start_time=start_time, end_time=end_time)
+    #get_stream_data(stream_id, CC_obj, start_time=start_time,end_time=end_time,data_type="all")
     name = stream._name
     results = OrderedDict()
 

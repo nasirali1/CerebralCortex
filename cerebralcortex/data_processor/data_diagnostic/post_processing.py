@@ -28,6 +28,8 @@ from collections import OrderedDict
 
 from cerebralcortex.kernel.datatypes.datastream import DataStream
 from cerebralcortex.CerebralCortex import CerebralCortex
+from cerebralcortex.kernel.schema_builder.execution_context import execution_context
+from cerebralcortex.kernel.schema_builder.data_descriptor import data_descriptor
 
 
 def store(input_streams: dict, data: OrderedDict, CC_obj: CerebralCortex, config: dict, algo_type: str):
@@ -261,17 +263,8 @@ def get_data_descriptor(algo_type: str, config: dict) -> dict:
               "rip_packet_loss": config["labels"]["rip_packet_loss"],
               "motionsense_packet_loss": config["labels"]["motionsense_packet_loss"]}
 
-    data_descriptor = {
-        "data_descriptor": [
-            {
-                "type": "label",
-                "unit": "window",
-                "labels": dd
 
-            }
-        ]
-    }
-    return json.dumps(data_descriptor)
+    return json.dumps(data_descriptor.get_data_descriptor("label", "window", dd))
 
 
 def get_execution_context(name: str, input_param: dict, input_streams: dict, output_streams: dict, method: str,
@@ -289,25 +282,20 @@ def get_execution_context(name: str, input_param: dict, input_streams: dict, out
     author = ["Ali"]
     version = '0.0.1'
     ref = 'url of pub'
-    execution_context = {
-        "execution_context": {
-            "processing_module": {
-                "name": name,
-                "description": config["description"]["data_diagnostic"],
-                "input_parameters": input_param,
-                "input_streams": input_streams,
-                "output_streams": output_streams,
-                "algorithm": {
-                    "method": method,
-                    "description": algo_description,
-                    "authors": author,
-                    "version": version,
-                    "reference": ref
-                }
-            }
-        }
-    }
-    return json.dumps(execution_context)
+
+    processing_module = {"name": name,
+                         "description": config["description"]["data_diagnostic"],
+                         "input_parameters": input_param,
+                         "input_streams": input_streams,
+                         "output_streams": output_streams}
+    algorithm = {"method": method,
+                 "description": algo_description,
+                 "authors": author,
+                 "version": version,
+                 "reference": ref}
+
+    ec = execution_context().get_execution_context(processing_module, algorithm)
+    return json.dumps(ec)
 
 
 def get_annotations() -> dict:
