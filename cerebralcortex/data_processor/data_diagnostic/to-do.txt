@@ -21,3 +21,15 @@
             writer.writerow(rr)
 
         ofile.close()
+
+
+Metadata:
+        1 - Default schema
+            Required
+            Optional
+
+        2 - Make timezone CC runtime parameter (make it a timezone object not a string)
+        3 - Autosense use
+        accel = accel_group.map(lambda ds: (ds[0], autosense_sequence_align(datastreams=[ds[1][0], ds[1][1], ds[1][2]],
+                                                                                    sampling_frequency=accel_sampling_frequency)))
+        4 - Nothing is optional in mysql except start and end time
