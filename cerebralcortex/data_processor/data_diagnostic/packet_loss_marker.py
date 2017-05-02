@@ -26,7 +26,7 @@ import uuid
 from collections import OrderedDict
 
 from cerebralcortex.data_processor.signalprocessing.window import window
-from cerebralcortex.data_processor.data_diagnostic.util import merge_consective_windows, motionsense_magnitude, get_stream_data
+from cerebralcortex.data_processor.data_diagnostic.util import merge_consective_windows, motionsense_magnitude
 from cerebralcortex.data_processor.data_diagnostic.post_processing import store
 from cerebralcortex.CerebralCortex import CerebralCortex
 
