@@ -24,7 +24,9 @@
 import json
 import uuid
 from datetime import datetime
+
 from pytz import timezone
+
 
 class StoreMetadata:
     # stream_identifier, ownerID, name,
@@ -35,7 +37,7 @@ class StoreMetadata:
     def store_stream_info(self, stream_identifier: uuid, stream_owner_id: uuid, name: str,
                           data_descriptor: dict,
                           execution_context: dict,
-                          annotations: dict, stream_type: str, start_time: datetime, end_time:datetime):
+                          annotations: dict, stream_type: str, start_time: datetime, end_time: datetime):
         """
         This method will update a record if stream already exist else it will insert a new record.
         :param stream_identifier:
@@ -50,31 +52,30 @@ class StoreMetadata:
 
         isIDCreated = self.is_id_created(stream_owner_id, name)
 
-
-
         if isIDCreated:
             stream_identifier = isIDCreated
             if execution_context:
-                execution_context["execution_context"]['processing_module']["output_streams"][0]["id"] = stream_identifier
+                execution_context["execution_context"]['processing_module']["output_streams"][0][
+                    "id"] = stream_identifier
             new_end_time = self.check_end_time(stream_identifier, end_time)
             is_annotation_changed = self.append_annotations(stream_identifier, stream_owner_id, name, data_descriptor,
-                                                             execution_context, annotations, stream_type)
+                                                            execution_context, annotations, stream_type)
         else:
             new_end_time = None
             is_annotation_changed = False
 
-        if new_end_time!="unchanged" and is_annotation_changed==True:
-            #update annotations and end-time
+        if new_end_time != "unchanged" and is_annotation_changed == True:
+            # update annotations and end-time
             qry = "UPDATE " + self.datastreamTable + " set annotations=JSON_ARRAY_APPEND(annotations, '$.annotations',  CAST(%s AS JSON)), end_time=%s where identifier=%s"
             vals = json.dumps(annotations), new_end_time, str(stream_identifier)
             isQueryReady = 1
-        elif new_end_time!="unchanged" and is_annotation_changed=="unchanged":
-            #update only end-time
+        elif new_end_time != "unchanged" and is_annotation_changed == "unchanged":
+            # update only end-time
             qry = "UPDATE " + self.datastreamTable + " set end_time=%s where identifier=%s"
             vals = end_time, str(stream_identifier)
             isQueryReady = 1
-        elif new_end_time=="unchanged" and is_annotation_changed==True:
-            #update only annotations
+        elif new_end_time == "unchanged" and is_annotation_changed == True:
+            # update only annotations
             qry = "UPDATE " + self.datastreamTable + " set annotations=JSON_ARRAY_APPEND(annotations, '$.annotations',  CAST(%s AS JSON)) where identifier=%s"
             vals = json.dumps(annotations), str(stream_identifier)
             isQueryReady = 1
@@ -82,7 +83,8 @@ class StoreMetadata:
         elif (is_annotation_changed == False):
             qry = "INSERT INTO " + self.datastreamTable + " (identifier, owner, name, data_descriptor, execution_context, annotations, type, start_time, end_time) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s)"
             vals = str(stream_identifier), str(stream_owner_id), str(name), json.dumps(
-                data_descriptor), json.dumps(execution_context), json.dumps(annotations), stream_type, start_time, end_time
+                data_descriptor), json.dumps(execution_context), json.dumps(
+                annotations), stream_type, start_time, end_time
             isQueryReady = 1
         if isQueryReady == 1:
             self.cursor.execute(qry, vals)
@@ -131,7 +133,7 @@ class StoreMetadata:
 
     def is_id_created(self, owner_id, name):
         # if stream name, id, and owner are same then return true
-        qry = "SELECT * from "+self.datastreamTable+" where owner=%s and name=%s"
+        qry = "SELECT * from " + self.datastreamTable + " where owner=%s and name=%s"
         vals = owner_id, name
         self.cursor.execute(qry, vals)
         rows = self.cursor.fetchall()
@@ -143,7 +145,7 @@ class StoreMetadata:
     def check_end_time(self, stream_id, end_time):
         localtz = timezone(self.configuration["time_settings"]["zone"])
 
-        qry = "SELECT * from "+self.datastreamTable+" where identifier = %(identifier)s"
+        qry = "SELECT * from " + self.datastreamTable + " where identifier = %(identifier)s"
         vals = {'identifier': str(stream_id)}
         self.cursor.execute(qry, vals)
         rows = self.cursor.fetchall()
@@ -153,12 +155,9 @@ class StoreMetadata:
                 end_time = localtz.localize(end_time)
             if old_end_time.tzinfo is None:
                 old_end_time = localtz.localize(old_end_time)
-            if old_end_time<=end_time:
+            if old_end_time <= end_time:
                 return end_time
             else:
                 return "unchanged"
         else:
             raise ValueError("Stream has no start/end time.")
-
-
-

@@ -26,6 +26,7 @@
 from cerebralcortex.kernel.DataStoreEngine.Metadata.Metadata import Metadata
 from cerebralcortex.kernel.datatypes.datastream import DataStream
 
+
 class StoreData:
     def store_stream(self, datastream: DataStream):
         """
@@ -41,11 +42,9 @@ class StoreData:
         stream_type = datastream.datastream_type
         data = datastream.data
 
-
-
         if data:
             if isinstance(data, list):
-                total_dp = len(data)-1
+                total_dp = len(data) - 1
                 new_start_time = data[0].start_time
                 new_end_time = data[total_dp].start_time
             else:
@@ -76,7 +75,6 @@ class StoreData:
             .options(table=table_name, keyspace=self.keyspaceName) \
             .save()
 
-
     def map_datapoint_to_dataframe(self, stream_id, datapoints):
         temp = []
         for i in datapoints:
@@ -90,5 +88,3 @@ class StoreData:
                                              ["identifier", "day", "start_time", "end_time", "sample"])
 
         return df
-
-

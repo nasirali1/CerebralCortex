@@ -22,15 +22,17 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import uuid
 import statistics as stat
-from datetime import datetime
+import uuid
 from collections import OrderedDict
+from datetime import datetime
 
-from cerebralcortex.data_processor.signalprocessing.window import window
-from cerebralcortex.data_processor.data_diagnostic.util import merge_consective_windows, outlier_detection, motionsense_magnitude
-from cerebralcortex.data_processor.data_diagnostic.post_processing import store
 from cerebralcortex.CerebralCortex import CerebralCortex
+from cerebralcortex.data_processor.data_diagnostic.post_processing import store
+from cerebralcortex.data_processor.data_diagnostic.util import merge_consective_windows, outlier_detection, \
+    motionsense_magnitude
+from cerebralcortex.data_processor.signalprocessing.window import window
+from cerebralcortex.kernel.DataStoreEngine.dataset import DataSet
 
 
 def attachment_marker(stream_id: uuid, CC_obj: CerebralCortex, config: dict, start_time=None, end_time=None):
@@ -42,9 +44,9 @@ def attachment_marker(stream_id: uuid, CC_obj: CerebralCortex, config: dict, sta
     :param config: Data diagnostics configurations
     """
 
-    stream = CC_obj.get_datastream(stream_id, data_type="all", start_time=start_time, end_time=end_time)
+    stream = CC_obj.get_datastream(stream_id, data_type=DataSet.COMPLETE, start_time=start_time, end_time=end_time)
 
-    CC_obj.get_datastream(stream_id, data_type="all", start_time=start_time, end_time=end_time)
+    CC_obj.get_datastream(stream_id, data_type=DataSet.COMPLETE, start_time=start_time, end_time=end_time)
 
     results = OrderedDict()
     threshold_val = None
@@ -83,11 +85,12 @@ def attachment_marker(stream_id: uuid, CC_obj: CerebralCortex, config: dict, sta
     store(input_streams, merged_windows, CC_obj, config, config["algo_names"]["attachment_marker"])
 
 
-#TO-DO gsr_response method is not being used. Need to make sure whether GSR values actually respresent GSR data.
+# TO-DO gsr_response method is not being used. Need to make sure whether GSR values actually respresent GSR data.
 
 
 
-def gsr_response(stream_id: uuid, start_time: datetime, end_time: datetime, label_attachment: str, label_off: str, CC_obj: CerebralCortex, config: dict) -> str:
+def gsr_response(stream_id: uuid, start_time: datetime, end_time: datetime, label_attachment: str, label_off: str,
+                 CC_obj: CerebralCortex, config: dict) -> str:
     """
     This method analyzes Galvanic skin response to label a window as improper attachment or sensor-off-body
     :param stream_id: UUID
@@ -99,7 +102,7 @@ def gsr_response(stream_id: uuid, start_time: datetime, end_time: datetime, labe
     :param config:
     :return: string
     """
-    datapoints = CC_obj.get_datastream(stream_id, start_time=start_time, end_time=end_time, data_type="data")
+    datapoints = CC_obj.get_datastream(stream_id, start_time=start_time, end_time=end_time, data_type=DataSet.COMPLETE)
 
     vals = []
     for dp in datapoints:

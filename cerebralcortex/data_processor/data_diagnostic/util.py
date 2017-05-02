@@ -22,19 +22,13 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import statistics as stat
-import math
-import uuid
 import ast
-
-from datetime import datetime
-from typing import List
+import math
+import statistics as stat
 from collections import OrderedDict
+from typing import List
 
-from cerebralcortex.kernel.datatypes.datastream import DataPoint, Stream
-from cerebralcortex.CerebralCortex import CerebralCortex
-
-
+from cerebralcortex.kernel.datatypes.datastream import DataPoint
 
 
 def merge_consective_windows(data: OrderedDict) -> DataPoint:
@@ -57,12 +51,12 @@ def merge_consective_windows(data: OrderedDict) -> DataPoint:
             element = val
             end = key[1]
         else:
-            merged_windows.append(DataPoint(start, end, element))#[(start, end)] = element
+            merged_windows.append(DataPoint(start, end, element))  # [(start, end)] = element
             element = val
             start = key[0]
             end = key[1]
     if val is not None:
-        merged_windows.append(DataPoint(start, end, val))#merged_windows[(start, end)] = val
+        merged_windows.append(DataPoint(start, end, val))  # merged_windows[(start, end)] = val
 
     return merged_windows
 
@@ -107,17 +101,3 @@ def motionsense_magnitude(accel_xyz: List[DataPoint]) -> DataPoint:
         magnitudeList.append(DataPoint(dp.start_time, dp.end_time, magnitude))
 
     return magnitudeList
-
-
-def get_stream_data(stream_id: uuid, CC_obj: CerebralCortex, start_time: datetime=None, end_time: datetime=None, data_type: str="all") -> Stream:
-    """
-
-    :param stream_id:
-    :param CC_obj:
-    :param start_time:
-    :param end_time:
-    :param data_type:
-    :return:
-    """
-    stream = CC_obj.get_datastream(stream_id, data_type=data_type, start_time=start_time, end_time=end_time)
-    return stream

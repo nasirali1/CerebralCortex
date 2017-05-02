@@ -31,14 +31,14 @@ from cerebralcortex.configuration import Configuration
 from cerebralcortex.kernel.DataStoreEngine.Metadata.Metadata import Metadata
 from cerebralcortex.kernel.datatypes.datapoint import DataPoint
 from cerebralcortex.kernel.datatypes.datastream import DataStream
-
+from cerebralcortex.kernel.DataStoreEngine.dataset import DataSet
 
 # @unittest.skip("Skipped test class: Figure out a way to test with MySQLand Cassandra")
 class TestDataStoreEngine(unittest.TestCase):
     def setUp(self):
         self.testConfigFile = os.path.join(os.path.dirname(__file__), 'res/test_configuration.yml')
 
-        self.CC = CerebralCortex(self.testConfigFile, master="local[*]", name="Cerebral Cortex DataStoreEngine Tests")
+        self.CC = CerebralCortex(self.testConfigFile, master="local[*]", name="Cerebral Cortex DataStoreEngine Tests", time_zone="US/Central")
 
         self.configuration = Configuration(filepath=self.testConfigFile).config
 
@@ -128,7 +128,7 @@ class TestDataStoreEngine(unittest.TestCase):
                                                    annotations, stream_type, start_time, end_time, datapoints)
 
         self.CC.save_datastream(ds)
-        stream = self.CC.get_datastream(identifier, data_type="all")
+        stream = self.CC.get_datastream(identifier, data_type=DataSet.COMPLETE)
         self.assertEqual(stream._identifier, identifier)
         self.assertEqual(stream._owner, owner)
         self.assertEqual(stream._name, name)

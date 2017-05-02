@@ -26,10 +26,11 @@ import json
 import uuid
 from collections import OrderedDict
 
-from cerebralcortex.kernel.datatypes.datastream import DataStream
 from cerebralcortex.CerebralCortex import CerebralCortex
-from cerebralcortex.kernel.schema_builder.execution_context import execution_context
+from cerebralcortex.kernel.DataStoreEngine.dataset import DataSet
+from cerebralcortex.kernel.datatypes.datastream import DataStream
 from cerebralcortex.kernel.schema_builder.data_descriptor import data_descriptor
+from cerebralcortex.kernel.schema_builder.execution_context import execution_context
 
 
 def store(input_streams: dict, data: OrderedDict, CC_obj: CerebralCortex, config: dict, algo_type: str):
@@ -51,14 +52,14 @@ def store(input_streams: dict, data: OrderedDict, CC_obj: CerebralCortex, config
     execution_context = json.loads(result["ec"])
     annotations = json.loads(result["anno"])
 
-    metadata = CC_obj.get_datastream(parent_stream_id, data_type="metadata")
+    metadata = CC_obj.get_datastream(parent_stream_id, data_type=DataSet.ONLY_METADATA)
 
     owner = metadata._owner
     name = execution_context["execution_context"]["processing_module"]["output_streams"][0]["name"]
     stream_type = "datastream"
 
-
-    ds = DataStream(identifier=stream_uuid, owner=owner, name=name, data_descriptor=data_descriptor, execution_context=execution_context, annotations=annotations,
+    ds = DataStream(identifier=stream_uuid, owner=owner, name=name, data_descriptor=data_descriptor,
+                    execution_context=execution_context, annotations=annotations,
                     stream_type=stream_type, data=data)
 
     CC_obj.save_datastream(ds)
@@ -263,7 +264,6 @@ def get_data_descriptor(algo_type: str, config: dict) -> dict:
         dd = {"ecg_packet_loss": config["labels"]["ecg_packet_loss"],
               "rip_packet_loss": config["labels"]["rip_packet_loss"],
               "motionsense_packet_loss": config["labels"]["motionsense_packet_loss"]}
-
 
     return json.dumps(data_descriptor.get_data_descriptor("label", "window", dd))
 

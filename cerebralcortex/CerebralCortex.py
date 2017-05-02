@@ -31,6 +31,7 @@ from cerebralcortex.configuration import Configuration
 from cerebralcortex.kernel.datatypes.datastream import DataStream
 from cerebralcortex.kernel.datatypes.stream import Stream
 from cerebralcortex.kernel.DataStoreEngine.Data.Data import Data
+from cerebralcortex.kernel.DataStoreEngine.dataset import DataSet
 
 
 class CerebralCortex:
@@ -51,7 +52,7 @@ class CerebralCortex:
         if time_zone:
             self.configuration["time_settings"]["zone"] = time_zone
 
-    def get_datastream(self, stream_identifier, start_time: datetime = None, end_time: datetime = None, data_type="all"):
+    def get_datastream(self, stream_identifier, start_time: datetime = None, end_time: datetime = None, data_type=DataSet.COMPLETE):
         return Data(self.sc, self.sqlContext, self.configuration).get_stream(stream_identifier, start_time, end_time, data_type)
 
 

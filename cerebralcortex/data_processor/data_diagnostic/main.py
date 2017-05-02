@@ -24,11 +24,11 @@
 
 import os
 
-from cerebralcortex.data_processor.data_diagnostic.sensor_unavailable_marker import *
-from cerebralcortex.data_processor.data_diagnostic.battery_data_marker import battery_marker
-from cerebralcortex.data_processor.data_diagnostic.attachment_marker import attachment_marker
-from cerebralcortex.data_processor.data_diagnostic.packet_loss_marker import packet_loss_marker
 from cerebralcortex.configuration import Configuration
+from cerebralcortex.data_processor.data_diagnostic.attachment_marker import attachment_marker
+from cerebralcortex.data_processor.data_diagnostic.battery_data_marker import battery_marker
+from cerebralcortex.data_processor.data_diagnostic.packet_loss_marker import packet_loss_marker
+from cerebralcortex.data_processor.data_diagnostic.sensor_unavailable_marker import *
 
 
 class DiagnoseData:

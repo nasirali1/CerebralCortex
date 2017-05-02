@@ -25,10 +25,12 @@
 import uuid
 from collections import OrderedDict
 
-from cerebralcortex.data_processor.signalprocessing.window import window
-from cerebralcortex.data_processor.data_diagnostic.util import merge_consective_windows, motionsense_magnitude
-from cerebralcortex.data_processor.data_diagnostic.post_processing import store
 from cerebralcortex.CerebralCortex import CerebralCortex
+from cerebralcortex.data_processor.data_diagnostic.post_processing import store
+from cerebralcortex.data_processor.data_diagnostic.util import merge_consective_windows, motionsense_magnitude
+from cerebralcortex.data_processor.signalprocessing.window import window
+from cerebralcortex.kernel.DataStoreEngine.dataset import DataSet
+
 
 def packet_loss_marker(stream_id: uuid, CC_obj: CerebralCortex, config: dict, start_time=None, end_time=None):
     """
@@ -38,7 +40,7 @@ def packet_loss_marker(stream_id: uuid, CC_obj: CerebralCortex, config: dict, st
     :param CC_obj:
     :param config:
     """
-    stream = CC_obj.get_datastream(stream_id, data_type="all", start_time=start_time, end_time=end_time)
+    stream = CC_obj.get_datastream(stream_id, data_type=DataSet.COMPLETE, start_time=start_time, end_time=end_time)
     name = stream._name
     results = OrderedDict()
 

@@ -25,13 +25,17 @@
 import json
 import uuid
 from datetime import datetime
+
 from pytz import timezone
+
 from cerebralcortex.kernel.DataStoreEngine.Metadata.Metadata import Metadata
+from cerebralcortex.kernel.DataStoreEngine.dataset import DataSet
 from cerebralcortex.kernel.datatypes.datastream import DataStream, DataPoint
 
 
 class LoadData:
-    def get_stream(self, stream_id: uuid, start_time: datetime = None, end_time: datetime = None, data_type="all") -> DataStream:
+    def get_stream(self, stream_id: uuid, start_time: datetime = None, end_time: datetime = None,
+                   data_type=DataSet.COMPLETE) -> DataStream:
 
         """
         :param stream_id:
@@ -43,24 +47,24 @@ class LoadData:
         start_time = str(start_time)
         end_time = str(end_time)
 
-        where_clause = "identifier='" + stream_id +"'"
+        where_clause = "identifier='" + stream_id + "'"
 
         if stream_id == 'None':
             raise Exception("Stream identifier cannot be null.")
 
         if start_time != 'None':
-            where_clause += " and start_time>=cast('"+start_time+"' as timestamp)"
+            where_clause += " and start_time>=cast('" + start_time + "' as timestamp)"
 
         if end_time != 'None':
-            where_clause += " and start_time<=cast('"+end_time+"' as timestamp)"
+            where_clause += " and start_time<=cast('" + end_time + "' as timestamp)"
 
-        if data_type == "all":
+        if data_type == DataSet.COMPLETE:
             datapoints = self.map_dataframe_to_datapoint(
                 self.load_data_from_cassandra(self.datapointTable, where_clause))
             stream = self.map_datapoint_and_metadata_to_datastream(stream_id, datapoints)
-        elif data_type == "data":
+        elif data_type == DataSet.ONLY_DATA:
             return self.map_dataframe_to_datapoint(self.load_data_from_cassandra(self.datapointTable, where_clause))
-        elif data_type == "metadata":
+        elif data_type == DataSet.ONLY_METADATA:
             datapoints = []
             stream = self.map_datapoint_and_metadata_to_datastream(stream_id, datapoints)
         else:
