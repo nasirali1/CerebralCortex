@@ -31,7 +31,8 @@ import numpy as np
 
 from cerebralcortex.CerebralCortex import CerebralCortex
 from cerebralcortex.data_processor.data_diagnostic.post_processing import store
-from cerebralcortex.data_processor.data_diagnostic.util import merge_consective_windows, motionsense_magnitude
+from cerebralcortex.data_processor.data_diagnostic.util import merge_consective_windows
+from cerebralcortex.data_processor.signalprocessing.vector import magnitude
 from cerebralcortex.kernel.DataStoreEngine.Metadata.Metadata import Metadata
 from cerebralcortex.kernel.DataStoreEngine.dataset import DataSet
 
@@ -99,14 +100,18 @@ def wireless_disconnection(stream_id: uuid, CC_obj: CerebralCortex, config: dict
                              {"id": str(z), "name": config["sensor_types"]["autosense_accel_z"]}]
 
         for dp in battery_off_data:
-            if dp.start_time != "" and dp.end_time != "":
+            if dp.start_time != "" and dp.end_time == "":
                 # get a window prior to a battery powered off
                 start_time = dp.start_time - timedelta(seconds=config['general']['window_size'])
                 end_time = dp.start_time
                 if name == config["sensor_types"]["motionsense_accel"]:
                     motionsense_accel_xyz = CC_obj.get_datastream(motionsense_accel_stream_id, start_time=start_time,
-                                                                  end_time=end_time, data_type=DataSet.ONLY_DATA)
-                    magnitudeVals = motionsense_magnitude(motionsense_accel_xyz)
+                                                                  end_time=end_time, data_type=DataSet.COMPLETE)
+                    magnitudeValStream = magnitude(motionsense_accel_xyz)
+                    magnitudeVals = []
+                    for mv in magnitudeValStream.data:
+                        magnitudeVals.append(mv.sample)
+
                 else:
                     autosense_acc_x = CC_obj.get_datastream(x, start_time=start_time, end_time=end_time,
                                                             data_type=DataSet.ONLY_DATA)
