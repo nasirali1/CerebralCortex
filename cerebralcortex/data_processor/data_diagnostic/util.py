@@ -25,6 +25,7 @@
 import statistics as stat
 import math
 import uuid
+import ast
 
 from datetime import datetime
 from typing import List
@@ -101,6 +102,7 @@ def motionsense_magnitude(accel_xyz: List[DataPoint]) -> DataPoint:
 
     for dp in accel_xyz:
         data = dp.sample
+        data = ast.literal_eval(data)
         magnitude = math.sqrt(math.pow(data[0], 2) + math.pow(data[1], 2) + math.pow(data[2], 2))
         magnitudeList.append(DataPoint(dp.start_time, dp.end_time, magnitude))
 

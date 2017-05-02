@@ -48,7 +48,7 @@ labels:
   rip_on_body: 9
   motionsense_improper_attachment: 10
   motionsense_off_body: 8
-  motionsense__on_body: 9
+  motionsense_on_body: 9
   #packet loss labels
   ecg_packet_loss: 6
   rip_packet_loss: 6

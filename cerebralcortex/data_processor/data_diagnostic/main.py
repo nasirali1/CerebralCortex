@@ -42,7 +42,7 @@ class DiagnoseData:
         CC = CerebralCortex(configuration_file, master="local[*]", name="Data Diagnostic App", time_zone="US/Central")
 
         configuration = Configuration(filepath="data_diagnostic_config.yml").config
-        stream_name = configuration["sensor_types"]["autosense_rip"]
+        stream_name = configuration["sensor_types"]["motionsense_accel"]
 
         cls.diagnose("de5b4a7d-ba1b-44c4-b55e-cd0ca7487734", CC, configuration, stream_name)
 
@@ -71,7 +71,7 @@ class DiagnoseData:
                                                                                                  config["sensor_types"][
                                                                                                      "autosense_battery"])
             battery_marker(autosense_battery_stream_id, CC_obj, config, start_time=start_time, end_time=end_time)
-        elif stream_name == config["sensor_types"]["motionsense_battery"]:
+        elif stream_name == config["sensor_types"]["motionsense_accel"]:
             motionsense_battery_stream_id = Metadata(CC_obj.configuration).get_stream_ids_of_owner(owner_id, config[
                 "sensor_types"]["motionsense_battery"])
             battery_marker(motionsense_battery_stream_id, CC_obj, config, start_time=start_time, end_time=end_time)

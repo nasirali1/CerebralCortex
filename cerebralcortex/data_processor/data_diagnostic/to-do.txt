@@ -34,3 +34,7 @@ Metadata:
                                                                                     sampling_frequency=accel_sampling_frequency)))
         4 - Nothing is optional in mysql except start and end time
         5 - Make enum to params of get datastream of all, metadata etc
+
+
+        In some of DDT files, I am directly calling METADATA methods, this should be called via CC obj
+        Sample would be returned as "string". Sample could be anything!!! string, int, array, dict ...................
