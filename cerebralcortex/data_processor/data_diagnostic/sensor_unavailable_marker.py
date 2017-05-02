@@ -22,18 +22,21 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import numpy as np
 import math
 import uuid
-from datetime import timedelta
 from collections import OrderedDict
-from cerebralcortex.kernel.DataStoreEngine.Metadata.Metadata import Metadata
-from cerebralcortex.data_processor.data_diagnostic.util import merge_consective_windows, motionsense_magnitude
-from cerebralcortex.data_processor.data_diagnostic.post_processing import store
-from cerebralcortex.CerebralCortex import CerebralCortex
-from cerebralcortex.data_processor.signalprocessing.alignment import autosense_sequence_align
+from datetime import timedelta
 
-#TO-DO: use advanced sensor quality algorithms to detect whether a window contains good or bad data.
+import numpy as np
+
+from cerebralcortex.CerebralCortex import CerebralCortex
+from cerebralcortex.data_processor.data_diagnostic.post_processing import store
+from cerebralcortex.data_processor.data_diagnostic.util import merge_consective_windows, motionsense_magnitude
+from cerebralcortex.kernel.DataStoreEngine.Metadata.Metadata import Metadata
+from cerebralcortex.kernel.DataStoreEngine.dataset import DataSet
+
+
+# TO-DO: use advanced sensor quality algorithms to detect whether a window contains good or bad data.
 
 
 def wireless_disconnection(stream_id: uuid, CC_obj: CerebralCortex, config: dict, start_time=None, end_time=None):
@@ -52,7 +55,8 @@ def wireless_disconnection(stream_id: uuid, CC_obj: CerebralCortex, config: dict
     results = OrderedDict()
     threshold = 0
 
-    stream_info = CC_obj.get_datastream(stream_id, data_type="metadata", start_time=start_time, end_time=end_time)
+    stream_info = CC_obj.get_datastream(stream_id, data_type=DataSet.ONLY_METADATA, start_time=start_time,
+                                        end_time=end_time)
 
     owner_id = stream_info._owner
     name = stream_info._name
@@ -69,21 +73,26 @@ def wireless_disconnection(stream_id: uuid, CC_obj: CerebralCortex, config: dict
         threshold = config['sensor_unavailable_marker']['motionsense']
         label = config['labels']['motionsense_unavailable']
 
-
-    battery_off_data = CC_obj.get_datastream(stream_id, data_type="data", start_time=start_time, end_time=end_time)
+    battery_off_data = CC_obj.get_datastream(stream_id, data_type=DataSet.ONLY_DATA, start_time=start_time,
+                                             end_time=end_time)
 
     if battery_off_data:
         if name == config["sensor_types"]["motionsense_accel"]:
             motionsense_accel_stream_id = Metadata(CC_obj.configuration).get_stream_id_by_owner_id(owner_id,
-                                                                             config["sensor_types"][
-                                                                                        "motionsense_accel"],
-                                                                                    "id")
+                                                                                                   config[
+                                                                                                       "sensor_types"][
+                                                                                                       "motionsense_accel"],
+                                                                                                   "id")
             input_streams = [{"id": str(stream_id), "name": str(stream_name)},
-                             {"id": str(motionsense_accel_stream_id), "name": config["sensor_types"]["motionsense_accel"]}]
+                             {"id": str(motionsense_accel_stream_id),
+                              "name": config["sensor_types"]["motionsense_accel"]}]
         else:
-            x = Metadata(CC_obj.configuration).get_stream_id_by_owner_id(owner_id, config["sensor_types"]["autosense_accel_x"])
-            y = Metadata(CC_obj.configuration).get_stream_id_by_owner_id(owner_id, config["sensor_types"]["autosense_accel_y"])
-            z = Metadata(CC_obj.configuration).get_stream_id_by_owner_id(owner_id, config["sensor_types"]["autosense_accel_z"])
+            x = Metadata(CC_obj.configuration).get_stream_id_by_owner_id(owner_id,
+                                                                         config["sensor_types"]["autosense_accel_x"])
+            y = Metadata(CC_obj.configuration).get_stream_id_by_owner_id(owner_id,
+                                                                         config["sensor_types"]["autosense_accel_y"])
+            z = Metadata(CC_obj.configuration).get_stream_id_by_owner_id(owner_id,
+                                                                         config["sensor_types"]["autosense_accel_z"])
             input_streams = [{"id": str(stream_id), "name": stream_name},
                              {"id": str(x), "name": config["sensor_types"]["autosense_accel_x"]},
                              {"id": str(y), "name": config["sensor_types"]["autosense_accel_y"]},
@@ -96,12 +105,15 @@ def wireless_disconnection(stream_id: uuid, CC_obj: CerebralCortex, config: dict
                 end_time = dp.start_time
                 if name == config["sensor_types"]["motionsense_accel"]:
                     motionsense_accel_xyz = CC_obj.get_datastream(motionsense_accel_stream_id, start_time=start_time,
-                                                                  end_time=end_time, data_type="data")
+                                                                  end_time=end_time, data_type=DataSet.ONLY_DATA)
                     magnitudeVals = motionsense_magnitude(motionsense_accel_xyz)
                 else:
-                    autosense_acc_x = CC_obj.get_datastream(x, start_time=start_time, end_time=end_time, data_type="data")
-                    autosense_acc_y = CC_obj.get_datastream(y, start_time=start_time, end_time=end_time, data_type="data")
-                    autosense_acc_z = CC_obj.get_datastream(z, start_time=start_time, end_time=end_time, data_type="data")
+                    autosense_acc_x = CC_obj.get_datastream(x, start_time=start_time, end_time=end_time,
+                                                            data_type=DataSet.ONLY_DATA)
+                    autosense_acc_y = CC_obj.get_datastream(y, start_time=start_time, end_time=end_time,
+                                                            data_type=DataSet.ONLY_DATA)
+                    autosense_acc_z = CC_obj.get_datastream(z, start_time=start_time, end_time=end_time,
+                                                            data_type=DataSet.ONLY_DATA)
 
                     magnitudeVals = autosense_calculate_magnitude(autosense_acc_x, autosense_acc_y, autosense_acc_z)
 

@@ -21,14 +21,16 @@
 # CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-import numpy as np
 import uuid
 from collections import OrderedDict
 
-from cerebralcortex.data_processor.data_diagnostic.post_processing import store
-from cerebralcortex.data_processor.signalprocessing.window import window
-from cerebralcortex.data_processor.data_diagnostic.util import merge_consective_windows
+import numpy as np
+
 from cerebralcortex.CerebralCortex import CerebralCortex
+from cerebralcortex.data_processor.data_diagnostic.post_processing import store
+from cerebralcortex.data_processor.data_diagnostic.util import merge_consective_windows
+from cerebralcortex.data_processor.signalprocessing.window import window
+from cerebralcortex.kernel.DataStoreEngine.dataset import DataSet
 
 
 def battery_marker(stream_id: uuid, CC_obj: CerebralCortex, config: dict, start_time=None, end_time=None):
@@ -41,9 +43,9 @@ def battery_marker(stream_id: uuid, CC_obj: CerebralCortex, config: dict, start_
     """
     results = OrderedDict()
 
-    #stream = CC_obj.get_datastream(stream_id, data_type="all")
+    # stream = CC_obj.get_datastream(stream_id, data_type="all")
 
-    stream = CC_obj.get_datastream(stream_id, data_type="all", start_time=start_time, end_time=end_time)
+    stream = CC_obj.get_datastream(stream_id, data_type=DataSet.COMPLETE, start_time=start_time, end_time=end_time)
     windowed_data = window(stream.data, config['general']['window_size'], True)
 
     name = stream._name
@@ -82,7 +84,7 @@ def phone_battery(dp: list, config: dict) -> str:
     if dp_sample_avg <= config['battery_marker']['phone_powered_off']:
         return config['labels']['phone_powered_off']
     elif dp_sample_avg <= config['battery_marker']['phone_battery_down']:
-            return config['labels']['phone_battery_down']
+        return config['labels']['phone_battery_down']
     return None
 
 
@@ -101,11 +103,11 @@ def motionsense_battery(dp: list, config: dict) -> str:
     if dp_sample_avg <= config['battery_marker']['motionsense_powered_off']:
         return config['labels']['motionsense_powered_off']
     elif dp_sample_avg <= config['battery_marker']['phone_powered_off']:
-            return config['labels']['motionsense_battery_down']
+        return config['labels']['motionsense_battery_down']
     return None
 
 
-def autosense_battery(dp: list, config:dict) -> str:
+def autosense_battery(dp: list, config: dict) -> str:
     """
     labels a window as sensor powerd-off or low battery and returns the label
     :param dp:
