@@ -42,7 +42,7 @@ class DiagnoseData:
         CC = CerebralCortex(configuration_file, master="local[*]", name="Data Diagnostic App", time_zone="US/Central")
 
         configuration = Configuration(filepath="data_diagnostic_config.yml").config
-        stream_name = configuration["sensor_types"]["motionsense_accel"]
+        stream_name = configuration["sensor_types"]["autosense_rip"]
 
         cls.diagnose("de5b4a7d-ba1b-44c4-b55e-cd0ca7487734", CC, configuration, stream_name)
 

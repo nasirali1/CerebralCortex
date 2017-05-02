@@ -46,7 +46,7 @@ class StoreMetadata:
         :param annotations:
         :param stream_type:
         """
-        exe = 0
+        isQueryReady = 0
 
         isIDCreated = self.is_id_created(stream_owner_id, name)
 
@@ -67,24 +67,24 @@ class StoreMetadata:
             #update annotations and end-time
             qry = "UPDATE " + self.datastreamTable + " set annotations=JSON_ARRAY_APPEND(annotations, '$.annotations',  CAST(%s AS JSON)), end_time=%s where identifier=%s"
             vals = json.dumps(annotations), new_end_time, str(stream_identifier)
-            exe = 1
+            isQueryReady = 1
         elif new_end_time!="unchanged" and is_annotation_changed=="unchanged":
             #update only end-time
             qry = "UPDATE " + self.datastreamTable + " set end_time=%s where identifier=%s"
             vals = end_time, str(stream_identifier)
-            exe = 1
+            isQueryReady = 1
         elif new_end_time=="unchanged" and is_annotation_changed==True:
             #update only annotations
             qry = "UPDATE " + self.datastreamTable + " set annotations=JSON_ARRAY_APPEND(annotations, '$.annotations',  CAST(%s AS JSON)) where identifier=%s"
             vals = json.dumps(annotations), str(stream_identifier)
-            exe = 1
+            isQueryReady = 1
 
         elif (is_annotation_changed == False):
             qry = "INSERT INTO " + self.datastreamTable + " (identifier, owner, name, data_descriptor, execution_context, annotations, type, start_time, end_time) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s)"
             vals = str(stream_identifier), str(stream_owner_id), str(name), json.dumps(
                 data_descriptor), json.dumps(execution_context), json.dumps(annotations), stream_type, start_time, end_time
-            exe = 1
-        if exe == 1:
+            isQueryReady = 1
+        if isQueryReady == 1:
             self.cursor.execute(qry, vals)
             self.dbConnection.commit()
             self.cursor.close()

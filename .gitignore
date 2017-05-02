@@ -69,4 +69,4 @@ fabric.properties
 /cerebralcortex/data_processor/data_diagnostic/spark-warehouse/
 /cerebralcortex/data_processor/data_diagnostic/db_get.py
 /cerebralcortex/data_processor/data_diagnostic/sample_metadata.json
-/cerebralcortex/data_processor/data_diagnostic/to-do.txt
+/cerebralcortex/data_processor/data_diagnostic/todo
