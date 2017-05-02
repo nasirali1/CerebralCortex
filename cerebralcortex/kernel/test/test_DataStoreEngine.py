@@ -115,7 +115,7 @@ class TestDataStoreEngine(unittest.TestCase):
         localtz = timezone('US/Central')
         start_time = localtz.localize(start_time)
         end_time = localtz.localize(end_time)
-        sample = str({'Foo3': 123})
+        sample = {'Foo3': 123}
 
         dp1 = DataPoint(start_time=start_time, end_time=end_time, sample=sample)
 

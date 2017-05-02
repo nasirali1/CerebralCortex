@@ -22,11 +22,8 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import ast
-import math
 import statistics as stat
 from collections import OrderedDict
-from typing import List
 
 from cerebralcortex.kernel.datatypes.datastream import DataPoint
 
@@ -84,20 +81,3 @@ def outlier_detection(window_data: list) -> list:
             normal_values.append(float(val.sample))
 
     return normal_values
-
-
-def motionsense_magnitude(accel_xyz: List[DataPoint]) -> DataPoint:
-    """
-    compute magnitude of x, y, and z
-    :param accel_xyz:
-    :return: list of DataPoint
-    """
-    magnitudeList = []
-
-    for dp in accel_xyz:
-        data = dp.sample
-        data = ast.literal_eval(data)
-        magnitude = math.sqrt(math.pow(data[0], 2) + math.pow(data[1], 2) + math.pow(data[2], 2))
-        magnitudeList.append(DataPoint(dp.start_time, dp.end_time, magnitude))
-
-    return magnitudeList

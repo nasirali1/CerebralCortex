@@ -22,6 +22,7 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+import json
 
 from cerebralcortex.kernel.DataStoreEngine.Metadata.Metadata import Metadata
 from cerebralcortex.kernel.datatypes.datastream import DataStream
@@ -80,7 +81,7 @@ class StoreData:
         for i in datapoints:
             day = i.start_time
             day = day.strftime("%Y%m%d")
-            dp = str(stream_id), day, i.start_time, i.end_time, i.sample
+            dp = str(stream_id), day, i.start_time, i.end_time, json.dumps(i.sample)
             temp.append(dp)
 
         temp_RDD = self.sparkContext.parallelize(temp)

@@ -27,7 +27,8 @@ from collections import OrderedDict
 
 from cerebralcortex.CerebralCortex import CerebralCortex
 from cerebralcortex.data_processor.data_diagnostic.post_processing import store
-from cerebralcortex.data_processor.data_diagnostic.util import merge_consective_windows, motionsense_magnitude
+from cerebralcortex.data_processor.data_diagnostic.util import merge_consective_windows
+from cerebralcortex.data_processor.signalprocessing.vector import magnitude
 from cerebralcortex.data_processor.signalprocessing.window import window
 from cerebralcortex.kernel.DataStoreEngine.dataset import DataSet
 
@@ -58,8 +59,8 @@ def packet_loss_marker(stream_id: uuid, CC_obj: CerebralCortex, config: dict, st
         sampling_rate = config["sampling_rate"]["motionsense"]
         threshold_val = config["packet_loss_marker"]["motionsense_acceptable_packet_loss"]
         label = config["labels"]["motionsense_packet_loss"]
-        motionsense_accel_magni = motionsense_magnitude(stream.data)
-        windowed_data = window(motionsense_accel_magni, config['general']['window_size'], False)
+        motionsense_accel_magni = magnitude(stream)
+        windowed_data = window(motionsense_accel_magni.data, config['general']['window_size'], False)
     else:
         raise ValueError("Incorrect sensor type.")
 

@@ -29,8 +29,8 @@ from datetime import datetime
 
 from cerebralcortex.CerebralCortex import CerebralCortex
 from cerebralcortex.data_processor.data_diagnostic.post_processing import store
-from cerebralcortex.data_processor.data_diagnostic.util import merge_consective_windows, outlier_detection, \
-    motionsense_magnitude
+from cerebralcortex.data_processor.data_diagnostic.util import merge_consective_windows, outlier_detection
+from cerebralcortex.data_processor.signalprocessing.vector import magnitude
 from cerebralcortex.data_processor.signalprocessing.window import window
 from cerebralcortex.kernel.DataStoreEngine.dataset import DataSet
 
@@ -66,8 +66,8 @@ def attachment_marker(stream_id: uuid, CC_obj: CerebralCortex, config: dict, sta
         threshold_val = config['attachment_marker']['motionsense_on_body']
         label_on = config['labels']['motionsense_on_body']
         label_off = config['labels']['motionsense_off_body']
-        motionsense_accel_magni = motionsense_magnitude(stream.data)
-        windowed_data = window(motionsense_accel_magni, config['general']['window_size'], False)
+        motionsense_accel_magni = magnitude(stream)
+        windowed_data = window(motionsense_accel_magni.data, config['general']['window_size'], False)
     else:
         raise ValueError("Incorrect sensor type.")
 

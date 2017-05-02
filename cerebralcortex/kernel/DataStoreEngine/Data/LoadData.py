@@ -22,6 +22,7 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+import ast
 import json
 import uuid
 from datetime import datetime
@@ -89,7 +90,7 @@ class LoadData:
             else:
                 end_time = ""
 
-            dp = DataPoint(start_time, end_time, row["sample"])
+            dp = DataPoint(start_time, end_time, ast.literal_eval(row["sample"]))
             datapointsList.append(dp)
         return datapointsList
 

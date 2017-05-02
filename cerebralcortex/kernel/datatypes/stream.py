@@ -124,7 +124,7 @@ class Stream:
     def data(self, value):
         result = []
         for dp in value:
-            result.append(DataPoint(self._identifier, dp.start_time, dp.end_time, dp.sample))
+            result.append(DataPoint(dp.start_time, dp.end_time, dp.sample))
         self._data = result
 
     @classmethod
