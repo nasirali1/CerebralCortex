@@ -32,8 +32,6 @@ from cerebralcortex.data_processor.data_diagnostic.util import merge_consective_
 from cerebralcortex.data_processor.data_diagnostic.post_processing import store
 from cerebralcortex.CerebralCortex import CerebralCortex
 
-from cerebralcortex.data_processor.signalprocessing.vector import magnitude
-
 
 def attachment_marker(stream_id: uuid, CC_obj: CerebralCortex, config: dict, start_time=None, end_time=None):
     """

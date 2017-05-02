@@ -28,10 +28,10 @@ import uuid
 from datetime import timedelta
 from collections import OrderedDict
 from cerebralcortex.kernel.DataStoreEngine.Metadata.Metadata import Metadata
-from cerebralcortex.data_processor.data_diagnostic.util import merge_consective_windows, get_stream_data
+from cerebralcortex.data_processor.data_diagnostic.util import merge_consective_windows, motionsense_magnitude
 from cerebralcortex.data_processor.data_diagnostic.post_processing import store
 from cerebralcortex.CerebralCortex import CerebralCortex
-from cerebralcortex.data_processor.signalprocessing.window import window
+from cerebralcortex.data_processor.signalprocessing.alignment import autosense_sequence_align
 
 #TO-DO: use advanced sensor quality algorithms to detect whether a window contains good or bad data.
 
@@ -97,7 +97,7 @@ def wireless_disconnection(stream_id: uuid, CC_obj: CerebralCortex, config: dict
                 if name == config["sensor_types"]["motionsense_accel"]:
                     motionsense_accel_xyz = CC_obj.get_datastream(motionsense_accel_stream_id, start_time=start_time,
                                                                   end_time=end_time, data_type="data")
-                    magnitudeVals = motionsense_calculate_magnitude(motionsense_accel_xyz)
+                    magnitudeVals = motionsense_magnitude(motionsense_accel_xyz)
                 else:
                     autosense_acc_x = CC_obj.get_datastream(x, start_time=start_time, end_time=end_time, data_type="data")
                     autosense_acc_y = CC_obj.get_datastream(y, start_time=start_time, end_time=end_time, data_type="data")
@@ -130,22 +130,6 @@ def autosense_calculate_magnitude(accel_x: float, accel_y: float, accel_z: float
         z = 0 if len(accel_z) - 1 < i else float(accel_z[i].sample)
 
         magnitude = math.sqrt(math.pow(x, 2) + math.pow(y, 2) + math.pow(z, 2));
-        magnitudeList.append(magnitude)
-
-    return magnitudeList
-
-
-def motionsense_calculate_magnitude(accel_xyz: window) -> list:
-    """
-    compute magnitude of x, y, and z
-    :param accel_xyz:
-    :return: magnitude values of a window as list
-    """
-    magnitudeList = []
-
-    for dp in accel_xyz:
-        data = dp.sample
-        magnitude = math.sqrt(math.pow(data[0], 2) + math.pow(data[1], 2) + math.pow(data[2], 2));
         magnitudeList.append(magnitude)
 
     return magnitudeList
