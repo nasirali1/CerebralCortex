@@ -29,12 +29,13 @@ from cerebralcortex.kernel.DataStoreEngine.Metadata.StoreMetadata import StoreMe
 
 
 class Metadata(LoadMetadata, StoreMetadata):
-    def __init__(self, configuration):
+    def __init__(self, CC_obj):
         """
         Constructor
         :param configuration:
         """
-        self.configuration = configuration
+        self.CC_obj = CC_obj
+        self.configuration = CC_obj.configuration
         self.database = self.configuration['mysql']['database']
         self.dbUser = self.configuration['mysql']['db_user']
         self.dbPassword = self.configuration['mysql']['db_pass']

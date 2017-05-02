@@ -76,3 +76,7 @@ def cStress(rdd: RDD) -> RDD:
 
     # return rip_features.join(ecg_features).join(accel_features).map(fix_two_joins)
     return ecg_features
+
+ms_accel = DS([ DP([1,2,3]), [2,3,4] ])
+
+peak_valley = ms_accel.map(lambda ds: (ds[0], signalprocessing.magnitude(ds[1])))

@@ -49,15 +49,15 @@ class CerebralCortex:
         self.sqlContext = SQLContext(self.sc)  # TODO: This may need to become a sparkSession
 
         self.configuration = Configuration(filepath=configuration_file).config
-        if time_zone:
-            self.configuration["time_settings"]["zone"] = time_zone
+
+        self.time_zone = time_zone;
 
     def get_datastream(self, stream_identifier, start_time: datetime = None, end_time: datetime = None, data_type=DataSet.COMPLETE):
-        return Data(self.sc, self.sqlContext, self.configuration).get_stream(stream_identifier, start_time, end_time, data_type)
+        return Data(self.sc, self.sqlContext, self).get_stream(stream_identifier, start_time, end_time, data_type)
 
 
     def save_datastream(self, datastream):
-        Data(self.sc, self.sqlContext, self.configuration).store_stream(datastream)
+        Data(self.sc, self.sqlContext, self).store_stream(datastream)
 
     def save_stream(self, stream: Stream):
         # Save the stream here

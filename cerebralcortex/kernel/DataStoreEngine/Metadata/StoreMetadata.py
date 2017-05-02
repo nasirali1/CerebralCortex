@@ -143,7 +143,7 @@ class StoreMetadata:
             return False
 
     def check_end_time(self, stream_id, end_time):
-        localtz = timezone(self.configuration["time_settings"]["zone"])
+        localtz = timezone(self.CC_obj.time_zone)
 
         qry = "SELECT * from " + self.datastreamTable + " where identifier = %(identifier)s"
         vals = {'identifier': str(stream_id)}

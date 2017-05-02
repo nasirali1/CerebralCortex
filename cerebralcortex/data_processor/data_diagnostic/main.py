@@ -57,22 +57,22 @@ class DiagnoseData:
         :param start_time:
         :param end_time:
         """
-        main_stream_id = Metadata(CC_obj.configuration).get_stream_ids_of_owner(owner_id, stream_name)
+        main_stream_id = Metadata(CC_obj).get_stream_ids_of_owner(owner_id, stream_name)
 
         # phone battery
-        phone_battery_stream_id = Metadata(CC_obj.configuration).get_stream_ids_of_owner(owner_id,
-                                                                                         config["sensor_types"][
-                                                                                             "phone_battery"])
+        phone_battery_stream_id = Metadata(CC_obj).get_stream_ids_of_owner(owner_id,
+                                                                           config["sensor_types"][
+                                                                               "phone_battery"])
         battery_marker(phone_battery_stream_id, CC_obj, config, start_time=start_time, end_time=end_time)
 
         if stream_name == config["sensor_types"]["autosense_rip"] or stream_name == config["sensor_types"][
             "autosense_ecg"]:
-            autosense_battery_stream_id = Metadata(CC_obj.configuration).get_stream_ids_of_owner(owner_id,
-                                                                                                 config["sensor_types"][
-                                                                                                     "autosense_battery"])
+            autosense_battery_stream_id = Metadata(CC_obj).get_stream_ids_of_owner(owner_id,
+                                                                                   config["sensor_types"][
+                                                                                       "autosense_battery"])
             battery_marker(autosense_battery_stream_id, CC_obj, config, start_time=start_time, end_time=end_time)
         elif stream_name == config["sensor_types"]["motionsense_accel"]:
-            motionsense_battery_stream_id = Metadata(CC_obj.configuration).get_stream_ids_of_owner(owner_id, config[
+            motionsense_battery_stream_id = Metadata(CC_obj).get_stream_ids_of_owner(owner_id, config[
                 "sensor_types"]["motionsense_battery"])
             battery_marker(motionsense_battery_stream_id, CC_obj, config, start_time=start_time, end_time=end_time)
 

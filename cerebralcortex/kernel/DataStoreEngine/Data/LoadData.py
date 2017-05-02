@@ -82,7 +82,7 @@ class LoadData:
         rows = dataframe.collect()
 
         for row in rows:
-            localtz = timezone(self.configuration["time_settings"]["zone"])
+            localtz = timezone(self.CC_obj.time_zone)
             start_time = localtz.localize(row["start_time"])
             if row["end_time"] != None:
                 end_time = localtz.localize(row["end_time"])
@@ -102,7 +102,7 @@ class LoadData:
         """
 
         # query datastream(mysql) for metadata
-        datastream_info = Metadata(self.configuration).get_stream_info(stream_id)
+        datastream_info = Metadata(self.CC_obj).get_stream_info(stream_id)
 
         ownerID = datastream_info[0]["owner"]
         name = datastream_info[0]["name"]

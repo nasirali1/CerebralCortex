@@ -27,7 +27,6 @@ import datetime
 from pytz import timezone
 
 from cerebralcortex.CerebralCortex import CerebralCortex
-from cerebralcortex.configuration import Configuration
 from cerebralcortex.kernel.DataStoreEngine.Metadata.Metadata import Metadata
 from cerebralcortex.kernel.datatypes.datapoint import DataPoint
 from cerebralcortex.kernel.datatypes.datastream import DataStream
@@ -40,7 +39,7 @@ class TestDataStoreEngine(unittest.TestCase):
 
         self.CC = CerebralCortex(self.testConfigFile, master="local[*]", name="Cerebral Cortex DataStoreEngine Tests", time_zone="US/Central")
 
-        self.configuration = Configuration(filepath=self.testConfigFile).config
+        self.configuration = self.CC.configuration
 
         # TODO: populate databases with sample information for these tests
 
@@ -52,14 +51,14 @@ class TestDataStoreEngine(unittest.TestCase):
         start_time = datetime.datetime(2017, 4, 24, 0, 0, 1)
         end_time = datetime.datetime(2017, 4, 24, 0, 0, 2)
 
-        Metadata(self.configuration).store_stream_info("6db98dfb-d6e8-4b27-8d55-95b20fa0f754",
+        Metadata(self.CC).store_stream_info("6db98dfb-d6e8-4b27-8d55-95b20fa0f754",
                                                        "06634264-56bc-4c92-abd7-377dbbad79dd", "data-diagnostic-test",
                                                        data_descriptor, execution_context,
                                                        annotations,
                                                        stream_type, start_time, end_time)
 
     def test_get_stream_id_name(self):
-        stream_id = Metadata(self.configuration).get_stream_id_by_owner_id("06634264-56bc-4c92-abd7-377dbbad79dd",
+        stream_id = Metadata(self.CC).get_stream_id_by_owner_id("06634264-56bc-4c92-abd7-377dbbad79dd",
                                                                     "data-diagnostic-test")
         self.assertEqual(stream_id, "6db98dfb-d6e8-4b27-8d55-95b20fa0f754")
 
@@ -67,7 +66,7 @@ class TestDataStoreEngine(unittest.TestCase):
         if stream_meta:
             stream_info = stream_meta
         else:
-            stream_info = Metadata(self.configuration).get_stream_info("6db98dfb-d6e8-4b27-8d55-95b20fa0f754")
+            stream_info = Metadata(self.CC).get_stream_info("6db98dfb-d6e8-4b27-8d55-95b20fa0f754")
 
         self.assertEqual(stream_info[0]["identifier"], "6db98dfb-d6e8-4b27-8d55-95b20fa0f754")
         self.assertEqual(stream_info[0]["owner"], "06634264-56bc-4c92-abd7-377dbbad79dd")
@@ -78,30 +77,29 @@ class TestDataStoreEngine(unittest.TestCase):
         self.assertEqual(stream_info[0]["type"], "datastream")
 
     def test_append_annotations(self):
-        self.assertRaises(Exception, Metadata(self.configuration).append_annotations, "6db98dfb-d6e8-4b27-8d55-95b20fa0f754",
+        self.assertRaises(Exception, Metadata(self.CC).append_annotations, "6db98dfb-d6e8-4b27-8d55-95b20fa0f754",
                           "06634264-56bc-4c92-abd7-377dbbad79dd",
                           "data-diagnostic-test", {}, {}, {}, "datastream1")
 
-        self.assertRaises(Exception, Metadata(self.configuration).append_annotations, "6db98dfb-d6e8-4b27-8d55-95b20fa0f754",
+        self.assertRaises(Exception, Metadata(self.CC).append_annotations, "6db98dfb-d6e8-4b27-8d55-95b20fa0f754",
                           "06634264-56bc-4c92-abd7-377dbbad79dd",
                           "data-diagnostic-test", {}, {"some":"none"}, {}, "datastream1")
 
-        self.assertRaises(Exception, Metadata(self.configuration).append_annotations, "6db98dfb-d6e8-4b27-8d55-95b20fa0f754",
+        self.assertRaises(Exception, Metadata(self.CC).append_annotations, "6db98dfb-d6e8-4b27-8d55-95b20fa0f754",
                           "06634264-56bc-4c92-abd7-377dbbad79dd",
                           "data-diagnostic-test", {"a":"b"}, {}, {}, "datastream1")
 
-        self.assertRaises(Exception, Metadata(self.configuration).append_annotations, "6db98dfb-d6e8-4b27-8d55-95b20fa0f754",
+        self.assertRaises(Exception, Metadata(self.CC).append_annotations, "6db98dfb-d6e8-4b27-8d55-95b20fa0f754",
                           "06634264-56bc-4c92-abd7-377dbbad79dd",
                           "data-diagnostic_diff", {}, {}, {}, "datastream1")
 
-        annotations_unchanged = Metadata(self.configuration).append_annotations("6db98dfb-d6e8-4b27-8d55-95b20fa0f754",
+        annotations_unchanged = Metadata(self.CC).append_annotations("6db98dfb-d6e8-4b27-8d55-95b20fa0f754",
                                                                                 "06634264-56bc-4c92-abd7-377dbbad79dd",
                                                                                 "data-diagnostic-test", {}, {}, {}, "datastream")
         self.assertEqual(annotations_unchanged, "unchanged")
 
 
-    # def test_delete_stream(self):
-    #     Metadata(self.configuration).delete_stream("6db98dfb-d6e8-4b27-8d55-95b20fa0f754")
+
 
     def test_store_stream(self):
         identifier = "6db98dfb-d6e8-4b27-8d55-95b20fa0f754"

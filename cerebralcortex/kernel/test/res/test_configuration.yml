@@ -14,6 +14,3 @@ mysql:
   user_table: user
   study_table: study
 
-time_settings:
-  zone: US/Central
-
