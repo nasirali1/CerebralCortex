@@ -74,7 +74,7 @@ def wireless_disconnection(stream_id: uuid, CC_obj: CerebralCortex, config: dict
 
     if battery_off_data:
         if name == config["sensor_types"]["motionsense_accel"]:
-            motionsense_accel_stream_id = Metadata.get_stream_id_by_owner_id(owner_id,
+            motionsense_accel_stream_id = Metadata(CC_obj.configuration).get_stream_id_by_owner_id(owner_id,
                                                                              config["sensor_types"][
                                                                                         "motionsense_accel"],
                                                                                     "id")

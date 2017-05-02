@@ -28,9 +28,11 @@ from datetime import datetime
 from collections import OrderedDict
 
 from cerebralcortex.data_processor.signalprocessing.window import window
-from cerebralcortex.data_processor.data_diagnostic.util import merge_consective_windows, outlier_detection, motionsense_magnitude, get_stream_data
+from cerebralcortex.data_processor.data_diagnostic.util import merge_consective_windows, outlier_detection, motionsense_magnitude
 from cerebralcortex.data_processor.data_diagnostic.post_processing import store
 from cerebralcortex.CerebralCortex import CerebralCortex
+
+from cerebralcortex.data_processor.signalprocessing.vector import magnitude
 
 
 def attachment_marker(stream_id: uuid, CC_obj: CerebralCortex, config: dict, start_time=None, end_time=None):
