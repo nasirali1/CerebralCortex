@@ -100,7 +100,7 @@ def wireless_disconnection(stream_id: uuid, CC_obj: CerebralCortex, config: dict
                              {"id": str(z), "name": config["sensor_types"]["autosense_accel_z"]}]
 
         for dp in battery_off_data:
-            if dp.start_time != "" and dp.end_time == "":
+            if dp.start_time != "" and dp.end_time != "":
                 # get a window prior to a battery powered off
                 start_time = dp.start_time - timedelta(seconds=config['general']['window_size'])
                 end_time = dp.start_time
