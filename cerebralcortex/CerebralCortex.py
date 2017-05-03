@@ -53,11 +53,11 @@ class CerebralCortex:
         self.time_zone = time_zone;
 
     def get_datastream(self, stream_identifier, start_time: datetime = None, end_time: datetime = None, data_type=DataSet.COMPLETE):
-        return Data(self.sc, self.sqlContext, self).get_stream(stream_identifier, start_time, end_time, data_type)
+        return Data(self).get_stream(stream_identifier, start_time, end_time, data_type)
 
 
     def save_datastream(self, datastream):
-        Data(self.sc, self.sqlContext, self).store_stream(datastream)
+        Data(self).store_stream(datastream)
 
     def save_stream(self, stream: Stream):
         # Save the stream here

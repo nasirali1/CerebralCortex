@@ -34,7 +34,6 @@ class Stream:
                  identifier: UUID = None,
                  owner: UUID = None,
                  name: UUID = None,
-                 #description: str = None,
                  data_descriptor: List[DataDescriptor] = None,
                  execution_context: ExecutionContext = None,
                  annotations: List[StreamReference] = None,
@@ -46,7 +45,6 @@ class Stream:
         self._identifier = identifier
         self._owner = owner
         self._name = name
-        #self._description = description
         self._data_descriptor = data_descriptor
         self._datastream_type = stream_type
         self._execution_context = execution_context

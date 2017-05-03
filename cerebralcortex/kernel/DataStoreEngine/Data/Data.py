@@ -27,7 +27,7 @@ from cerebralcortex.kernel.DataStoreEngine.Data.StoreData import StoreData
 
 
 class Data(LoadData, StoreData):
-    def __init__(self, sparkContext, sqlContext, CC_obj):
+    def __init__(self, CC_obj):
         """
         :param sparkContext:
         :param sparkContext:
@@ -41,5 +41,5 @@ class Data(LoadData, StoreData):
         self.dbPassword = self.configuration['cassandra']['db_pass']
         self.datapointTable = self.configuration['cassandra']['datapoint_table']
 
-        self.sqlContext = sqlContext
-        self.sparkContext = sparkContext
+        self.sqlContext = CC_obj.sqlContext
+        self.sparkContext = CC_obj.sc

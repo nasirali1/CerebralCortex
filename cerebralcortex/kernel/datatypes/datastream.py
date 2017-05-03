@@ -26,7 +26,6 @@ from uuid import UUID
 import datetime
 
 from cerebralcortex.kernel.datatypes.datapoint import DataPoint
-from cerebralcortex.kernel.datatypes.enumerations import StreamTypes
 from cerebralcortex.kernel.datatypes.stream import Stream
 from cerebralcortex.kernel.datatypes.subtypes import DataDescriptor, StreamReference
 from cerebralcortex.kernel.datatypes.subtypes import ExecutionContext
