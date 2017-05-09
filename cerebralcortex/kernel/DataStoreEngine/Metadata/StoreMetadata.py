@@ -55,7 +55,7 @@ class StoreMetadata:
         if isIDCreated:
             stream_identifier = isIDCreated
             if execution_context:
-                execution_context["execution_context"]['processing_module']["output_streams"][0][
+                execution_context["execution_context"]['processing_module']["output_stream"][
                     "id"] = stream_identifier
             new_end_time = self.check_end_time(stream_identifier, end_time)
             is_annotation_changed = self.append_annotations(stream_identifier, stream_owner_id, name, data_descriptor,

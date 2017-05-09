@@ -78,14 +78,28 @@ class StoreData:
 
     def map_datapoint_to_dataframe(self, stream_id, datapoints):
         temp = []
+        no_end_time = 0
         for i in datapoints:
             day = i.start_time
             day = day.strftime("%Y%m%d")
-            dp = str(stream_id), day, i.start_time, i.end_time, json.dumps(i.sample)
+            if type(i.sample)==str:
+                sample = i.sample
+            else:
+                sample = json.dumps(i.sample)
+            if i.end_time:
+                dp = str(stream_id), day, i.start_time, i.end_time, sample
+            else:
+                dp = str(stream_id), day, i.start_time, sample
+                if no_end_time!=1:
+                    no_end_time = 1
             temp.append(dp)
 
         temp_RDD = self.sparkContext.parallelize(temp)
-        df = self.sqlContext.createDataFrame(temp_RDD,
-                                             ["identifier", "day", "start_time", "end_time", "sample"])
+        if(no_end_time==1):
+            df = self.sqlContext.createDataFrame(temp_RDD,
+                                             ["identifier", "day", "start_time", "sample"])
+        else:
+            df = self.sqlContext.createDataFrame(temp_RDD,
+                                                 ["identifier", "day", "start_time", "end_time", "sample"])
 
         return df

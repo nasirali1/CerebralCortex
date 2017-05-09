@@ -53,7 +53,7 @@ class execution_context:
         elif not pm["description"]:
             raise ValueError("Processing module description cannot be empty.")
 
-        elif not pm["output_streams"]:
+        elif not pm["output_stream"]:
             raise ValueError("Name of output stream cannot be empty.")
         else:
             return {"processing_module": pm}

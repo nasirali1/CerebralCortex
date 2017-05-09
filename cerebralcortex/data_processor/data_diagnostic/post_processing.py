@@ -55,7 +55,7 @@ def store(input_streams: dict, data: OrderedDict, CC_obj: CerebralCortex, config
     metadata = CC_obj.get_datastream(parent_stream_id, data_type=DataSet.ONLY_METADATA)
 
     owner = metadata._owner
-    name = execution_context["execution_context"]["processing_module"]["output_streams"][0]["name"]
+    name = execution_context["execution_context"]["processing_module"]["output_stream"]["name"]
     stream_type = "datastream"
 
     ds = DataStream(identifier=stream_uuid, owner=owner, name=name, data_descriptor=data_descriptor,
@@ -222,7 +222,7 @@ def packet_loss(generated_stream_id: uuid, sensor_type: str, input_streams: dict
     else:
         raise ValueError("Incorrect sensor type")
 
-    output_stream = [{"name": name, "id": str(generated_stream_id)}];
+    output_stream = {"name": name, "id": str(generated_stream_id)};
     algo_description = config["description"]["packet_loss_marker"]
     method = 'cerebralcortex.data_processor.data_diagnostic.packet_loss_marker'
 
@@ -268,13 +268,13 @@ def get_data_descriptor(algo_type: str, config: dict) -> dict:
     return json.dumps(data_descriptor.get_data_descriptor("label", "window", dd))
 
 
-def get_execution_context(name: str, input_param: dict, input_streams: dict, output_streams: dict, method: str,
+def get_execution_context(name: str, input_param: dict, input_streams: dict, output_stream: dict, method: str,
                           algo_description: str, config: dict) -> dict:
     """
     :param name:
     :param input_param:
     :param input_streams:
-    :param output_streams:
+    :param output_stream:
     :param method:
     :param algo_description:
     :param config:
@@ -288,7 +288,7 @@ def get_execution_context(name: str, input_param: dict, input_streams: dict, out
                          "description": config["description"]["data_diagnostic"],
                          "input_parameters": input_param,
                          "input_streams": input_streams,
-                         "output_streams": output_streams}
+                         "output_stream": output_stream}
     algorithm = {"method": method,
                  "description": algo_description,
                  "authors": author,
