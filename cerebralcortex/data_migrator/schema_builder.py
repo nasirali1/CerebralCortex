@@ -45,7 +45,7 @@ def get_execution_context(stream_id: uuid, name: str, pm_algo_name: str, old_sch
                  "authors": "blank",
                  "version": "blank",
                  "reference": "blank"}
-
+    old_schema = {"old_schema": old_schema}
     algo_and_old_schema = {**algorithm, **old_schema}
 
     ec = execution_context().get_execution_context(processing_module, algo_and_old_schema)

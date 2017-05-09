@@ -30,8 +30,9 @@ from cerebralcortex.CerebralCortex import CerebralCortex
 from cerebralcortex.data_migrator.data_builder import bz2file_to_datapoints
 from cerebralcortex.data_migrator.schema_builder import get_annotations, get_data_descriptor, get_execution_context
 from cerebralcortex.data_migrator.util import read_file
-from cerebralcortex.kernel.datatypes.datastream import DataStream
-
+from cerebralcortex.kernel.datatypes.datastream import DataStream, DataPoint
+import datetime
+from pytz import timezone
 
 def migrate(dir: str):
     """
@@ -48,6 +49,19 @@ def migrate(dir: str):
         json_filename = filename
         data_filename = filename.replace(".json", ".csv.bz2")
         data = bz2file_to_datapoints(data_filename)
+
+
+        # start_time = datetime.datetime(2017, 4, 24, 0, 0, 1)
+        # end_time = datetime.datetime(2017, 4, 24, 0, 0, 2)
+        # localtz = timezone('US/Central')
+        # start_time = localtz.localize(start_time)
+        # end_time = localtz.localize(end_time)
+        # sample = {'Foo3': 123}
+        # dp1 = DataPoint(start_time=start_time, end_time=end_time, sample=sample)
+        # dp2 = DataPoint(start_time=start_time, end_time=end_time, sample=sample)
+        # data = []
+        # data.append(dp1)
+        # data.append(dp2)
         parse_json_file(json_filename, data, CC)
         #exit()
 
@@ -63,10 +77,15 @@ def parse_json_file(filename, data, CC_obj):
     tmp = tmp[len(tmp) - 1].split("+")
     owner_id = tmp[0]
     stream_id = str(uuid.uuid3(uuid.NAMESPACE_DNS, str(tmp[0] + " " + tmp[1])))
-    if tmp[4]:
-        name = tmp[3] + " - " + tmp[4]
-    else:
-        name = tmp[3]
+    # if tmp[4]:
+    #     name = tmp[3] + " - " + tmp[4]
+    # else:
+    name = ''
+    for i in tmp[3:]:
+        name += i+" "
+
+    name = name.strip().replace(".json", "")
+    name = tmp[1]+" "+name
 
     pm_algo_name = tmp[2]
 
