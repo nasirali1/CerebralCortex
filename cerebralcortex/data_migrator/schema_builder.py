@@ -23,7 +23,6 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-import uuid
 from cerebralcortex.kernel.schema_builder.execution_context import execution_context
 
 

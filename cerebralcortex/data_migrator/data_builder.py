@@ -25,9 +25,9 @@
 
 import bz2
 import datetime
+from typing import List
 
 from pytz import timezone
-from typing import List
 
 from cerebralcortex.kernel.datatypes.datastream import DataPoint
 

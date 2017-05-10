@@ -30,9 +30,8 @@ from cerebralcortex.CerebralCortex import CerebralCortex
 from cerebralcortex.data_migrator.data_builder import bz2file_to_datapoints
 from cerebralcortex.data_migrator.schema_builder import get_annotations, get_data_descriptor, get_execution_context
 from cerebralcortex.data_migrator.util import read_file
-from cerebralcortex.kernel.datatypes.datastream import DataStream, DataPoint
-import datetime
-from pytz import timezone
+from cerebralcortex.kernel.datatypes.datastream import DataStream
+
 
 def migrate(dir: str):
     """
