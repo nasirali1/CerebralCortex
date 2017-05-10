@@ -58,7 +58,7 @@ def store(input_streams: dict, data: OrderedDict, CC_obj: CerebralCortex, config
     name = metadata.name
     stream_type = "datastream"
 
-    ds = DataStream(identifier=stream_uuid, owner=owner, name=name, data_descriptor=data_descriptor,
+    ds = DataStream(owner=owner, name=name, data_descriptor=data_descriptor,
                     execution_context=execution_context, annotations=annotations,
                     stream_type=stream_type, data=data)
 

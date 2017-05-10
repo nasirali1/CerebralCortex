@@ -27,25 +27,18 @@ import uuid
 from cerebralcortex.kernel.schema_builder.execution_context import execution_context
 
 
-def get_execution_context(stream_id: uuid, name: str, pm_algo_name: str, old_schema: dict) -> dict:
+def get_execution_context(pm_algo_name: str, old_schema: dict) -> dict:
     """
-    :param stream_id:
-    :param name:
     :param pm_algo_name:
     :param old_schema:
     :return:
     """
-    processing_module = {"name": pm_algo_name,
-                         "description": "blank",
-                         "input_parameters": "blank",
-                         "input_streams": "blank",
-                         "output_stream": {"id": stream_id, "name": name}}
-    algorithm = {"method": pm_algo_name,
-                 "description": "blank",
-                 "authors": "blank",
-                 "version": "blank",
-                 "reference": "blank"}
+
     old_schema = {"old_schema": old_schema}
+
+    processing_module = execution_context().processing_module_schema(pm_algo_name, "blank", "blank", "blank")
+    algorithm = execution_context().algorithm_schema(pm_algo_name, "blank", "blank", "blank", "blank")
+
     algo_and_old_schema = {**algorithm, **old_schema}
 
     ec = execution_context().get_execution_context(processing_module, algo_and_old_schema)

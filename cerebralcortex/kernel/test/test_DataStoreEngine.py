@@ -58,7 +58,7 @@ class TestDataStoreEngine(unittest.TestCase):
                                                        "06634264-56bc-4c92-abd7-377dbbad79dd", "data-diagnostic-test",
                                                        data_descriptor, execution_context,
                                                        annotations,
-                                                       stream_type, start_time, end_time)
+                                                       stream_type, start_time, end_time, "new")
 
     def test_get_stream_id_name(self):
         stream_id = Metadata(self.CC).get_stream_id_by_owner_id("06634264-56bc-4c92-abd7-377dbbad79dd",

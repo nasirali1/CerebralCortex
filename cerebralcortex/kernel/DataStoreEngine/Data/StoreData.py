@@ -34,7 +34,7 @@ class StoreData:
 
         :param datastream:
         """
-        stream_identifier = datastream.identifier
+
         ownerID = datastream.owner
         name = datastream.name
         data_descriptor = datastream.data_descriptor
@@ -52,10 +52,14 @@ class StoreData:
                 new_start_time = data.start_time
                 new_end_time = data.start_time
 
+            id = Metadata(self.CC_obj).is_id_created2(ownerID, name, data_descriptor, execution_context)
+
+            stream_identifier = id["id"]
+
             Metadata(self.CC_obj).store_stream_info(stream_identifier, ownerID, name,
                                                     data_descriptor, execution_context,
                                                     annotations,
-                                                    stream_type, new_start_time, new_end_time)
+                                                    stream_type, new_start_time, new_end_time, id["status"])
             dataframe = self.map_datapoint_to_dataframe(stream_identifier, data)
 
             self.store_data(dataframe, self.datapointTable)
