@@ -32,7 +32,7 @@ from pytz import timezone
 from cerebralcortex.kernel.datatypes.datastream import DataPoint
 
 
-def bz2file_to_datapoints(filename: str) -> List[DataPoint]:
+def bz2file_to_datapoints(filename: str, data_block_size) -> List[DataPoint]:
     """
     Read bz2 compressed files and map the data to Datapoints structure
     :param filename:
@@ -41,19 +41,26 @@ def bz2file_to_datapoints(filename: str) -> List[DataPoint]:
     datapoints = []
     bz_file = bz2.BZ2File(filename)
 
+    line_number = 1
     for line in bz_file:
-        tuple = line.decode("utf-8").replace("\r\n", "").split(
-            ",")  # str(line).replace("b", "").replace("\\r\\n", "").replace("\'", "").split(",")
-        if (len(tuple) == 5):
-            sample = str([tuple[2], tuple[3], tuple[4]])
+        row = line.decode("utf-8").replace("\r\n", "").split(
+            ",")
+        if (len(row) == 5):
+            sample = str([row[2], row[3], row[4]])
         else:
-            sample = str([tuple[2]])
+            sample = str([row[2]])
 
-        start_time = datetime.datetime.fromtimestamp(int(tuple[0]) / 1000)
+        start_time = datetime.datetime.fromtimestamp(int(row[0]) / 1000)
         localtz = timezone('US/Central')
         start_time = localtz.localize(start_time)
         end_time = ""
 
-        datapoints.append(DataPoint(start_time=start_time, end_time=end_time, sample=sample))
+        if line_number>data_block_size:
+            yield datapoints
+            datapoints.clear()
+            line_number=1
+        else:
+            datapoints.append(DataPoint(start_time=start_time, end_time=end_time, sample=sample))
+            line_number +=1
 
     return datapoints
