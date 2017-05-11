@@ -53,10 +53,9 @@ def get_data_descriptor(old_schema: dict) -> dict:
     return old_schema["datadescriptor"]
 
 
-def get_annotations(old_schema: dict) -> dict:
+def get_annotations() -> dict:
     """
 
-    :param old_schema:
     :return:
     """
     return []

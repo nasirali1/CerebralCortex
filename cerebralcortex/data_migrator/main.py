@@ -22,6 +22,7 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+import datetime
 import glob
 import os
 import uuid
@@ -46,7 +47,7 @@ def migrate(folder_path: str, data_block_size):
         raise ValueError("Path to the data directory cannot be empty.")
 
     for filename in glob.iglob(folder_path + '/**/*.json', recursive=True):
-        print("Processing file "+filename)
+        print(str(datetime.datetime.now()) + " -- Started processing file " + filename)
 
         tmp = filename.split("/")
         tmp = tmp[len(tmp) - 1].split("+")
@@ -55,10 +56,10 @@ def migrate(folder_path: str, data_block_size):
 
         name = ''
         for i in tmp[3:]:
-            name += i+" "
+            name += i + " "
 
         name = name.strip().replace(".json", "")
-        name = tmp[1]+" "+name
+        name = tmp[1] + " " + name
 
         pm_algo_name = tmp[2]
 
@@ -66,14 +67,13 @@ def migrate(folder_path: str, data_block_size):
         old_schema = read_file(filename)
         execution_context = get_execution_context(pm_algo_name, old_schema)
         data_descriptor = get_data_descriptor(old_schema)
-        annotations = get_annotations(old_schema)
-
-        print("Schema building is complete. Starting adding data to datastores.")
-
-        for data_block in bz2file_to_datapoints(data_filename,data_block_size):
+        annotations = get_annotations()
+        print(str(datetime.datetime.now()) + " -- Schema building is complete ")
+        print(str(datetime.datetime.now()) + " -- Started unzipping file and adding records in Cassandra ")
+        for data_block in bz2file_to_datapoints(data_filename, data_block_size):
             persist_data(execution_context, data_descriptor, annotations, stream_id, name, owner_id, data_block, CC)
+        print(str(datetime.datetime.now()) + " -- Completed processing file " + filename)
 
-        print("Completed adding data and schema of "+filename)
 
 def persist_data(execution_context, data_descriptor, annotations, stream_id, name, owner_id, data, CC_obj):
     """
@@ -84,12 +84,12 @@ def persist_data(execution_context, data_descriptor, annotations, stream_id, nam
     """
 
     stream_type = "datastream"
-
     ds = DataStream(identifier=stream_id, owner=owner_id, name=name, data_descriptor=data_descriptor,
                     execution_context=execution_context, annotations=annotations,
                     stream_type=stream_type, data=data)
 
     CC_obj.save_datastream(ds)
 
-#sample usage
-migrate("/home/ali/IdeaProjects/MD2K_DATA/Rice/8be4f601-70ce-3e13-a321-b85ee84b37ce", 100000)
+
+# sample usage
+migrate("/home/ali/IdeaProjects/MD2K_DATA/Rice/8be4f601-70ce-3e13-a321-b85ee84b37ce", 1000)

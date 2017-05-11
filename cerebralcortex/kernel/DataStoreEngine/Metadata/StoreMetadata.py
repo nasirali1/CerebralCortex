@@ -37,7 +37,8 @@ class StoreMetadata:
     def store_stream_info(self, stream_identifier: uuid, stream_owner_id: uuid, name: str,
                           data_descriptor: dict,
                           execution_context: dict,
-                          annotations: dict, stream_type: str, start_time: datetime, end_time: datetime, isIDCreated: str):
+                          annotations: dict, stream_type: str, start_time: datetime, end_time: datetime,
+                          isIDCreated: str):
         """
         This method will update a record if stream already exist else it will insert a new record.
         :param stream_identifier:
@@ -50,10 +51,10 @@ class StoreMetadata:
         """
         isQueryReady = 0
 
-        #isIDCreated = self.is_id_created(stream_owner_id, name)
+        # isIDCreated = self.is_id_created(stream_owner_id, name)
 
-        if isIDCreated=="update":
-            #stream_identifier = isIDCreated
+        if isIDCreated == "update":
+            # stream_identifier = isIDCreated
             # if execution_context:
             #     execution_context["execution_context"]['processing_module']["output_stream"][
             #         "id"] = stream_identifier
@@ -156,7 +157,7 @@ class StoreMetadata:
         vals = ownerID, name
         self.cursor.execute(qry, vals)
         rows = self.cursor.fetchall()
-        if len(rows)>=2:
+        if len(rows) >= 2:
             pass
         else:
             if rows:

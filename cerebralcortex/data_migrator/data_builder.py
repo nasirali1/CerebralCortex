@@ -42,6 +42,7 @@ def bz2file_to_datapoints(filename: str, data_block_size) -> List[DataPoint]:
     bz_file = bz2.BZ2File(filename)
 
     line_number = 1
+
     for line in bz_file:
         row = line.decode("utf-8").replace("\r\n", "").split(
             ",")
@@ -55,12 +56,12 @@ def bz2file_to_datapoints(filename: str, data_block_size) -> List[DataPoint]:
         start_time = localtz.localize(start_time)
         end_time = ""
 
-        if line_number>data_block_size:
+        if line_number > data_block_size:
             yield datapoints
             datapoints.clear()
-            line_number=1
+            line_number = 1
         else:
             datapoints.append(DataPoint(start_time=start_time, end_time=end_time, sample=sample))
-            line_number +=1
+            line_number += 1
 
-    return datapoints
+    yield datapoints

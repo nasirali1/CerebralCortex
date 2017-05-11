@@ -71,3 +71,5 @@ fabric.properties
 /cerebralcortex/data_processor/data_diagnostic/sample_metadata.json
 /cerebralcortex/data_processor/data_diagnostic/todo
 /cerebralcortex/data_migrator/schema/
+!/cerebralcortex/data_migrator/tess/
+/cerebralcortex/data_migrator/tess/
