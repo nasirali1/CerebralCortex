@@ -52,13 +52,13 @@ class StoreData:
                 new_start_time = data.start_time
                 new_end_time = data.start_time
 
-            id = Metadata(self.CC_obj).is_id_created2(ownerID, name, data_descriptor, execution_context)
+            result = Metadata(self.CC_obj).is_id_created2(ownerID, name, data_descriptor, execution_context)
 
-            stream_identifier = id["id"]
+            stream_identifier = result["id"]
             Metadata(self.CC_obj).store_stream_info(stream_identifier, ownerID, name,
                                                     data_descriptor, execution_context,
                                                     annotations,
-                                                    stream_type, new_start_time, new_end_time, id["status"])
+                                                    stream_type, new_start_time, new_end_time, result["status"])
 
             dataframe = self.map_datapoint_to_dataframe(stream_identifier, data)
 
@@ -86,7 +86,7 @@ class StoreData:
         for i in datapoints:
             day = i.start_time
             day = day.strftime("%Y%m%d")
-            if type(i.sample) == str:
+            if isinstance(i.sample, str):
                 sample = i.sample
             else:
                 sample = json.dumps(i.sample)
