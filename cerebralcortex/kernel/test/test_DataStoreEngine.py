@@ -38,15 +38,6 @@ class TestDataStoreEngine(unittest.TestCase):
 
         self.CC = CerebralCortex(self.testConfigFile, master="local[*]", name="Cerebral Cortex DataStoreEngine Tests", time_zone="US/Central")
 
-        self.configuration = self.CC.configuration
-        self.test_store_stream()
-        self.test_get_stream_id_name()
-        self.test_get_stream_info()
-        self.test_append_annotations()
-        self.test_store_stream()
-        # TODO: populate databases with sample information for these tests
-
-    def test_store_stream_info(self):
         data_descriptor = {}
         execution_context = {}
         annotations = {}
@@ -55,10 +46,18 @@ class TestDataStoreEngine(unittest.TestCase):
         end_time = datetime.datetime(2017, 4, 24, 0, 0, 2)
 
         Metadata(self.CC).store_stream_info("6db98dfb-d6e8-4b27-8d55-95b20fa0f754",
-                                                       "06634264-56bc-4c92-abd7-377dbbad79dd", "data-diagnostic-test",
-                                                       data_descriptor, execution_context,
-                                                       annotations,
-                                                       stream_type, start_time, end_time, "new")
+                                            "06634264-56bc-4c92-abd7-377dbbad79dd", "data-diagnostic-test",
+                                            data_descriptor, execution_context,
+                                            annotations,
+                                            stream_type, start_time, end_time, "new")
+
+        self.configuration = self.CC.configuration
+        self.test_get_stream_id_name()
+        self.test_get_stream_info()
+        self.test_append_annotations()
+        self.test_store_stream()
+        # TODO: populate databases with sample information for these tests
+
 
     def test_get_stream_id_name(self):
         stream_id = Metadata(self.CC).get_stream_id_by_owner_id("06634264-56bc-4c92-abd7-377dbbad79dd",
@@ -99,6 +98,9 @@ class TestDataStoreEngine(unittest.TestCase):
                                                                                 "data-diagnostic-test", {}, {}, {}, "datastream")
         self.assertEqual(annotations_unchanged, "unchanged")
 
+    def test_get_stream_ids_by_name(self):
+        stream_ids = Metadata(self.CC).get_stream_ids_by_name("data-diagnostic-test", "06634264-56bc-4c92-abd7-377dbbad79dd")
+        print(stream_ids)
 
 
 

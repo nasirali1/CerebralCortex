@@ -132,16 +132,16 @@ class StoreMetadata:
         else:
             return False
 
-    def is_id_created(self, owner_id, name):
-        # if stream name, id, and owner are same then return true
-        qry = "SELECT * from " + self.datastreamTable + " where owner=%s and name=%s"
-        vals = owner_id, name
-        self.cursor.execute(qry, vals)
-        rows = self.cursor.fetchall()
-        if rows:
-            return rows[0]["identifier"]
-        else:
-            return False
+    # def is_id_created(self, owner_id, name):
+    #     # if stream name, id, and owner are same then return true
+    #     qry = "SELECT * from " + self.datastreamTable + " where owner=%s and name=%s"
+    #     vals = owner_id, name
+    #     self.cursor.execute(qry, vals)
+    #     rows = self.cursor.fetchall()
+    #     if rows:
+    #         return rows[0]["identifier"]
+    #     else:
+    #         return False
 
     def is_id_created2(self, ownerID: uuid, name: str, data_descriptor: dict, execution_context: dict) -> dict:
 
@@ -157,7 +157,7 @@ class StoreMetadata:
         vals = ownerID, name
         self.cursor.execute(qry, vals)
         rows = self.cursor.fetchall()
-        if len(rows) >= 2:
+        if len(rows) >= 2000:
             pass
         else:
             if rows:
