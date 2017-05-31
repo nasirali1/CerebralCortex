@@ -25,6 +25,7 @@
 
 from cerebralcortex.kernel.schema_builder.execution_context import execution_context
 
+
 def get_execution_context(pm_algo_name: str, old_schema: dict) -> dict:
     """
     :param pm_algo_name:

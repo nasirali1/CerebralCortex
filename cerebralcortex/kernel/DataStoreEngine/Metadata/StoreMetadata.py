@@ -37,8 +37,7 @@ class StoreMetadata:
     def store_stream_info(self, stream_identifier: uuid, stream_owner_id: uuid, name: str,
                           data_descriptor: dict,
                           execution_context: dict,
-                          annotations: dict, stream_type: str, start_time: datetime, end_time: datetime,
-                          isIDCreated: str):
+                          annotations: dict, stream_type: str, start_time: datetime, end_time: datetime, isIDCreated):
         """
         This method will update a record if stream already exist else it will insert a new record.
         :param stream_identifier:
@@ -50,8 +49,6 @@ class StoreMetadata:
         :param stream_type:
         """
         isQueryReady = 0
-
-        # isIDCreated = self.is_id_created(stream_owner_id, name)
 
         if isIDCreated == "update":
             # stream_identifier = isIDCreated
@@ -112,58 +109,50 @@ class StoreMetadata:
         self.cursor.execute(qry, vals)
         result = self.cursor.fetchall()
         if result:
-            if (result[0]["identifier"] == str(stream_identifier)):
-                if (result[0]["owner"] != stream_owner_id):
+            if result[0]["identifier"] == str(stream_identifier):
+                if result[0]["owner"] != stream_owner_id:
                     raise Exception("Update failed: owner ID is not same..")
-                elif (result[0]["name"] != name):
+                elif result[0]["name"] != name:
                     raise Exception("Update failed: name is not same..")
-                elif (json.loads(result[0]["data_descriptor"]) != data_descriptor):
+                elif json.loads(result[0]["data_descriptor"]) != data_descriptor:
                     raise Exception("Update failed: data descriptor is not same.")
-                elif (json.loads(result[0]["execution_context"]) != execution_context):
+                elif json.loads(result[0]["execution_context"]) != execution_context:
                     raise Exception("Update failed: execution context is not same.")
-                elif (result[0]["type"] != stream_type):
+                elif result[0]["type"] != stream_type:
                     raise Exception("Update failed: type is not same.")
-                elif (json.loads(result[0]["annotations"]) == annotations):
+                elif json.loads(result[0]["annotations"]) == annotations:
                     return "unchanged"
-                elif (json.loads(result[0]["annotations"]) != annotations):
+                elif json.loads(result[0]["annotations"]) != annotations:
                     return "unchanged"
                 else:
                     return True
         else:
             return False
 
-    # def is_id_created(self, owner_id, name):
-    #     # if stream name, id, and owner are same then return true
-    #     qry = "SELECT * from " + self.datastreamTable + " where owner=%s and name=%s"
-    #     vals = owner_id, name
-    #     self.cursor.execute(qry, vals)
-    #     rows = self.cursor.fetchall()
-    #     if rows:
-    #         return rows[0]["identifier"]
-    #     else:
-    #         return False
-
-    def is_id_created2(self, ownerID: uuid, name: str, data_descriptor: dict, execution_context: dict) -> dict:
+    def is_id_created(self, ownerID: uuid, name: str, execution_context: dict) -> dict:
 
         """
-        if stream name, owner, data_descriptor, and execution context are same then return existing UUID
+        return existing UUID if stream name, owner ID, and method name defined in algorithm metadata (execution context) are found in MySql else it generates a newly created UUID
+        Assumption -> two streams cannot have same stream-name, owner-ID, and method-name
         :param ownerID:
         :param name:
-        :param data_descriptor:
         :param execution_context:
         :return:
         """
-        qry = "SELECT * from " + self.datastreamTable + " where owner=%s and name=%s"
-        vals = ownerID, name
+        if "execution_context" in execution_context and "algorithm" in execution_context[
+            "execution_context"] and "method" in execution_context["execution_context"]["algorithm"]:
+            algo_method = execution_context["execution_context"]["algorithm"]["method"]
+        else:
+            raise ValueError("Method name is undefined in execution context.")
+
+        qry = "SELECT * from " + self.datastreamTable + " where owner=%s and name=%s and execution_context->>\"$.execution_context.algorithm.method\"=%s"
+        vals = ownerID, name, algo_method
         self.cursor.execute(qry, vals)
         rows = self.cursor.fetchall()
-        if len(rows) >= 2000:
-            pass
+        if rows:
+            return {"id": rows[0]["identifier"], "status": "update"}
         else:
-            if rows:
-                return {"id": rows[0]["identifier"], "status": "update"}
-            else:
-                return {"id": uuid.uuid4(), "status": "new"}
+            return {"id": uuid.uuid4(), "status": "new"}
 
     def check_end_time(self, stream_id, end_time):
         localtz = timezone(self.CC_obj.time_zone)
