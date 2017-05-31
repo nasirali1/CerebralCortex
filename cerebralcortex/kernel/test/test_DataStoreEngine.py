@@ -34,12 +34,11 @@ from cerebralcortex.kernel.datatypes.datastream import DataStream
 from cerebralcortex.kernel.DataStoreEngine.dataset import DataSet
 
 class TestDataStoreEngine(unittest.TestCase):
-    def setUp(self):
-        self.testConfigFile = os.path.join(os.path.dirname(__file__), 'res/test_configuration.yml')
 
-        self.CC = CerebralCortex(self.testConfigFile, master="local[*]", name="Cerebral Cortex DataStoreEngine Tests", time_zone="US/Central")
-
-        self.configuration = self.CC.configuration
+    testConfigFile = os.path.join(os.path.dirname(__file__), 'res/test_configuration.yml')
+    CC = CerebralCortex(testConfigFile, master="local[*]", name="Cerebral Cortex DataStoreEngine Tests", time_zone="US/Central")
+    configuration = CC.configuration
+    meta_obj = Metadata(CC)
 
     def test_01_setup_data(self):
         data_descriptor = {}
@@ -60,9 +59,9 @@ class TestDataStoreEngine(unittest.TestCase):
 
         Metadata(self.CC).store_stream_info(stream_identifier,
                                                        "06634264-56bc-4c92-abd7-377dbbad79dd", "data-diagnostic-test",
-                                                       data_descriptor, execution_context,
-                                                       annotations,
-                                                       stream_type, start_time, end_time, result["status"])
+                                        data_descriptor, execution_context,
+                                        annotations,
+                                        stream_type, start_time, end_time, result["status"])
 
     def test_02_get_stream_info(self):
 
@@ -101,25 +100,22 @@ class TestDataStoreEngine(unittest.TestCase):
 
 
     def test_04_get_stream_ids_by_name(self):
-        stream_ids = Metadata(self.CC).get_stream_ids_by_name("data-diagnostic-test", "06634264-56bc-4c92-abd7-377dbbad79dd")
-
-
         start_time = datetime.datetime(2017, 4, 24, 0, 0, 1)
         end_time = datetime.datetime(2017, 4, 24, 0, 0, 2)
 
-        by_name = Metadata(self).get_stream_ids_by_name("data-diagnostic-test")
+        by_name = Metadata(self.CC).get_stream_ids_by_name("data-diagnostic-test")
         self.assertIsInstance(by_name, list)
         self.assertEqual(by_name[0], "6db98dfb-d6e8-4b27-8d55-95b20fa0f754")
 
-        by_name_id = Metadata(self).get_stream_ids_by_name("data-diagnostic-test", "06634264-56bc-4c92-abd7-377dbbad79dd")
+        by_name_id = Metadata(self.CC).get_stream_ids_by_name("data-diagnostic-test", "06634264-56bc-4c92-abd7-377dbbad79dd")
         self.assertIsInstance(by_name_id, list)
         self.assertEqual(by_name_id[0], "6db98dfb-d6e8-4b27-8d55-95b20fa0f754")
 
-        by_name_id_start_time = Metadata(self).get_stream_ids_by_name("data-diagnostic-test","06634264-56bc-4c92-abd7-377dbbad79dd",  start_time)
+        by_name_id_start_time = Metadata(self.CC).get_stream_ids_by_name("data-diagnostic-test","06634264-56bc-4c92-abd7-377dbbad79dd",  start_time)
         self.assertIsInstance(by_name_id_start_time, list)
         self.assertEqual(by_name_id_start_time[0], "6db98dfb-d6e8-4b27-8d55-95b20fa0f754")
 
-        by_name_id_start_time_end_time = Metadata(self).get_stream_ids_by_name("data-diagnostic-test","06634264-56bc-4c92-abd7-377dbbad79dd", start_time, end_time)
+        by_name_id_start_time_end_time = Metadata(self.CC).get_stream_ids_by_name("data-diagnostic-test","06634264-56bc-4c92-abd7-377dbbad79dd", start_time, end_time)
         self.assertIsInstance(by_name_id_start_time_end_time, list)
         self.assertEqual(by_name_id_start_time_end_time[0], "6db98dfb-d6e8-4b27-8d55-95b20fa0f754")
 
@@ -128,19 +124,19 @@ class TestDataStoreEngine(unittest.TestCase):
         start_time = datetime.datetime(2017, 4, 24, 0, 0, 1)
         end_time = datetime.datetime(2017, 4, 24, 0, 0, 2)
 
-        by_id = Metadata(self).get_stream_ids_of_owner("06634264-56bc-4c92-abd7-377dbbad79dd")
+        by_id = Metadata(self.CC).get_stream_ids_of_owner("06634264-56bc-4c92-abd7-377dbbad79dd")
         self.assertIsInstance(by_id, list)
         self.assertEqual(by_id[0], "6db98dfb-d6e8-4b27-8d55-95b20fa0f754")
 
-        by_name_id = Metadata(self).get_stream_ids_of_owner("06634264-56bc-4c92-abd7-377dbbad79dd", "data-diagnostic-test")
+        by_name_id = Metadata(self.CC).get_stream_ids_of_owner("06634264-56bc-4c92-abd7-377dbbad79dd", "data-diagnostic-test")
         self.assertIsInstance(by_name_id, list)
         self.assertEqual(by_name_id[0], "6db98dfb-d6e8-4b27-8d55-95b20fa0f754")
 
-        by_name_id_start_time = Metadata(self).get_stream_ids_of_owner("06634264-56bc-4c92-abd7-377dbbad79dd", "data-diagnostic-test", start_time)
+        by_name_id_start_time = Metadata(self.CC).get_stream_ids_of_owner("06634264-56bc-4c92-abd7-377dbbad79dd", "data-diagnostic-test", start_time)
         self.assertIsInstance(by_name_id_start_time, list)
         self.assertEqual(by_name_id_start_time[0], "6db98dfb-d6e8-4b27-8d55-95b20fa0f754")
 
-        by_name_id_start_time_end_time = Metadata(self).get_stream_ids_of_owner("06634264-56bc-4c92-abd7-377dbbad79dd", "data-diagnostic-test", start_time, end_time)
+        by_name_id_start_time_end_time = Metadata(self.CC).get_stream_ids_of_owner("06634264-56bc-4c92-abd7-377dbbad79dd", "data-diagnostic-test", start_time, end_time)
         self.assertIsInstance(by_name_id_start_time_end_time, list)
         self.assertEqual(by_name_id_start_time_end_time[0], "6db98dfb-d6e8-4b27-8d55-95b20fa0f754")
 
@@ -182,7 +178,6 @@ class TestDataStoreEngine(unittest.TestCase):
         self.assertEqual(stream.data[0].start_time, start_time)
         self.assertEqual(stream.data[0].end_time, end_time)
         self.assertEqual(stream.data[0].sample, sample)
-
 
 
 if __name__ == '__main__':

@@ -51,18 +51,14 @@ class StoreMetadata:
         isQueryReady = 0
 
         if isIDCreated == "update":
-            # stream_identifier = isIDCreated
-            # if execution_context:
-            #     execution_context["execution_context"]['processing_module']["output_stream"][
-            #         "id"] = stream_identifier
             new_end_time = self.check_end_time(stream_identifier, end_time)
             is_annotation_changed = self.append_annotations(stream_identifier, stream_owner_id, name, data_descriptor,
                                                             execution_context, annotations, stream_type)
         else:
             new_end_time = None
-            is_annotation_changed = False
+            is_annotation_changed = "new"
 
-        if new_end_time != "unchanged" and is_annotation_changed == True:
+        if new_end_time != "unchanged" and is_annotation_changed == "changed":
             # update annotations and end-time
             qry = "UPDATE " + self.datastreamTable + " set annotations=JSON_ARRAY_APPEND(annotations, '$.annotations',  CAST(%s AS JSON)), end_time=%s where identifier=%s"
             vals = json.dumps(annotations), new_end_time, str(stream_identifier)
@@ -72,29 +68,29 @@ class StoreMetadata:
             qry = "UPDATE " + self.datastreamTable + " set end_time=%s where identifier=%s"
             vals = end_time, str(stream_identifier)
             isQueryReady = 1
-        elif new_end_time == "unchanged" and is_annotation_changed == True:
+        elif new_end_time == "unchanged" and is_annotation_changed == "changed":
             # update only annotations
             qry = "UPDATE " + self.datastreamTable + " set annotations=JSON_ARRAY_APPEND(annotations, '$.annotations',  CAST(%s AS JSON)) where identifier=%s"
             vals = json.dumps(annotations), str(stream_identifier)
             isQueryReady = 1
 
-        elif (is_annotation_changed == False):
+        elif (is_annotation_changed == "new"):
             qry = "INSERT INTO " + self.datastreamTable + " (identifier, owner, name, data_descriptor, execution_context, annotations, type, start_time, end_time) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s)"
             vals = str(stream_identifier), str(stream_owner_id), str(name), json.dumps(
                 data_descriptor), json.dumps(execution_context), json.dumps(
                 annotations), stream_type, start_time, end_time
             isQueryReady = 1
+
+        # if nothing is changed then isQueryReady would be 0 and no database transaction would be performed
         if isQueryReady == 1:
             self.cursor.execute(qry, vals)
             self.dbConnection.commit()
-            self.cursor.close()
-            self.dbConnection.close()
 
     def append_annotations(self, stream_identifier: uuid, stream_owner_id: uuid, name: str,
                            data_descriptor: dict,
                            execution_context: dict,
                            annotations: dict,
-                           stream_type: str):
+                           stream_type: str) -> str:
         """
         This method will check if the stream already exist with the same data (as provided in params) except annotations.
         :param stream_identifier:
@@ -108,6 +104,7 @@ class StoreMetadata:
         vals = {'identifier': str(stream_identifier)}
         self.cursor.execute(qry, vals)
         result = self.cursor.fetchall()
+
         if result:
             if result[0]["identifier"] == str(stream_identifier):
                 if result[0]["owner"] != stream_owner_id:
@@ -125,9 +122,9 @@ class StoreMetadata:
                 elif json.loads(result[0]["annotations"]) != annotations:
                     return "unchanged"
                 else:
-                    return True
+                    return "changed"
         else:
-            return False
+            return "new"
 
     def is_id_created(self, ownerID: uuid, name: str, execution_context: dict) -> dict:
 
@@ -149,6 +146,7 @@ class StoreMetadata:
         vals = ownerID, name, algo_method
         self.cursor.execute(qry, vals)
         rows = self.cursor.fetchall()
+
         if rows:
             return {"id": rows[0]["identifier"], "status": "update"}
         else:
@@ -161,6 +159,7 @@ class StoreMetadata:
         vals = {'identifier': str(stream_id)}
         self.cursor.execute(qry, vals)
         rows = self.cursor.fetchall()
+
         if rows:
             old_end_time = rows[0]["end_time"]
             if end_time.tzinfo is None:

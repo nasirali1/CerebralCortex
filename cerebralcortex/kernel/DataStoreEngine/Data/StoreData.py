@@ -31,7 +31,6 @@ from cerebralcortex.kernel.datatypes.datastream import DataStream
 class StoreData:
     def store_stream(self, datastream: DataStream):
         """
-
         :param datastream:
         """
 
