@@ -66,14 +66,6 @@ class TestDataStoreEngine(unittest.TestCase):
                                         stream_type, start_time, end_time, result["status"])
 
     def test_02_get_stream_info(self):
-        Metadata(self.CC).store_stream_info("6db98dfb-d6e8-4b27-8d55-95b20fa0f754",
-                                                       "06634264-56bc-4c92-abd7-377dbbad79dd", "data-diagnostic-test",
-                                                       data_descriptor, execution_context,
-                                                       annotations,
-                                                       stream_type, start_time, end_time, "new")
-
-
-    def test_get_stream_info(self):
 
         stream_info = Metadata(self.CC).get_stream_info("6db98dfb-d6e8-4b27-8d55-95b20fa0f754")
 
