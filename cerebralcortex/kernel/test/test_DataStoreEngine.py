@@ -40,6 +40,7 @@ class TestDataStoreEngine(unittest.TestCase):
     configuration = CC.configuration
     meta_obj = Metadata(CC)
 
+
     def test_01_setup_data(self):
         data_descriptor = {}
         execution_context = json.loads('{"execution_context": {"algorithm": {"method": "cerebralcortex.data_processor.data_diagnostic.BatteryDataMarker"}}}')
@@ -47,6 +48,7 @@ class TestDataStoreEngine(unittest.TestCase):
         stream_type = "datastream"
         start_time = datetime.datetime(2017, 4, 24, 0, 0, 1)
         end_time = datetime.datetime(2017, 4, 24, 0, 0, 2)
+
 
         result = Metadata(self.CC).is_id_created("06634264-56bc-4c92-abd7-377dbbad79dd", "data-diagnostic-test", execution_context)
 
@@ -64,6 +66,14 @@ class TestDataStoreEngine(unittest.TestCase):
                                         stream_type, start_time, end_time, result["status"])
 
     def test_02_get_stream_info(self):
+        Metadata(self.CC).store_stream_info("6db98dfb-d6e8-4b27-8d55-95b20fa0f754",
+                                                       "06634264-56bc-4c92-abd7-377dbbad79dd", "data-diagnostic-test",
+                                                       data_descriptor, execution_context,
+                                                       annotations,
+                                                       stream_type, start_time, end_time, "new")
+
+
+    def test_get_stream_info(self):
 
         stream_info = Metadata(self.CC).get_stream_info("6db98dfb-d6e8-4b27-8d55-95b20fa0f754")
 

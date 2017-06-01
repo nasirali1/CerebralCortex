@@ -37,7 +37,9 @@ class StoreMetadata:
     def store_stream_info(self, stream_identifier: uuid, stream_owner_id: uuid, name: str,
                           data_descriptor: dict,
                           execution_context: dict,
-                          annotations: dict, stream_type: str, start_time: datetime, end_time: datetime, isIDCreated):
+                          annotations: dict, stream_type: str, start_time: datetime, end_time: datetime,
+                          isIDCreated: str):
+
         """
         This method will update a record if stream already exist else it will insert a new record.
         :param stream_identifier:
@@ -50,7 +52,9 @@ class StoreMetadata:
         """
         isQueryReady = 0
 
+
         if isIDCreated == "update":
+
             new_end_time = self.check_end_time(stream_identifier, end_time)
             is_annotation_changed = self.append_annotations(stream_identifier, stream_owner_id, name, data_descriptor,
                                                             execution_context, annotations, stream_type)
@@ -151,6 +155,28 @@ class StoreMetadata:
             return {"id": rows[0]["identifier"], "status": "update"}
         else:
             return {"id": uuid.uuid4(), "status": "new"}
+
+    def is_id_created2(self, ownerID: uuid, name: str, data_descriptor: dict, execution_context: dict) -> dict:
+
+        """
+        if stream name, owner, data_descriptor, and execution context are same then return existing UUID
+        :param ownerID:
+        :param name:
+        :param data_descriptor:
+        :param execution_context:
+        :return:
+        """
+        qry = "SELECT * from " + self.datastreamTable + " where owner=%s and name=%s"
+        vals = ownerID, name
+        self.cursor.execute(qry, vals)
+        rows = self.cursor.fetchall()
+        if len(rows) >= 2:
+            pass
+        else:
+            if rows:
+                return {"id": rows[0]["identifier"], "status": "update"}
+            else:
+                return {"id": uuid.uuid4(), "status": "new"}
 
     def check_end_time(self, stream_id, end_time):
         localtz = timezone(self.CC_obj.time_zone)

@@ -177,7 +177,6 @@ def sensor_unavailable(sensor_type: str, input_streams: dict, config: dict) -> d
     else:
         raise ValueError("Incorrect sensor type")
 
-    # output_stream = {"name": name, "id": str(generated_stream_id)};
     algo_description = config["description"]["sensor_unavailable_marker"]
     method = 'cerebralcortex.data_processor.data_diagnostic.packet_loss_marker'
 
@@ -212,7 +211,6 @@ def packet_loss(sensor_type: str, input_streams: dict, config: dict) -> dict:
     else:
         raise ValueError("Incorrect sensor type")
 
-    # output_stream = {"name": name, "id": str(generated_stream_id)};
     algo_description = config["description"]["packet_loss_marker"]
     method = 'cerebralcortex.data_processor.data_diagnostic.packet_loss_marker'
 
@@ -269,6 +267,7 @@ def get_execution_context(name: str, input_param: dict, input_streams: dict, met
     :param config:
     :return:
     """
+
     author = [{"name": "Ali", "email": "nasir.ali08@gmail.com"}]
     version = '0.0.1'
     ref = {"url": "http://www.cs.memphis.edu/~santosh/Papers/Continuous-Stress-BCB-2014.pdf"}
