@@ -73,6 +73,54 @@ class LoadData:
 
         return stream
 
+    def get_annotation_stream(self, annotation_stream_id: uuid, input_stream_id: uuid, annotation: str, start_time: datetime = None, end_time: datetime = None,
+                              data_type=DataSet.COMPLETE) -> DataStream:
+        datapointsList = []
+        start_time = str(start_time)
+        end_time = str(end_time)
+
+        where_clause = "identifier='" + annotation_stream_id + "'"
+
+        if annotation_stream_id == 'None':
+            raise Exception("Stream identifier cannot be null.")
+
+        if input_stream_id == 'None':
+            raise Exception("Input stream identifier cannot be null.")
+
+        if start_time != 'None':
+            where_clause += " and start_time>=cast('" + start_time + "' as timestamp)"
+
+        if end_time != 'None':
+            where_clause += " and start_time<=cast('" + end_time + "' as timestamp)"
+
+        if annotation != 'None':
+            where_clause += " and sample='{"+annotation+"}'"
+
+        annotation_stream = self.load_data_from_cassandra(self.datapointTable, where_clause)
+        rows = annotation_stream.collect()
+
+        for row in rows:
+            localtz = timezone(self.CC_obj.time_zone)
+            start_time = localtz.localize(row["start_time"])
+            end_time = localtz.localize(row["end_time"])
+
+            dp = self.get_datastream(input_stream_id, start_time=start_time,
+                           end_time=end_time, data_type=DataSet.ONLY_DATA)
+            datapointsList.append(dp)
+
+
+        if data_type == DataSet.COMPLETE:
+            annotation_stream = self.map_datapoint_and_metadata_to_datastream(annotation_stream_id, datapointsList)
+        elif data_type == DataSet.ONLY_DATA:
+            return datapointsList
+        elif data_type == DataSet.ONLY_METADATA:
+            datapoints = []
+            annotation_stream = self.map_datapoint_and_metadata_to_datastream(annotation_stream_id, datapoints)
+        else:
+            raise ValueError("Invalid type parameter.")
+
+        return annotation_stream
+
     def map_dataframe_to_datapoint(self, dataframe: object) -> list:
         """
         Converts a PySpark DataFrame into a list of datapoint objects

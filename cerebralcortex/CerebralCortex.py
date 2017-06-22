@@ -53,7 +53,7 @@ class CerebralCortex:
 
         self.configuration = Configuration(filepath=configuration_file).config
 
-        self.time_zone = time_zone;
+        self.time_zone = time_zone
 
     def get_datastream(self, stream_identifier: uuid, start_time: datetime = None, end_time: datetime = None,
                        data_type: enumerate = DataSet.COMPLETE) -> DataStream:

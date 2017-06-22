@@ -190,6 +190,8 @@ class TestDataStoreEngine(unittest.TestCase):
         self.assertEqual(stream.data[0].end_time, end_time)
         self.assertEqual(stream.data[0].sample, sample)
 
+    def test_07_get_annotation_stream(self):
+        pass
 
 if __name__ == '__main__':
     unittest.main()
