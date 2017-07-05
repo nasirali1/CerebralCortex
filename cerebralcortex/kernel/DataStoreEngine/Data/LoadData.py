@@ -22,10 +22,11 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import ast
 import json
 import uuid
+from collections import OrderedDict
 from datetime import datetime
+from typing import List
 
 from pytz import timezone
 
@@ -51,7 +52,7 @@ class LoadData:
         where_clause = "identifier='" + stream_id + "'"
 
         if stream_id == 'None':
-            raise Exception("Stream identifier cannot be null.")
+            raise Exception("Identifier cannot be null.")
 
         if start_time != 'None':
             where_clause += " and start_time>=cast('" + start_time + "' as timestamp)"
@@ -73,7 +74,8 @@ class LoadData:
 
         return stream
 
-    def get_annotation_stream(self, annotation_stream_id: uuid, input_stream_id: uuid, annotation: str, start_time: datetime = None, end_time: datetime = None,
+    def get_annotation_stream(self, annotation_stream_id: uuid, input_stream_id: uuid, annotation: str,
+                              start_time: datetime = None, end_time: datetime = None,
                               data_type=DataSet.COMPLETE) -> DataStream:
         datapointsList = []
         start_time = str(start_time)
@@ -94,7 +96,7 @@ class LoadData:
             where_clause += " and start_time<=cast('" + end_time + "' as timestamp)"
 
         if annotation != 'None':
-            where_clause += " and sample='{"+annotation+"}'"
+            where_clause += " and sample='{" + annotation + "}'"
 
         annotation_stream = self.load_data_from_cassandra(self.datapointTable, where_clause)
         rows = annotation_stream.collect()
@@ -104,10 +106,9 @@ class LoadData:
             start_time = localtz.localize(row["start_time"])
             end_time = localtz.localize(row["end_time"])
 
-            dp = self.get_datastream(input_stream_id, start_time=start_time,
-                           end_time=end_time, data_type=DataSet.ONLY_DATA)
+            dp = self.get_stream(input_stream_id, start_time=start_time,
+                                 end_time=end_time, data_type=DataSet.ONLY_DATA)
             datapointsList.append(dp)
-
 
         if data_type == DataSet.COMPLETE:
             annotation_stream = self.map_datapoint_and_metadata_to_datastream(annotation_stream_id, datapointsList)
@@ -120,6 +121,61 @@ class LoadData:
             raise ValueError("Invalid type parameter.")
 
         return annotation_stream
+
+    def get_annotation_stream22(self, annotation_stream_id: uuid, input_stream_id: uuid, annotation: str,
+                                start_time: datetime = None, end_time: datetime = None, label: str = None,
+                                data_type=DataSet.COMPLETE) -> DataStream:
+        datapointsList = []
+
+        annotated_data_stream = OrderedDict()
+
+        annotation_stream_dps = self.get_stream(annotation_stream_id, start_time=start_time,
+                                                end_time=end_time, data_type=DataSet.ONLY_DATA)
+
+        data_stream_dps = self.get_stream(input_stream_id, start_time=start_time,
+                                          end_time=end_time, data_type=DataSet.ONLY_DATA)
+
+        for _key, _data in self.map_annotation_stream_to_data_stream(annotation_stream_dps, data_stream_dps, label):
+            annotated_data_stream[_key] = _data
+
+        if data_type == DataSet.COMPLETE:
+            annotation_stream = self.map_datapoint_and_metadata_to_datastream(annotation_stream_id, datapointsList)
+        elif data_type == DataSet.ONLY_DATA:
+            return datapointsList
+        elif data_type == DataSet.ONLY_METADATA:
+            datapoints = []
+            annotation_stream = self.map_datapoint_and_metadata_to_datastream(annotation_stream_id, datapoints)
+        else:
+            raise ValueError("Invalid type parameter.")
+
+        return annotation_stream
+
+    def map_annotation_stream_to_data_stream(self, annotation_stream_dps: List[DataPoint],
+                                             data_stream_dps: List[DataPoint], label: str) -> OrderedDict:
+        """
+        Map annotation stream to data stream.
+        :param annotation_stream_dps:
+        :param data_stream_dps:
+        :param label:
+        :rtype: OrderedDict
+        """
+        window_data = []
+        tmp = 0
+        for annotation_dp in annotation_stream_dps:
+            if annotation_dp.sample == label:
+                for index, datastream_dp in enumerate(data_stream_dps[tmp:], start=0):
+                    if datastream_dp.start_time >= annotation_dp.start_time:
+                        if (annotation_dp.start_time >= datastream_dp.start_time) and (
+                            datastream_dp.end_time <= annotation_dp.end_time):
+                            window_data.append(datastream_dp)
+                        else:
+                            tmp = index
+                            key = (annotation_dp.start_time, annotation_dp.end_time)
+                            yield key, window_data
+                            window_data = []
+                            break
+        key = (annotation_dp.start_time, annotation_dp.end_time)
+        yield key, window_data
 
     def map_dataframe_to_datapoint(self, dataframe: object) -> list:
         """
@@ -138,7 +194,7 @@ class LoadData:
             else:
                 end_time = ""
 
-            dp = DataPoint(start_time, end_time, ast.literal_eval(row["sample"]))
+            dp = DataPoint(start_time, end_time, row["sample"])
             datapointsList.append(dp)
         return datapointsList
 
