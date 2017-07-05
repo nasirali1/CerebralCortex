@@ -134,11 +134,8 @@ class LoadData:
         return annotation_stream
 
     def get_annotation_stream(self, annotation_stream_id: uuid, input_stream_id: uuid, annotation: str,
-                              start_time: datetime = None, end_time: datetime = None, label: str = None,
-                              data_type=DataSet.COMPLETE) -> DataStream:
+                              start_time: datetime = None, end_time: datetime = None) -> List[DataPoint]:
         datapoints_list = []
-
-        annotated_data_stream = OrderedDict()
 
         annotation_stream_dps = self.get_stream(annotation_stream_id, start_time=start_time,
                                                 end_time=end_time, data_type=DataSet.ONLY_DATA)
@@ -146,51 +143,40 @@ class LoadData:
         data_stream_dps = self.get_stream(input_stream_id, start_time=start_time,
                                           end_time=end_time, data_type=DataSet.ONLY_DATA)
 
-        for dp in self.map_annotation_stream_to_data_stream(annotation_stream_dps, data_stream_dps, label):
+        for dp in self.map_annotation_stream_to_data_stream(annotation_stream_dps, data_stream_dps, annotation):
             datapoints_list = datapoints_list + dp
 
         return datapoints_list
 
-        # if data_type == DataSet.COMPLETE:
-        #     annotation_stream = self.map_datapoint_and_metadata_to_datastream(annotation_stream_id, datapointsList)
-        # elif data_type == DataSet.ONLY_DATA:
-        #     return datapointsList
-        # elif data_type == DataSet.ONLY_METADATA:
-        #     datapoints = []
-        #     annotation_stream = self.map_datapoint_and_metadata_to_datastream(annotation_stream_id, datapoints)
-        # else:
-        #     raise ValueError("Invalid type parameter.")
-        #
-        # return annotation_stream
 
     def map_annotation_stream_to_data_stream(self, annotation_stream_dps: List[DataPoint],
-                                             data_stream_dps: List[DataPoint], label: str) -> OrderedDict:
+                                             data_stream_dps: List[DataPoint], annotation: str) -> List[DataPoint]:
         """
         Map annotation stream to data stream.
         :param annotation_stream_dps:
         :param data_stream_dps:
-        :param label:
-        :rtype: OrderedDict
+        :param annotation:
+        :rtype: List[DataPoint]
         """
-        window_data = []
+        filtered_datapoints = []
         tmp = 0
         for annotation_dp in annotation_stream_dps:
-            if annotation_dp.sample == label:
+            if annotation_dp.sample == annotation:
                 for index, datastream_dp in enumerate(data_stream_dps[tmp:], start=0):
                     if datastream_dp.start_time >= annotation_dp.start_time:
                         if (annotation_dp.start_time <= datastream_dp.start_time) and (
                                 annotation_dp.end_time >= datastream_dp.end_time):
-                            window_data.append(datastream_dp)
+                            filtered_datapoints.append(datastream_dp)
                             if (tmp+index+1)==len(data_stream_dps):
                                 tmp = index+tmp+1
-                                yield window_data
-                                window_data = []
+                                yield filtered_datapoints
+                                filtered_datapoints = []
                         else:
                             tmp = tmp+index
-                            yield window_data
-                            window_data = []
+                            yield filtered_datapoints
+                            filtered_datapoints = []
                             break
-        yield window_data
+        yield filtered_datapoints
 
     def map_dataframe_to_datapoint(self, dataframe: object) -> list:
         """

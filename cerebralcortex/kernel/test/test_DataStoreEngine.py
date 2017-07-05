@@ -235,7 +235,7 @@ class TestDataStoreEngine(unittest.TestCase):
         self.CC.save_datastream(ds_anno)
         self.CC.save_datastream(ds_data)
 
-        self.CC.get_annotation_stream("d1ce45e5-3120-4b4a-af1a-49e74dc47eb8", "5678dd7d-3774-455a-b4ef-2e86b4db8940", "", label="good")
+        self.CC.get_annotation_stream("d1ce45e5-3120-4b4a-af1a-49e74dc47eb8", "5678dd7d-3774-455a-b4ef-2e86b4db8940", "good")
         #stream = self.CC.get_datastream(identifier_anno, data_type=DataSet.COMPLETE)
         #stream = self.CC.get_datastream(identifier_data, data_type=DataSet.COMPLETE)
 

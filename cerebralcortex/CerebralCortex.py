@@ -34,6 +34,7 @@ from cerebralcortex.kernel.datatypes.datastream import DataStream
 from cerebralcortex.kernel.datatypes.stream import Stream
 from cerebralcortex.kernel.DataStoreEngine.Data.Data import Data
 from cerebralcortex.kernel.DataStoreEngine.dataset import DataSet
+from cerebralcortex.kernel.datatypes.datastream import DataStream, DataPoint
 from cerebralcortex.kernel.DataStoreEngine.Metadata.Metadata import Metadata
 
 
@@ -106,9 +107,8 @@ class CerebralCortex:
 
         return DataStream(identifier, data=[])
 
-    def get_annotation_stream(self, annotation_stream_id: uuid, input_stream_id: uuid, annotation: str, start_time: datetime = None, end_time: datetime = None, label:str=None,
-                              data_type=DataSet.COMPLETE) -> DataStream:
-        return Data(self).get_annotation_stream(annotation_stream_id, input_stream_id, annotation, start_time, end_time, label, data_type)
+    def get_annotation_stream(self, annotation_stream_id: uuid, input_stream_id: uuid, annotation: str, start_time: datetime = None, end_time: datetime = None) -> List[DataPoint]:
+        return Data(self).get_annotation_stream(annotation_stream_id, input_stream_id, annotation, start_time, end_time)
 
     def update_or_create(self, stream: Stream):
         """
