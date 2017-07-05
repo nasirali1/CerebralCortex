@@ -214,19 +214,23 @@ class TestDataStoreEngine(unittest.TestCase):
             else:
                 sample_anno = 'bad'
                 sample_data = random.randint(1,100),random.randint(1,100),random.randint(1,100)
-            start_time = datetime.datetime(2017, 4, 24, 0, 0, i)
-            end_time = datetime.datetime(2017, 4, 24, 0, 0, (5+i))
+            start_time_anno = datetime.datetime(2017, 4, 24, 0, 0, i)
+            end_time_anno = datetime.datetime(2017, 4, 24, 0, 0, (5+i))
+
+            start_time_data = datetime.datetime(2017, 4, 24, 0, 0, i)
+            end_time_data = datetime.datetime(2017, 4, 24, 0, 0, (3+i))
+
             localtz = timezone('US/Central')
-            start_time = localtz.localize(start_time)
-            end_time = localtz.localize(end_time)
-            datapoints_anno.append(DataPoint(start_time=start_time, end_time=end_time, sample=sample_anno))
-            datapoints_data.append(DataPoint(start_time=start_time, end_time=end_time, sample=sample_data))
+            start_time_anno = localtz.localize(start_time_anno)
+            end_time_anno = localtz.localize(end_time_anno)
+            datapoints_anno.append(DataPoint(start_time=start_time_anno, end_time=end_time_anno, sample=sample_anno))
+            datapoints_data.append(DataPoint(start_time=start_time_data, end_time=end_time_data, sample=sample_data))
 
         ds_anno = DataStream(uuid.UUID(identifier_anno), owner_id, name_anno, data_descriptor, execution_context_anno,
-                             annotations, stream_type, start_time, end_time, datapoints_anno)
+                             annotations, stream_type, start_time_anno, end_time_anno, datapoints_anno)
 
         ds_data = DataStream(uuid.UUID(identifier_data), owner_id, name_data, data_descriptor, execution_context_data,
-                             annotations, stream_type, start_time, end_time, datapoints_data)
+                             annotations, stream_type, start_time_anno, end_time_anno, datapoints_data)
 
         self.CC.save_datastream(ds_anno)
         self.CC.save_datastream(ds_data)

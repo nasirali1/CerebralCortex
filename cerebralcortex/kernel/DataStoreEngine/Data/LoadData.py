@@ -74,9 +74,20 @@ class LoadData:
 
         return stream
 
-    def get_annotation_stream(self, annotation_stream_id: uuid, input_stream_id: uuid, annotation: str,
-                              start_time: datetime = None, end_time: datetime = None,
-                              data_type=DataSet.COMPLETE) -> DataStream:
+    def deprecated_get_annotation_stream(self, annotation_stream_id: uuid, input_stream_id: uuid, annotation: str,
+                                         start_time: datetime = None, end_time: datetime = None,
+                                         data_type=DataSet.COMPLETE) -> DataStream:
+        """
+        This method is not optimized. It will send n (depending on the number of windows) number of queries to Cassandra to retrieve data.
+        In future, this will be deleted after verifying performance of other filtering method(s).
+        :param annotation_stream_id:
+        :param input_stream_id:
+        :param annotation:
+        :param start_time:
+        :param end_time:
+        :param data_type:
+        :return:
+        """
         datapointsList = []
         start_time = str(start_time)
         end_time = str(end_time)
@@ -122,10 +133,10 @@ class LoadData:
 
         return annotation_stream
 
-    def get_annotation_stream22(self, annotation_stream_id: uuid, input_stream_id: uuid, annotation: str,
-                                start_time: datetime = None, end_time: datetime = None, label: str = None,
-                                data_type=DataSet.COMPLETE) -> DataStream:
-        datapointsList = []
+    def get_annotation_stream(self, annotation_stream_id: uuid, input_stream_id: uuid, annotation: str,
+                              start_time: datetime = None, end_time: datetime = None, label: str = None,
+                              data_type=DataSet.COMPLETE) -> DataStream:
+        datapoints_list = []
 
         annotated_data_stream = OrderedDict()
 
@@ -135,20 +146,22 @@ class LoadData:
         data_stream_dps = self.get_stream(input_stream_id, start_time=start_time,
                                           end_time=end_time, data_type=DataSet.ONLY_DATA)
 
-        for _key, _data in self.map_annotation_stream_to_data_stream(annotation_stream_dps, data_stream_dps, label):
-            annotated_data_stream[_key] = _data
+        for dp in self.map_annotation_stream_to_data_stream(annotation_stream_dps, data_stream_dps, label):
+            datapoints_list = datapoints_list + dp
 
-        if data_type == DataSet.COMPLETE:
-            annotation_stream = self.map_datapoint_and_metadata_to_datastream(annotation_stream_id, datapointsList)
-        elif data_type == DataSet.ONLY_DATA:
-            return datapointsList
-        elif data_type == DataSet.ONLY_METADATA:
-            datapoints = []
-            annotation_stream = self.map_datapoint_and_metadata_to_datastream(annotation_stream_id, datapoints)
-        else:
-            raise ValueError("Invalid type parameter.")
+        return datapoints_list
 
-        return annotation_stream
+        # if data_type == DataSet.COMPLETE:
+        #     annotation_stream = self.map_datapoint_and_metadata_to_datastream(annotation_stream_id, datapointsList)
+        # elif data_type == DataSet.ONLY_DATA:
+        #     return datapointsList
+        # elif data_type == DataSet.ONLY_METADATA:
+        #     datapoints = []
+        #     annotation_stream = self.map_datapoint_and_metadata_to_datastream(annotation_stream_id, datapoints)
+        # else:
+        #     raise ValueError("Invalid type parameter.")
+        #
+        # return annotation_stream
 
     def map_annotation_stream_to_data_stream(self, annotation_stream_dps: List[DataPoint],
                                              data_stream_dps: List[DataPoint], label: str) -> OrderedDict:
@@ -165,17 +178,19 @@ class LoadData:
             if annotation_dp.sample == label:
                 for index, datastream_dp in enumerate(data_stream_dps[tmp:], start=0):
                     if datastream_dp.start_time >= annotation_dp.start_time:
-                        if (annotation_dp.start_time >= datastream_dp.start_time) and (
-                            datastream_dp.end_time <= annotation_dp.end_time):
+                        if (annotation_dp.start_time <= datastream_dp.start_time) and (
+                                annotation_dp.end_time >= datastream_dp.end_time):
                             window_data.append(datastream_dp)
+                            if (tmp+index+1)==len(data_stream_dps):
+                                tmp = index+tmp+1
+                                yield window_data
+                                window_data = []
                         else:
-                            tmp = index
-                            key = (annotation_dp.start_time, annotation_dp.end_time)
-                            yield key, window_data
+                            tmp = tmp+index
+                            yield window_data
                             window_data = []
                             break
-        key = (annotation_dp.start_time, annotation_dp.end_time)
-        yield key, window_data
+        yield window_data
 
     def map_dataframe_to_datapoint(self, dataframe: object) -> list:
         """
