@@ -203,18 +203,40 @@ class TestDataStoreEngine(unittest.TestCase):
             '{"execution_context": {"algorithm": {"method": "test.data_store.annotation.filter"}}}')
         execution_context_data = json.loads(
             '{"execution_context": {"algorithm": {"method": "test.data_store.data.filter"}}}')
-        annotations_anno = json.loads('[{"name": "test-case","identifier": "5b7fb6f3-7bf6-4031-881c-a25faf112dd9"}]')
-        annotations_data = {}
+        annotations_data = json.loads('[{"name": "test-case","identifier": "6db98dfb-d6e8-4b27-8d55-95b20fa0f750"}]')
+        annotations_anno = {}
         datapoints_anno = []
         datapoints_data = []
+
+        result_data = Metadata(self.CC).is_id_created(owner_id, name_data, execution_context_data)
+        if result_data["status"] != "new":
+            identifier_data = result_data["id"]
+
+
+        Metadata(self.CC).store_stream_info(identifier_anno,
+                                            owner_id, name_anno,
+                                            data_descriptor, execution_context_anno,
+                                            annotations_anno,
+                                            "annotations", datetime.datetime(2017, 4, 24, 0, 0, 1),
+                                              datetime.datetime(2017, 4, 24, 0, 0, 5), result_data["status"])
+
+        result_anno = Metadata(self.CC).is_id_created(owner_id, name_data, execution_context_data)
+        if result_anno["status"] != "new":
+            identifier_anno = result_anno["id"]
+
+        Metadata(self.CC).store_stream_info(identifier_data,
+                                            owner_id, name_data,
+                                            data_descriptor, execution_context_data,
+                                            annotations_data,
+                                            "datastream", datetime.datetime(2017, 4, 24, 0, 0, 1),
+                                            datetime.datetime(2017, 4, 24, 0, 0, 5), result_anno["status"])
 
         for i in range(0,5):
             if(i%2==0):
                 sample_anno = 'good'
-                sample_data = random.randint(1,100),random.randint(1,100),random.randint(1,100)
             else:
                 sample_anno = 'bad'
-                sample_data = random.randint(1,100),random.randint(1,100),random.randint(1,100)
+            sample_data = i,i+2,i+3
             start_time_anno = datetime.datetime(2017, 4, 24, 0, 0, i)
             end_time_anno = datetime.datetime(2017, 4, 24, 0, 0, (5+i))
 
@@ -224,6 +246,9 @@ class TestDataStoreEngine(unittest.TestCase):
             localtz = timezone('US/Central')
             start_time_anno = localtz.localize(start_time_anno)
             end_time_anno = localtz.localize(end_time_anno)
+            start_time_data = localtz.localize(start_time_data)
+            end_time_data = localtz.localize(end_time_data)
+
             datapoints_anno.append(DataPoint(start_time=start_time_anno, end_time=end_time_anno, sample=sample_anno))
             datapoints_data.append(DataPoint(start_time=start_time_data, end_time=end_time_data, sample=sample_data))
 
@@ -236,8 +261,20 @@ class TestDataStoreEngine(unittest.TestCase):
         self.CC.save_datastream(ds_anno)
         self.CC.save_datastream(ds_data)
 
-        self.CC.filter1("33c8666a-6a45-4671-972a-2970ac9e303e", "test-case", "good")
-        #self.CC.get_annotation_stream("33c8666a-6a45-4671-972a-2970ac9e303e", "1f7ac78c-87de-499a-bc28-9321690c3b08", "good")
+        filted_stream = self.CC.filter_stream(identifier_data, "test-case", "good")
+
+        self.assertEqual(len(filted_stream), 5)
+
+        for i in range(0,5):
+            sample_data = [i,i+2,i+3]
+            start_time_data = datetime.datetime(2017, 4, 24, 0, 0, i)
+            end_time_data = datetime.datetime(2017, 4, 24, 0, 0, (3+i))
+            start_time_data = localtz.localize(start_time_data)
+            end_time_data = localtz.localize(end_time_data)
+
+            self.assertEqual(filted_stream[i].start_time, start_time_data)
+            self.assertEqual(filted_stream[i].end_time, end_time_data)
+            self.assertEqual(filted_stream[i].sample, sample_data)
 
 
 if __name__ == '__main__':

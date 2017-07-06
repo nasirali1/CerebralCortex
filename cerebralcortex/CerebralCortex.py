@@ -99,7 +99,7 @@ class CerebralCortex:
         """
         return Metadata(self).get_stream_ids_by_name(stream_name, owner_id, start_time, end_time)
 
-    def filter1(self, data_stream_id: uuid, annotation_stream_name: uuid, annotation: str, start_time: datetime=None, end_time: datetime=None) -> List[DataPoint]:
+    def filter_stream(self, data_stream_id: uuid, annotation_stream_name: uuid, annotation: str, start_time: datetime=None, end_time: datetime=None) -> List[DataPoint]:
         """
         This method maps derived annotation stream to a data stream and returns a List of mapped Datapoints
         :param data_stream_id:
