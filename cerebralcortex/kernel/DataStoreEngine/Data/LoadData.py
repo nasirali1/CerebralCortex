@@ -148,6 +148,7 @@ class LoadData:
 
         return datapoints_list
 
+    @classmethod
     def map_annotation_stream_to_data_stream(self, annotation_stream_dps: List[DataPoint],
                                              data_stream_dps: List[DataPoint], annotation: str) -> List[DataPoint]:
         """
