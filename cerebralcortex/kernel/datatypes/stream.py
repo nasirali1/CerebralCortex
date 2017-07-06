@@ -21,11 +21,10 @@
 # CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+import datetime
+import uuid
 from typing import List
 from uuid import UUID
-import uuid
-import datetime
-
 
 from cerebralcortex.kernel.datatypes.datapoint import DataPoint
 from cerebralcortex.kernel.datatypes.subtypes import StreamReference, DataDescriptor, ExecutionContext
@@ -127,8 +126,9 @@ class Stream:
             result.append(DataPoint(dp.start_time, dp.end_time, dp.sample))
         self._data = result
 
-    #TODO- cannot use it due to circular dependencies. Moving it to CC class
-    def filter(self, annotation_stream_name: uuid, annotation: str, start_time: datetime, end_time: datetime) -> List[DataPoint]:
+    # TODO- cannot use it due to circular dependencies. Moving it to CC class
+    def filter(self, annotation_stream_name: uuid, annotation: str, start_time: datetime, end_time: datetime) -> List[
+        DataPoint]:
         """
         This method maps datastream to derived annotation stream and returns a List of Datapoints
         :param annotation_stream_name:
@@ -137,9 +137,8 @@ class Stream:
         :param end_time:
         :return:
         """
-        #annotation_stream_id = Metadata.get_annotation_id(self.identifier, annotation_stream_name)
-        #return Data.get_annotation_stream(annotation_stream_id, self.identifier, annotation, start_time, end_time)
-
+        # annotation_stream_id = Metadata.get_annotation_id(self.identifier, annotation_stream_name)
+        # return Data.get_annotation_stream(annotation_stream_id, self.identifier, annotation, start_time, end_time)
 
     @classmethod
     def from_datastream(cls, input_streams: List):

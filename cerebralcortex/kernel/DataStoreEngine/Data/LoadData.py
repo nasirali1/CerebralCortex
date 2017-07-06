@@ -22,9 +22,9 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+import ast
 import json
 import uuid
-import ast
 from datetime import datetime
 from typing import List
 
@@ -148,7 +148,6 @@ class LoadData:
 
         return datapoints_list
 
-
     def map_annotation_stream_to_data_stream(self, annotation_stream_dps: List[DataPoint],
                                              data_stream_dps: List[DataPoint], annotation: str) -> List[DataPoint]:
         """
@@ -165,14 +164,14 @@ class LoadData:
                 for index, datastream_dp in enumerate(data_stream_dps[tmp:], start=0):
                     if datastream_dp.start_time >= annotation_dp.start_time:
                         if (annotation_dp.start_time <= datastream_dp.start_time) and (
-                                annotation_dp.end_time >= datastream_dp.end_time):
+                                    annotation_dp.end_time >= datastream_dp.end_time):
                             filtered_datapoints.append(datastream_dp)
-                            if (tmp+index+1)==len(data_stream_dps):
-                                tmp = index+tmp+1
+                            if (tmp + index + 1) == len(data_stream_dps):
+                                tmp = index + tmp + 1
                                 yield filtered_datapoints
                                 filtered_datapoints = []
                         else:
-                            tmp = tmp+index
+                            tmp = tmp + index
                             yield filtered_datapoints
                             filtered_datapoints = []
                             break
@@ -195,7 +194,7 @@ class LoadData:
             else:
                 end_time = ""
 
-            #ast.literal_eval is used to convert strings into json, list, dict. it returns string if ast.literal_eval fails
+            # ast.literal_eval is used to convert strings into json, list, dict. it returns string if ast.literal_eval fails
             try:
                 smple = ast.literal_eval(row["sample"])
             except:

@@ -26,7 +26,6 @@ import json
 import os
 import unittest
 import uuid
-import random
 
 from pytz import timezone
 
@@ -212,13 +211,12 @@ class TestDataStoreEngine(unittest.TestCase):
         if result_data["status"] != "new":
             identifier_data = result_data["id"]
 
-
         Metadata(self.CC).store_stream_info(identifier_anno,
                                             owner_id, name_anno,
                                             data_descriptor, execution_context_anno,
                                             annotations_anno,
                                             "annotations", datetime.datetime(2017, 4, 24, 0, 0, 1),
-                                              datetime.datetime(2017, 4, 24, 0, 0, 5), result_data["status"])
+                                            datetime.datetime(2017, 4, 24, 0, 0, 5), result_data["status"])
 
         result_anno = Metadata(self.CC).is_id_created(owner_id, name_data, execution_context_data)
         if result_anno["status"] != "new":
@@ -231,17 +229,17 @@ class TestDataStoreEngine(unittest.TestCase):
                                             "datastream", datetime.datetime(2017, 4, 24, 0, 0, 1),
                                             datetime.datetime(2017, 4, 24, 0, 0, 5), result_anno["status"])
 
-        for i in range(0,5):
-            if(i%2==0):
+        for i in range(0, 5):
+            if (i % 2 == 0):
                 sample_anno = 'good'
             else:
                 sample_anno = 'bad'
-            sample_data = i,i+2,i+3
+            sample_data = i, i + 2, i + 3
             start_time_anno = datetime.datetime(2017, 4, 24, 0, 0, i)
-            end_time_anno = datetime.datetime(2017, 4, 24, 0, 0, (5+i))
+            end_time_anno = datetime.datetime(2017, 4, 24, 0, 0, (5 + i))
 
             start_time_data = datetime.datetime(2017, 4, 24, 0, 0, i)
-            end_time_data = datetime.datetime(2017, 4, 24, 0, 0, (3+i))
+            end_time_data = datetime.datetime(2017, 4, 24, 0, 0, (3 + i))
 
             localtz = timezone('US/Central')
             start_time_anno = localtz.localize(start_time_anno)
@@ -265,10 +263,10 @@ class TestDataStoreEngine(unittest.TestCase):
 
         self.assertEqual(len(filted_stream), 5)
 
-        for i in range(0,5):
-            sample_data = [i,i+2,i+3]
+        for i in range(0, 5):
+            sample_data = [i, i + 2, i + 3]
             start_time_data = datetime.datetime(2017, 4, 24, 0, 0, i)
-            end_time_data = datetime.datetime(2017, 4, 24, 0, 0, (3+i))
+            end_time_data = datetime.datetime(2017, 4, 24, 0, 0, (3 + i))
             start_time_data = localtz.localize(start_time_data)
             end_time_data = localtz.localize(end_time_data)
 
