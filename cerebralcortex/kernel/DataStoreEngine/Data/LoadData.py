@@ -24,7 +24,7 @@
 
 import json
 import uuid
-from collections import OrderedDict
+import ast
 from datetime import datetime
 from typing import List
 
@@ -133,7 +133,7 @@ class LoadData:
 
         return annotation_stream
 
-    def get_annotation_stream(self, annotation_stream_id: uuid, input_stream_id: uuid, annotation: str,
+    def get_annotation_stream(self, input_stream_id: uuid, annotation_stream_id: uuid, annotation: str,
                               start_time: datetime = None, end_time: datetime = None) -> List[DataPoint]:
         datapoints_list = []
 
@@ -195,7 +195,13 @@ class LoadData:
             else:
                 end_time = ""
 
-            dp = DataPoint(start_time, end_time, row["sample"])
+            #ast.literal_eval is used to convert strings into json, list, dict. it returns string if ast.literal_eval fails
+            try:
+                smple = ast.literal_eval(row["sample"])
+            except:
+                smple = row["sample"]
+
+            dp = DataPoint(start_time, end_time, smple)
             datapointsList.append(dp)
         return datapointsList
 

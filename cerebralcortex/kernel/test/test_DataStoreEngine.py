@@ -192,7 +192,7 @@ class TestDataStoreEngine(unittest.TestCase):
         self.assertEqual(stream.data[0].end_time, end_time)
         self.assertEqual(stream.data[0].sample, sample)
 
-    def test_07_get_annotation_stream(self):
+    def test_07_stream_filter(self):
         identifier_anno = "6db98dfb-d6e8-4b27-8d55-95b20fa0f750"
         identifier_data = "6db98dfb-d6e8-4b27-8d55-95b20fa0f751"
         owner_id = "06634264-56bc-4c92-abd7-377dbbad79dd"
@@ -203,10 +203,11 @@ class TestDataStoreEngine(unittest.TestCase):
             '{"execution_context": {"algorithm": {"method": "test.data_store.annotation.filter"}}}')
         execution_context_data = json.loads(
             '{"execution_context": {"algorithm": {"method": "test.data_store.data.filter"}}}')
-        annotations = {}
+        annotations_anno = json.loads('[{"name": "test-case","identifier": "5b7fb6f3-7bf6-4031-881c-a25faf112dd9"}]')
+        annotations_data = {}
         datapoints_anno = []
         datapoints_data = []
-        stream_type = "filter-test-case"
+
         for i in range(0,5):
             if(i%2==0):
                 sample_anno = 'good'
@@ -227,17 +228,17 @@ class TestDataStoreEngine(unittest.TestCase):
             datapoints_data.append(DataPoint(start_time=start_time_data, end_time=end_time_data, sample=sample_data))
 
         ds_anno = DataStream(uuid.UUID(identifier_anno), owner_id, name_anno, data_descriptor, execution_context_anno,
-                             annotations, stream_type, start_time_anno, end_time_anno, datapoints_anno)
+                             annotations_data, "annotations", start_time_anno, end_time_anno, datapoints_anno)
 
         ds_data = DataStream(uuid.UUID(identifier_data), owner_id, name_data, data_descriptor, execution_context_data,
-                             annotations, stream_type, start_time_anno, end_time_anno, datapoints_data)
+                             annotations_anno, "datastream", start_time_anno, end_time_anno, datapoints_data)
 
         self.CC.save_datastream(ds_anno)
         self.CC.save_datastream(ds_data)
 
-        self.CC.get_annotation_stream("d1ce45e5-3120-4b4a-af1a-49e74dc47eb8", "5678dd7d-3774-455a-b4ef-2e86b4db8940", "good")
-        #stream = self.CC.get_datastream(identifier_anno, data_type=DataSet.COMPLETE)
-        #stream = self.CC.get_datastream(identifier_data, data_type=DataSet.COMPLETE)
+        self.CC.filter1("33c8666a-6a45-4671-972a-2970ac9e303e", "test-case", "good")
+        #self.CC.get_annotation_stream("33c8666a-6a45-4671-972a-2970ac9e303e", "1f7ac78c-87de-499a-bc28-9321690c3b08", "good")
+
 
 if __name__ == '__main__':
     unittest.main()
