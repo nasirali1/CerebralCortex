@@ -255,7 +255,7 @@ class LoadMetadata:
 
     def is_auth_token_valid(self, token_owner, auth_token, auth_token_expiry_time):
         if not auth_token or not auth_token_expiry_time:
-            raise ValueError("AuthApi token and auth-token expiry time cannot be null/empty.")
+            raise ValueError("Auth token and auth-token expiry time cannot be null/empty.")
 
         qry = "select * from user where token=%s and user_name=%s"
         vals = auth_token, token_owner
