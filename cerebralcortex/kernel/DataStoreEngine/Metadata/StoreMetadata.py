@@ -198,3 +198,15 @@ class StoreMetadata:
                 return "unchanged"
         else:
             raise ValueError("Stream has no start/end time.")
+
+
+    def update_auth_token(self, user_name, auth_token, auth_token_issued_time, auth_token_expiry_time):
+
+        if not auth_token and not auth_token_expiry_time and not auth_token_issued_time:
+            raise ValueError("AuthApi token and auth-token issue/expiry time cannot be null/empty.")
+
+        qry = "UPDATE " + self.userTable + " set token=%s, token_issued=%s, token_expiry=%s where user_name=%s"
+        vals = auth_token, auth_token_issued_time, auth_token_expiry_time,user_name
+
+        self.cursor.execute(qry, vals)
+        self.dbConnection.commit()

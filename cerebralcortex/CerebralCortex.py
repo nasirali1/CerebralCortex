@@ -122,6 +122,14 @@ class CerebralCortex:
 
         return DataStream(identifier, data=[])
 
+    def login_user(self, user_name, password):
+        return Metadata(self).login_user(user_name, password)
+    def update_auth_token(self, user_name, auth_token, auth_token_issued_time, auth_token_expiry_time):
+        return Metadata(self).update_auth_token(user_name, auth_token, auth_token_issued_time, auth_token_expiry_time)
+
+    def is_auth_token_valid(self, token_owner, auth_token, auth_token_expiry_time):
+        return Metadata(self).is_auth_token_valid(token_owner, auth_token, auth_token_expiry_time)
+
     def update_or_create(self, stream: Stream):
         """
         This method should search the DBs to see if this stream object already exists.

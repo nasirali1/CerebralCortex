@@ -4,6 +4,7 @@ from flask_restplus import Namespace, Resource, fields as rest_fields
 from cerebralcortex.apiserver import CC
 from cerebralcortex.kernel.datatypes.datapoint import DataPoint
 from cerebralcortex.kernel.datatypes.datastream import Stream
+from cerebralcortex.apiserver.auth.auth2 import token_required
 
 api = Namespace('stream', description='Data and annotation streams')
 
@@ -192,6 +193,7 @@ STREAMS = [
 
 
 @api.route('/')
+#@token_required
 class APIStreamList(Resource):
     @api.doc('list_streams')
     @api.marshal_list_with(stream)
