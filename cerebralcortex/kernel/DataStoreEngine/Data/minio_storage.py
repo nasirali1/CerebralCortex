@@ -47,7 +47,7 @@ class MinioStorage:
                 for d in data.stream(32*1024):
                     file_data.write(d)
         except ResponseError as err:
-            print(err)
+            return str(err)
 
     def list_buckets(self):
         bucket_list = {}
@@ -84,19 +84,19 @@ class MinioStorage:
             return object_stat
 
     def get_object(self, bucket_name, object_name):
-        object_stat = {}
+        object = {}
         try:
             if self.bucket_exist(bucket_name):
-                object_stat = self.minioClient.get_object(bucket_name, object_name)
-                #object_stat = json.dumps(object_stat, default=lambda o: o.__dict__)
-                return object_stat
+                object = self.minioClient.get_object(bucket_name, object_name)
+
+                return object
             else:
-                object_stat["error"] = "Bucket does not exist"
-                return object_stat
+                object["error"] = "Bucket does not exist"
+                return object
 
         except Exception as err:
-            object_stat["error"] = str(err).replace("NoSuchKey: message: ", "")
-            return object_stat
+            object["error"] = str(err).replace("NoSuchKey: message: ", "")
+            return object
 
     def bucket_exist(self, bucket_name):
         try:
