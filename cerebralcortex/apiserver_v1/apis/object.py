@@ -63,7 +63,7 @@ class MinioObjects12(Resource):
         '''Download an object'''
         object = MinioStorage(CC).get_object(bucket_name, object_name)
 
-        if "error" in object and object["error"]!="":
+        if type(object) is dict and "error" in object and object["error"]!="":
             return object["error"], 404
 
         return Response(object.data, mimetype=object.getheader("content-type"))

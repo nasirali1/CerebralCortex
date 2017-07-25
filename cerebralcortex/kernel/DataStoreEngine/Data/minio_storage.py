@@ -88,7 +88,6 @@ class MinioStorage:
         try:
             if self.bucket_exist(bucket_name):
                 object = self.minioClient.get_object(bucket_name, object_name)
-
                 return object
             else:
                 object["error"] = "Bucket does not exist"
