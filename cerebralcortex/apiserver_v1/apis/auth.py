@@ -15,6 +15,8 @@ auth_api = Namespace(auth_route, description='Authentication service')
 class Auth(Resource):
     @auth_api.doc('')
     @auth_api.expect(auth_data_model(auth_api), validate=True)
+    @auth_api.response(400, 'User name and password cannot be empty.')
+    @auth_api.response(401, 'Wrong username or password.')
     #@auth_api.doc(params={"header":"Content-Type: application/json"})
     #@auth_api.marshal_list_with(auth_data_model(auth_api))
     def post(self):

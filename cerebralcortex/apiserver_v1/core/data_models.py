@@ -56,3 +56,10 @@ def auth_data_model(stream_api):
         'password': rest_fields.String(required=True),
     })
     return auth
+
+def objects_list_model(api):
+    model = api.model('Model', {
+        'name': rest_fields.String,
+        'address': rest_fields.String,
+        'date_updated': rest_fields.DateTime(dt_format='rfc822'),
+    })
