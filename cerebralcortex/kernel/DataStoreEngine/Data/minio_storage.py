@@ -67,8 +67,7 @@ class MinioStorage:
                     "content_type": obj.content_type, "etag": obj.etag}
             return objects_in_bucket
         except Exception as e:
-            objects_in_bucket["error"] = str(e).replace("NoSuchBucket: message: ", "").replace(
-                "InvalidBucketError: message: ", "")
+            objects_in_bucket["error"] = str(e)
             return objects_in_bucket
 
     def get_object_stat(self, bucket_name: str, object_name: str) -> dict:
@@ -99,18 +98,18 @@ class MinioStorage:
         :param object_name:
         :return:
         """
-        object = {}
+        obj = {}
         try:
             if self.bucket_exist(bucket_name):
-                object = self.minioClient.get_object(bucket_name, object_name)
-                return object
+                obj = self.minioClient.get_object(bucket_name, object_name)
+                return obj
             else:
-                object["error"] = "Bucket does not exist"
-                return object
+                obj["error"] = "Bucket does not exist"
+                return obj
 
         except Exception as err:
-            object["error"] = str(err).replace("NoSuchKey: message: ", "")
-            return object
+            obj["error"] = str(err).replace("NoSuchKey: message: ", "")
+            return obj
 
     def bucket_exist(self, bucket_name: str) -> bool:
         """
