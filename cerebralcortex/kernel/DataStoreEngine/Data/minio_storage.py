@@ -26,7 +26,6 @@ import json
 
 from minio import Minio
 from minio.error import ResponseError
-from pytz import timezone
 
 
 class MinioStorage:
@@ -35,7 +34,7 @@ class MinioStorage:
         self.CC_obj = CC_obj
         self.configuration = CC_obj.configuration
         self.hostIP = self.configuration['cassandra']['host']
-        self.localtz = timezone(self.CC_obj.time_zone)
+
         self.minioClient = Minio(
             str(self.configuration['minio']['host']) + ":" + str(self.configuration['minio']['port']),
             access_key=self.configuration['minio']['access_key'],
@@ -50,7 +49,7 @@ class MinioStorage:
         bucket_list = {}
         buckets = self.minioClient.list_buckets()
         for bucket in buckets:
-            bucket_list[bucket.name] = {"last_modified": str(bucket.creation_date.replace(tzinfo=self.localtz))}
+            bucket_list[bucket.name] = {"last_modified": str(bucket.creation_date)}
         return bucket_list
 
     def list_objects_in_bucket(self, bucket_name: str) -> dict:
@@ -64,7 +63,7 @@ class MinioStorage:
             objects = self.minioClient.list_objects(bucket_name, recursive=True)
             for obj in objects:
                 objects_in_bucket[obj.object_name] = {
-                    "last_modified": str(obj.last_modified.replace(tzinfo=self.localtz)), "size": obj.size,
+                    "last_modified": str(obj.last_modified), "size": obj.size,
                     "content_type": obj.content_type, "etag": obj.etag}
             return objects_in_bucket
         except Exception as e:
