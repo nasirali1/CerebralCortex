@@ -15,8 +15,8 @@ class Stream(Resource):
     @stream_api.header("Authorization", 'Bearer JWT', required=True)
     @stream_api.expect(stream_data_model(stream_api), validate=True)
     @stream_api.marshal_list_with(stream_data_model(stream_api))
-    def post(self):
-        '''Post Stream Data'''
+    def put(self):
+        '''Put Stream Data'''
 
         raw_data = request.json.get('raw_data', None)
 
